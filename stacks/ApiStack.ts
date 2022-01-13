@@ -4,16 +4,14 @@ export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
 
-    // Create a HTTP API
-    const api = new sst.Api(this, "Api", {
-      routes: {
-        "GET /": "src/lambda.handler",
+    const api = new sst.ApolloApi(this, "Player", {
+      server: {
+        handler: "src/index.handler",
+        environment: {
+          // TODO - environment variable
+        },
+        bundle: {},
       },
-    });
-
-    // Show the endpoint in the output
-    this.addOutputs({
-      ApiEndpoint: api.url,
     });
   }
 }
