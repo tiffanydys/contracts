@@ -33,16 +33,28 @@ export type Field = {
   plantedAt: FieldWrapper<Scalars['DateTime']>;
 };
 
+export type HarvestInput = {
+  field: Scalars['Int'];
+  harvestedAt: Scalars['DateTime'];
+};
+
 /** MutationType */
 export type Mutation = {
   __typename?: 'Mutation';
-  save?: Maybe<FieldWrapper<Farm>>;
+  harvest?: Maybe<FieldWrapper<Farm>>;
+  plant?: Maybe<FieldWrapper<Farm>>;
 };
 
 
 /** MutationType */
-export type MutationSaveArgs = {
-  events?: InputMaybe<Array<Event>>;
+export type MutationHarvestArgs = {
+  plant: HarvestInput;
+};
+
+
+/** MutationType */
+export type MutationPlantArgs = {
+  plant: PlantInput;
 };
 
 export enum Plant {
@@ -57,6 +69,12 @@ export type PlantAction = {
   plantedAt: FieldWrapper<Scalars['DateTime']>;
 };
 
+export type PlantInput = {
+  field: Scalars['Int'];
+  plant: Plant;
+  plantedAt: Scalars['DateTime'];
+};
+
 /** QueryType */
 export type Query = {
   __typename?: 'Query';
@@ -67,10 +85,6 @@ export type Query = {
 /** QueryType */
 export type QueryFarmArgs = {
   id: Scalars['ID'];
-};
-
-export type SaveInput = {
-  events: Array<Event>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -148,13 +162,14 @@ export type ResolversTypes = ResolversObject<{
   Event: Partial<ResolversTypes['PlantAction']>;
   Farm: ResolverTypeWrapper<Partial<Farm>>;
   Field: ResolverTypeWrapper<Partial<Field>>;
+  HarvestInput: ResolverTypeWrapper<Partial<HarvestInput>>;
   ID: ResolverTypeWrapper<Partial<Scalars['ID']>>;
   Int: ResolverTypeWrapper<Partial<Scalars['Int']>>;
   Mutation: ResolverTypeWrapper<{}>;
   Plant: ResolverTypeWrapper<Partial<Plant>>;
   PlantAction: ResolverTypeWrapper<Partial<PlantAction>>;
+  PlantInput: ResolverTypeWrapper<Partial<PlantInput>>;
   Query: ResolverTypeWrapper<{}>;
-  SaveInput: ResolverTypeWrapper<Partial<SaveInput>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']>>;
 }>;
 
@@ -165,12 +180,13 @@ export type ResolversParentTypes = ResolversObject<{
   Event: Partial<ResolversParentTypes['PlantAction']>;
   Farm: Partial<Farm>;
   Field: Partial<Field>;
+  HarvestInput: Partial<HarvestInput>;
   ID: Partial<Scalars['ID']>;
   Int: Partial<Scalars['Int']>;
   Mutation: {};
   PlantAction: Partial<PlantAction>;
+  PlantInput: Partial<PlantInput>;
   Query: {};
-  SaveInput: Partial<SaveInput>;
   String: Partial<Scalars['String']>;
 }>;
 
@@ -196,7 +212,8 @@ export type FieldResolvers<ContextType = Context, ParentType extends ResolversPa
 }>;
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  save?: Resolver<Maybe<ResolversTypes['Farm']>, ParentType, ContextType, RequireFields<MutationSaveArgs, never>>;
+  harvest?: Resolver<Maybe<ResolversTypes['Farm']>, ParentType, ContextType, RequireFields<MutationHarvestArgs, 'plant'>>;
+  plant?: Resolver<Maybe<ResolversTypes['Farm']>, ParentType, ContextType, RequireFields<MutationPlantArgs, 'plant'>>;
 }>;
 
 export type PlantActionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlantAction'] = ResolversParentTypes['PlantAction']> = ResolversObject<{

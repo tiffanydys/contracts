@@ -30,15 +30,23 @@ export const typeDefs = gql`
 
   union Event = PlantAction
 
-  input SaveInput {
-    events: [Event!]!
+  input PlantInput {
+    plant: Plant!
+    field: Int!
+    plantedAt: DateTime!
+  }
+
+  input HarvestInput {
+    field: Int!
+    harvestedAt: DateTime!
   }
 
   """
   MutationType
   """
   type Mutation {
-    save(events: [Event!]): Farm
+    plant(plant: PlantInput!): Farm
+    harvest(plant: HarvestInput!): Farm
   }
 
   """

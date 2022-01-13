@@ -3,7 +3,8 @@
 import { Resolvers } from "./types";
 
 import { farm } from "./farm/queries/farm";
-import { save } from "./farm/mutations/save";
+import { plant } from "./farm/mutations/plant";
+import { harvest } from "./farm/mutations/harvest";
 
 export const resolvers: Resolvers = {
   // Custom Scalars
@@ -14,6 +15,7 @@ export const resolvers: Resolvers = {
   },
 
   Mutation: {
-    save,
+    plant,
+    harvest,
   },
 };
