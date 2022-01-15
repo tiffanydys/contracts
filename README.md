@@ -8,7 +8,6 @@ It handles saving actions, loading farms and verifiying transactions (save and w
 
 Run `make` for see full list of commands.
 
-Ensure you have your AWS credentials set up correctly in `~/.aws/config` - This will be used to deploy live debug environment to develop in.
+Ensure you have your AWS credentials set up correctly. AWS credentials should never be stored in your config file.
 
-https://serverless-stack.com/chapters/configure-the-aws-cli.html
-
+See: https://github.com/99designs/aws-vault
