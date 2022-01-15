@@ -13,7 +13,7 @@ help:
 	@grep '^[a-zA-Z]' $(MAKEFILE_LIST) | sort | awk -F ':.*?## ' 'NF==2 {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: test
-test: node_modules bin/contracts ## Run application and contract tests. Run `JEST_OPTS="any jest options" make test` to pass jest options
+test: node_modules bin/contracts ## Run docker-compose up eth before running this target. `JEST_OPTS="any jest options" make test` to pass jest options
 	yarn test $(JEST_FLAGS)
 
 .PHONY: test.watch

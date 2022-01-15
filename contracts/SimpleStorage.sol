@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SimpleStorage {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract SimpleStorage is Ownable {
     uint storedData;
 
-    function set(uint x) public {
+    function set(uint x) public onlyOwner {
         storedData = x;
     }
 

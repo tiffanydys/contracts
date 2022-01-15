@@ -4,9 +4,16 @@ This API is used for players in Sunflower Land.
 
 It handles saving actions, loading farms and verifiying transactions (save and withdraw to Polygon Blockchain)
 
-# Getting Started with this repo
+## Prerequisites
 
-Run `make` for see full list of commands.
+* make
+* solc
+* nodejs
+* docker-compose
+
+## Getting Started with this repo
+
+Run `make` to see full list of commands.
 
 Ensure you have your AWS credentials set up correctly. AWS credentials should never be stored in your config file.
 
