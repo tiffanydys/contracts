@@ -7,8 +7,7 @@
     "start": "sst start",
     "build": "sst build",
     "deploy": "sst deploy",
-    "remove": "sst remove",
-    "generate": "graphql-codegen"
+    "remove": "sst remove"
   },
   "eslintConfig": {
     "extends": [
@@ -16,11 +15,6 @@
     ]
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.138.0",
-    "@graphql-codegen/cli": "^2.3.1",
-    "@graphql-codegen/schema-ast": "^2.4.1",
-    "@graphql-codegen/typescript": "^2.4.2",
-    "@graphql-codegen/typescript-resolvers": "^2.4.3",
     "@tsconfig/node14": "^1.0.1",
     "@types/aws-lambda": "^8.10.70",
     "@types/node": "<15.0.0",
@@ -29,8 +23,6 @@
   "dependencies": {
     "@aws-cdk/core": "1.138.0",
     "@serverless-stack/cli": "0.58.0",
-    "@serverless-stack/resources": "0.58.0",
-    "apollo-server-lambda": "^3.6.1",
-    "graphql-scalars": "^1.14.1"
+    "@serverless-stack/resources": "0.58.0"
   }
 }
