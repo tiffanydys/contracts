@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract SunflowerLandInventory is ERC1155Pausable, Ownable {
     address private game;
 
-    constructor() public ERC1155("https://sunflower-land/api/item/{id}.json") payable {}
+    constructor() ERC1155("https://sunflower-land/api/item/{id}.json") payable {}
 
     function passGameRole(address _game) public onlyOwner returns (bool) {
         game = _game;

@@ -27,7 +27,7 @@ contract SunflowerLand is Ownable {
     SunflowerLandToken token;
     SunflowerLandFarm farm;
 
-    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm) public payable {
+    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm) payable {
         inventory = _inventory;
         token = _token;
         farm = _farm;
@@ -38,7 +38,7 @@ contract SunflowerLand is Ownable {
         return keccak256(abi.encodePacked(_msgSender(), tokenId, block.timestamp)).toEthSignedMessageHash();
     }
 
-    function verify(bytes32 hash, bytes memory signature) public returns (bool) {
+    function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
         return ethSignedHash.recover(signature) == owner();
     }
@@ -58,7 +58,7 @@ contract SunflowerLand is Ownable {
         executed[txHash] = true;
 
         if (amount > 0) {
-            (bool sent, bytes memory data) = charity.call{value: amount}("");
+            (bool sent,) = charity.call{value: amount}("");
             require(sent, "SunflowerLand: Donation Failed");
         }
 
