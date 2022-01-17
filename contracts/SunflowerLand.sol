@@ -18,6 +18,9 @@ contract SunflowerLand is Ownable {
 
     mapping(bytes32 => bool) public executed;
 
+    // Farm address to saved timestamp
+    mapping(address => bytes32) public sessions;
+
     function deposit() external payable {}
 
     SunflowerLandInventory inventory;
@@ -31,8 +34,8 @@ contract SunflowerLand is Ownable {
     }
 
     // A unique nonce identifer for the account
-    function session() public view returns(bytes32) {
-        return keccak256(abi.encodePacked(_msgSender(), block.timestamp)).toEthSignedMessageHash();
+    function getSession(uint tokenId) public view returns(bytes32) {
+        return keccak256(abi.encodePacked(_msgSender(), tokenId, block.timestamp)).toEthSignedMessageHash();
     }
 
     function verify(bytes32 hash, bytes memory signature) public returns (bool) {
@@ -68,6 +71,7 @@ contract SunflowerLand is Ownable {
     function save(
         // Verification
         bytes memory signature,
+        bytes32 sessionId,
         // Data
         uint farmId,
         uint256[] memory mintIds,
@@ -78,7 +82,7 @@ contract SunflowerLand is Ownable {
         uint256 burnTokens
     ) public {
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(farmId, mintIds, mintAmounts, burnIds, burnAmounts));
+        bytes32 txHash = keccak256(abi.encodePacked(sessionId, farmId, mintIds, mintAmounts, burnIds, burnAmounts));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;
@@ -93,6 +97,16 @@ contract SunflowerLand is Ownable {
 
         // Get the holding address of the farm
         address farmAddress = farm.getFarm(farmId);
+
+        // Check the session is new or has not changed (already saved or withdrew funds)
+        bytes32 farmSessionId = sessions[farmAddress];
+        require(
+            farmSessionId == 0 || farmSessionId == sessionId,
+            "SunflowerLand: Session has changed"
+        );
+
+        // Start a new session
+        sessions[farmAddress] = getSession(farmId);
 
         // Update tokens
         inventory.gameMint(farmAddress, mintIds, mintAmounts, signature);
@@ -110,21 +124,12 @@ contract SunflowerLand is Ownable {
 
     // Withdraw resources from farm to another account
     function withdraw(
-        // Verification
-        bytes memory signature,
-        // Data
         uint256 farmId,
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
         uint256 tokenAmount
     ) public  {
-        // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(farmId, to, ids, amounts, tokenAmount));
-        require(!executed[txHash], "SunflowerLand: Tx Executed");
-        require(verify(txHash, signature), "SunflowerLand: Unauthorised");
-        executed[txHash] = true;
-
         address farmOwner = farm.ownerOf(farmId);
 
         // Check they own the farm
@@ -135,8 +140,15 @@ contract SunflowerLand is Ownable {
 
         address farmAddress = farm.getFarm(farmId);
 
+        // Start a new session
+        sessions[farmAddress] = getSession(farmId);
+
         // Withdraw from farm
-        inventory.gameTransferFrom(farmAddress, to, ids, amounts, signature);
+        inventory.gameTransferFrom(farmAddress, to, ids, amounts, "");
         token.gameTransfer(farmAddress, to, tokenAmount);
+    }
+
+    function getSession(address account) public view returns(bytes32) {
+        return sessions[account];
     }
 }

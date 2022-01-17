@@ -10,7 +10,6 @@ export default class ApiStack extends sst.Stack {
         "POST    /farm": "src/api/createFarm.handler",
 
         "POST    /actions": "src/api/actions.handler",
-        "POST    /withdraw": "src/api/withdraw.handler",
         "POST    /save": "src/api/save.handler",
       },
     });

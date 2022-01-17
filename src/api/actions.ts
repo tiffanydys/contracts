@@ -8,6 +8,7 @@ type Body = {
   actions: GameAction[];
   farmId: number;
   sender: string;
+  sessionId: string;
   signature: string;
 };
 
@@ -31,7 +32,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   // Verify the user signature can actually make actions
-  const address = verify(body.sender, body.signature);
+  const address = verify(body.sessionId, body.signature);
 
   if (address !== body.sender) {
     throw new Error("Signature is invalid");
@@ -40,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const farm = loadFarmFromDB(body.farmId);
   const updated = processActions(farm, body.actions);
 
-  // Store farm in DB (insert if does not exist yet)
+  // Update session in DB (insert if does not exist yet)
 
   // Optional - store actions in DB (for auditing)
 
