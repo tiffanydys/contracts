@@ -50,7 +50,18 @@ contract SunflowerLandFarm is ERC721Enumerable, Ownable {
         _mint(account, tokenId);
 	}
 
-    function getFarm(uint256 tokenId) public view returns (address) {
-        return farms[tokenId];
+    struct Farm {
+        address owner;
+        address account;
+    }
+
+    function getFarm(uint256 tokenId) public view returns (Farm memory) {
+        address account = farms[tokenId];
+        address owner = ownerOf(tokenId);
+
+        return Farm({
+            account: account,
+            owner: owner
+        });
     }
 }
