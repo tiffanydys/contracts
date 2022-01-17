@@ -1,6 +1,8 @@
 import Web3 from "web3";
 import { AbiItem } from "web3-utils";
 
+export const gasLimit = 6721975
+
 export class TestAccount {
   static readonly ACCOUNT_0  = new TestAccount(
     "0x17e0cC27d7030de22b01a0c235abbb0F99f641ba",
@@ -12,21 +14,26 @@ export class TestAccount {
     "0xd4f9fd3336dc904874ea88f88dbbc476648766c394f37b2f6f9dc62900e1e5e4",
   );
 
+  static readonly ACCOUNT_2  = new TestAccount(
+    "0xAcA6b82bd697EDCa9F2fe497D55fd9F787E92e5f",
+    "0xe25bed314a90ea95134f0936045598867491c4c0ac83b22b7965165d31ef961d",
+  );
+
   private constructor(public readonly address: string, public readonly privateKey: any) {
   }
 }
 
-export async function deployContract(web3: Web3, contract: { abi: {}; bin: string }, address: string) {
+export async function deployContract(web3: Web3, contract: { abi: {}; bin: string }, address: string, args: any[] = []) {
   const simpleStorage = new web3.eth.Contract(contract.abi as AbiItem[]);
 
   return simpleStorage
     .deploy({
       data: contract.bin,
-      arguments: []
+      arguments: args
     })
     .send({
       from: address,
       gasPrice: await web3.eth.getGasPrice(),
-      gas: 6721975
+      gas: gasLimit
     });
 }
