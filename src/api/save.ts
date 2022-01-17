@@ -1,10 +1,12 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { diffCheck } from "../lib/diffCheck";
 import { encodeParameters, sign } from "../lib/sign";
-import { loadFarmFromDB } from "./getFarm";
+import { loadSession } from "./session";
 
 type Body = {
   farmId: number;
+  sessionId: string;
+  sender: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -19,9 +21,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   // TODO - Load the farm at the start of the session - from DB or Blockchain?
-  const oldFarm = loadFarmFromDB(body.farmId);
+  const oldFarm = loadSession(body.sender, body.sessionId);
 
-  const newFarm = loadFarmFromDB(body.farmId);
+  const newFarm = loadSession(body.sender, body.sessionId);
 
   const changeset = diffCheck({ old: oldFarm, newFarm, id: body.farmId });
 

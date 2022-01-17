@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { loadFarmFromDB } from "./getFarm";
+import { loadSession } from "./session";
 import { processActions } from "../lib/reducer";
 import { GameAction } from "../lib/types";
 import { verify } from "../lib/sign";
@@ -38,7 +38,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("Signature is invalid");
   }
 
-  const farm = loadFarmFromDB(body.farmId);
+  const farm = loadSession(body.sender, body.sessionId);
+
+  if (!farm) {
+    throw new Error("No session exists for this farm");
+  }
+
   const updated = processActions(farm, body.actions);
 
   // Update session in DB (insert if does not exist yet)

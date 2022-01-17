@@ -6,8 +6,8 @@ export default class ApiStack extends sst.Stack {
 
     const api = new sst.Api(this, "Api", {
       routes: {
-        "GET    /farm/{id}": "src/api/getFarm.handler",
         "POST    /farm": "src/api/createFarm.handler",
+        "POST    /session": "src/api/session.handler",
 
         "POST    /actions": "src/api/actions.handler",
         "POST    /save": "src/api/save.handler",
