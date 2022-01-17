@@ -113,14 +113,14 @@ contract SunflowerLand is Ownable {
         // Verification
         bytes memory signature,
         // Data
-        uint farmId,
+        uint256 farmId,
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
-        uint tokenAmount
+        uint256 tokenAmount
     ) public  {
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(farmId, to, ids, amounts));
+        bytes32 txHash = keccak256(abi.encodePacked(farmId, to, ids, amounts, tokenAmount));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;

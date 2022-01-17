@@ -6,12 +6,17 @@ export default class ApiStack extends sst.Stack {
 
     const api = new sst.Api(this, "Api", {
       routes: {
-        "GET /": "src/index.handler",
-      }
+        "GET    /farm/{id}": "src/api/getFarm.handler",
+        "POST    /farm": "src/api/createFarm.handler",
+
+        "POST    /actions": "src/api/actions.handler",
+        "POST    /withdraw": "src/api/withdraw.handler",
+        "POST    /save": "src/api/save.handler",
+      },
     });
 
     this.addOutputs({
-      "ApiEndpoint": api.url,
+      ApiEndpoint: api.url,
     });
   }
 }
