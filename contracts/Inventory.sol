@@ -5,6 +5,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+struct MintInput {
+    address to;
+    uint256[] ids;
+    uint256[] amounts;
+    bytes data;
+}
+
 contract SunflowerLandInventory is ERC1155Pausable, Ownable {
     address private game;
 
@@ -21,14 +28,11 @@ contract SunflowerLandInventory is ERC1155Pausable, Ownable {
     }
 
     function gameMint(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        MintInput memory input
     ) public {
         require(game == _msgSender(), "SunflowerLandInventory: You are not the game");
 
-        _mintBatch(to, ids, amounts, data);
+        _mintBatch(input.to, input.ids, input.amounts, input.data);
 
         // Emit
     }

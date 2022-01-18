@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./Inventory.sol";
 import "./Token.sol";
 import "./Farm.sol";
- 
+import "./Inventory.sol";
 
 // Do we need Ownable - what would happen if we renounced ownership?
 
@@ -109,7 +109,14 @@ contract SunflowerLand is Ownable {
         sessions[farmNFT.account] = getSession(farmId);
 
         // Update tokens
-        inventory.gameMint(farmNFT.account, mintIds, mintAmounts, signature);
+        MintInput memory input = MintInput({
+            to: farmNFT.account,
+            ids: mintIds,
+            amounts: mintAmounts,
+            data: signature
+        });
+
+        inventory.gameMint(input);
         inventory.gameBurn(farmNFT.account, burnIds, burnAmounts);
 
         if (mintTokens > 0) {
