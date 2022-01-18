@@ -19,6 +19,9 @@ pre-reqs += node_modules
 help:
 	@grep '^[a-zA-Z]' $(MAKEFILE_LIST) | sort | awk -F ':.*?## ' 'NF==2 {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: install
+install: | $(pre-reqs) ## Install pre-requisites
+
 .PHONY: test
 test: | $(pre-reqs) ## Run docker-compose up eth before running this target. `JEST_OPTS="any jest options" make test` to pass jest options
 	yarn test $(JEST_FLAGS)
