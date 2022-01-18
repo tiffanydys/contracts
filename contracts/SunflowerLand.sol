@@ -96,29 +96,29 @@ contract SunflowerLand is Ownable {
         );
 
         // Get the holding address of the farm
-        address farmAddress = farm.getFarm(farmId);
+        Farm memory farmNFT = farm.getFarm(farmId);
 
         // Check the session is new or has not changed (already saved or withdrew funds)
-        bytes32 farmSessionId = sessions[farmAddress];
+        bytes32 farmSessionId = sessions[farmNFT.account];
         require(
             farmSessionId == 0 || farmSessionId == sessionId,
             "SunflowerLand: Session has changed"
         );
 
         // Start a new session
-        sessions[farmAddress] = getSession(farmId);
+        sessions[farmNFT.account] = getSession(farmId);
 
         // Update tokens
-        inventory.gameMint(farmAddress, mintIds, mintAmounts, signature);
-        inventory.gameBurn(farmAddress, burnIds, burnAmounts);
+        inventory.gameMint(farmNFT.account, mintIds, mintAmounts, signature);
+        inventory.gameBurn(farmNFT.account, burnIds, burnAmounts);
 
         if (mintTokens > 0) {
-            token.gameMint(farmAddress, mintTokens);
+            token.gameMint(farmNFT.account, mintTokens);
         }
         
         if (burnTokens > 0) {
             // Send to the burn address so total supply keeps increasing
-            token.gameTransfer(farmAddress, 0x0000000000000000000000000000000000000000, burnTokens);
+            token.gameTransfer(farmNFT.account, 0x0000000000000000000000000000000000000000, burnTokens);
         }
     }
 
@@ -138,14 +138,14 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-        address farmAddress = farm.getFarm(farmId);
+        Farm memory farmNFT = farm.getFarm(farmId);
 
         // Start a new session
-        sessions[farmAddress] = getSession(farmId);
+        sessions[farmNFT.account] = getSession(farmId);
 
         // Withdraw from farm
-        inventory.gameTransferFrom(farmAddress, to, ids, amounts, "");
-        token.gameTransfer(farmAddress, to, tokenAmount);
+        inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
+        token.gameTransfer(farmNFT.account, to, tokenAmount);
     }
 
     function getSession(address account) public view returns(bytes32) {
