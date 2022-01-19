@@ -11,10 +11,8 @@ contract SunflowerLandToken is ERC20Pausable, Ownable {
 
   address private team;
 
-  constructor(address _game, address _team) payable ERC20("Sunflower Land", "SFL") {
-        gameRoles[msg.sender] = true;
-
-      _team = team;
+  constructor() payable ERC20("Sunflower Land", "SFL") {
+      team = msg.sender;
   }
 
   function addGameRole(address _game) public onlyOwner {
