@@ -6,10 +6,10 @@ It handles saving actions, loading farms and verifiying transactions (save and w
 
 ## Prerequisites
 
-* make
-* solc
-* nodejs
-* docker-compose
+- make
+- solc
+- nodejs
+- docker-compose
 
 ## Getting Started with this repo
 
