@@ -27,21 +27,24 @@ export class TestAccount {
 }
 
 export async function deploySFLContracts(web3: Web3) {
-  const inventory = await deployContract(
-    web3,
-    abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
-    TestAccount.TEAM.address
-  );
-  const token = await deployContract(
-    web3,
-    abijson.contracts["contracts/Token.sol:SunflowerLandToken"],
-    TestAccount.TEAM.address
-  );
-  const farm = await deployContract(
-    web3,
-    abijson.contracts["contracts/Farm.sol:SunflowerLandFarm"],
-    TestAccount.TEAM.address
-  );
+  const [inventory, token, farm] = await Promise.all([
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
+      TestAccount.TEAM.address
+    ),
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Token.sol:SunflowerLandToken"],
+      TestAccount.TEAM.address
+    ),
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Farm.sol:SunflowerLandFarm"],
+      TestAccount.TEAM.address
+    ),
+  ]);
+
   const sunflowerLand = await deployContract(
     web3,
     abijson.contracts["contracts/SunflowerLand.sol:SunflowerLand"],
@@ -49,15 +52,17 @@ export async function deploySFLContracts(web3: Web3) {
     [inventory.options.address, token.options.address, farm.options.address]
   );
 
-  await farm.methods
-    .addGameRole(sunflowerLand.options.address)
-    .send({ from: TestAccount.TEAM.address });
-  await token.methods
-    .addGameRole(sunflowerLand.options.address)
-    .send({ from: TestAccount.TEAM.address });
-  await inventory.methods
-    .passGameRole(sunflowerLand.options.address)
-    .send({ from: TestAccount.TEAM.address });
+  await Promise.all([
+    farm.methods
+      .addGameRole(sunflowerLand.options.address)
+      .send({ from: TestAccount.TEAM.address }),
+    token.methods
+      .addGameRole(sunflowerLand.options.address)
+      .send({ from: TestAccount.TEAM.address }),
+    inventory.methods
+      .passGameRole(sunflowerLand.options.address)
+      .send({ from: TestAccount.TEAM.address }),
+  ]);
 
   return { sunflowerLand, farm, token, inventory };
 }
