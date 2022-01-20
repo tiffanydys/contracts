@@ -16,7 +16,7 @@ describe("SunflowerLand contract", () => {
     const donation = 0;
     const { game, farm } = await deployGameContract(web3);
 
-    const signature = await sign(web3, TestAccount.CHARITY.address, donation)
+    const signature = await sign(web3, TestAccount.CHARITY.address, donation);
     await game.methods.createFarm(signature, TestAccount.CHARITY.address, donation).send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
@@ -25,6 +25,38 @@ describe("SunflowerLand contract", () => {
 
     expect(await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address })).toEqual("1");
     expect(await farm.methods.ownerOf(1).call({ from: TestAccount.TEAM.address })).toEqual(TestAccount.PLAYER.address);
+  });
+
+  it("requires signature charity address to match in order to create a farm", async () => {
+    const web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETH_NETWORK!));
+    const { game } = await deployGameContract(web3);
+
+    const someOtherAddress = "0x6eF5dBF9902AD320Fe49216D086B2b50AbC9328f";
+    const donation = 0;
+    const signature = await sign(web3, someOtherAddress, donation);
+    const result = game.methods.createFarm(signature, TestAccount.CHARITY.address, donation).send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit
+    })
+
+    await expect(result.catch((e: Error) => Promise.reject(e.message))).rejects.toContain("SunflowerLand: Unauthorised");
+  });
+
+  it("requires signature donation to match in order to create a farm", async () => {
+    const web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETH_NETWORK!));
+    const { game } = await deployGameContract(web3);
+
+    const someOtherDonation = 1;
+    const donation = 0;
+    const signature = await sign(web3, TestAccount.CHARITY.address, someOtherDonation);
+    const result = game.methods.createFarm(signature, TestAccount.CHARITY.address, donation).send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit
+    })
+
+    await expect(result.catch((e: Error) => Promise.reject(e.message))).rejects.toContain("SunflowerLand: Unauthorised");
   });
 
   async function deployGameContract(web3: Web3) {
@@ -48,6 +80,6 @@ describe("SunflowerLand contract", () => {
     const txHash = web3.utils.keccak256(web3.utils.encodePacked(...args)!);
     const { signature } = await web3.eth.accounts.sign(txHash, TestAccount.TEAM.privateKey);
 
-    return signature
+    return signature;
   }
 });
