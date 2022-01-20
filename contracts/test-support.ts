@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import { AbiItem } from "web3-utils";
+import abijson from "../bin/contracts/combined.json";
 
 export const gasLimit = 6721975;
 
@@ -25,7 +26,43 @@ export class TestAccount {
   ) {}
 }
 
-export async function deployContract(
+export async function deploySFLContracts(web3: Web3) {
+  const inventory = await deployContract(
+    web3,
+    abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
+    TestAccount.TEAM.address
+  );
+  const token = await deployContract(
+    web3,
+    abijson.contracts["contracts/Token.sol:SunflowerLandToken"],
+    TestAccount.TEAM.address
+  );
+  const farm = await deployContract(
+    web3,
+    abijson.contracts["contracts/Farm.sol:SunflowerLandFarm"],
+    TestAccount.TEAM.address
+  );
+  const sunflowerLand = await deployContract(
+    web3,
+    abijson.contracts["contracts/SunflowerLand.sol:SunflowerLand"],
+    TestAccount.TEAM.address,
+    [inventory.options.address, token.options.address, farm.options.address]
+  );
+
+  await farm.methods
+    .addGameRole(sunflowerLand.options.address)
+    .send({ from: TestAccount.TEAM.address });
+  await token.methods
+    .addGameRole(sunflowerLand.options.address)
+    .send({ from: TestAccount.TEAM.address });
+  await inventory.methods
+    .passGameRole(sunflowerLand.options.address)
+    .send({ from: TestAccount.TEAM.address });
+
+  return { sunflowerLand, farm, token, inventory };
+}
+
+async function deployContract(
   web3: Web3,
   contract: { abi: {}; bin: string },
   address: string,
