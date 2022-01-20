@@ -5,7 +5,7 @@
 	@git config --get core.hooksPath > $@
 pre-reqs += .githooks.log
 
-bin/contracts: contracts
+bin/contracts: $(wildcard contracts/*.sol)
 	@rm -rf $@
 	solc -o bin/contracts/ --combined-json abi,bin --bin --abi --include-path node_modules/ --base-path . ./contracts/*.sol
 pre-reqs += bin/contracts
