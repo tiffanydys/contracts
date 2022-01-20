@@ -22,6 +22,17 @@ help:
 .PHONY: install
 install: | $(pre-reqs) ## Install pre-requisites
 
+.PHONY: pre-commit
+pre-commit: lint-staged test | $(pre-reqs) ## Run all checks before checking in
+
+.PHONY: lint-staged
+lint-staged: | $(pre-reqs) ## Lint staged files
+	yarn lint-staged
+
+.PHONY: lint
+lint: | $(pre-reqs) ## Lint all files
+	yarn prettier --write .
+
 .PHONY: test
 test: | $(pre-reqs) ## Run docker-compose up eth before running this target. `JEST_OPTS="any jest options" make test` to pass jest options
 	yarn test $(JEST_FLAGS)
