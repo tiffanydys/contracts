@@ -74,6 +74,35 @@ describe("SunflowerLand contract", () => {
     ).rejects.toContain("SunflowerLand: Unauthorised");
   });
 
+  it("requires a unique signature in order to create a farm", async () => {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+    );
+    const donation = 0;
+    const { sunflowerLand, farm } = await deploySFLContracts(web3);
+
+    const signature = await sign(web3, TestAccount.CHARITY.address, donation);
+    await sunflowerLand.methods
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    const result = sunflowerLand.methods
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("SunflowerLand: Tx Executed");
+  });
+
   async function sign(web3: Web3, ...args: any) {
     const txHash = web3.utils.keccak256(web3.utils.encodePacked(...args)!);
     const { signature } = await web3.eth.accounts.sign(
