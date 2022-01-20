@@ -8,8 +8,7 @@ describe("SunflowerLand contract", () => {
 
     const { farm } = await deployGameContract(web3);
 
-    const farmInitialTotalSupply = await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address });
-    expect(farmInitialTotalSupply).toEqual("0");
+    expect(await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address })).toEqual("0");
   });
 
   it("mints new farm to player account", async () => {
@@ -24,11 +23,8 @@ describe("SunflowerLand contract", () => {
       gas: gasLimit
     });
 
-    const farmUpdatedTotalSupply = await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address });
-    expect(farmUpdatedTotalSupply).toEqual("1");
-
-    const owner = await farm.methods.ownerOf(1).call({ from: TestAccount.TEAM.address });
-    expect(owner).toEqual(TestAccount.PLAYER.address);
+    expect(await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address })).toEqual("1");
+    expect(await farm.methods.ownerOf(1).call({ from: TestAccount.TEAM.address })).toEqual(TestAccount.PLAYER.address);
   });
 
   async function deployGameContract(web3: Web3) {
