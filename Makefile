@@ -7,7 +7,7 @@ pre-reqs += .githooks.log
 
 bin/contracts: $(wildcard contracts/*.sol)
 	@rm -rf $@
-	solc -o bin/contracts/ --combined-json abi,bin --bin --abi --include-path node_modules/ --base-path . ./contracts/*.sol
+	solc --overwrite -o bin/contracts/ --combined-json abi,bin --bin --abi --include-path node_modules/ --base-path . ./contracts/*.sol
 pre-reqs += bin/contracts
 
 node_modules: package.json
@@ -40,6 +40,10 @@ test: | $(pre-reqs) ## Run docker-compose up eth before running this target. `JE
 .PHONY: test.watch
 test.watch: | $(pre-reqs) ## Run tests in watch mode. This can also be done with `JEST_OPTS="--watch" make test`
 	yarn test --watch
+
+.PHONY: contracts.watch
+contracts.watch: | $(pre-reqs) ## Continuously compile contracts
+	yarn chokidar contracts/*.sol -c "$(MAKE) bin/contracts"
 
 .PHONY: start
 start: | $(pre-reqs) ## Starts the local Lambda development environment.
