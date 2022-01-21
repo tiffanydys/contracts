@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./GameOwner.sol";
 
 struct MintInput {
     address to;
@@ -12,7 +12,7 @@ struct MintInput {
     bytes data;
 }
 
-contract SunflowerLandInventory is ERC1155Pausable, Ownable {
+contract SunflowerLandInventory is ERC1155Pausable, GameOwner {
     address private game;
 
     constructor() ERC1155("https://sunflower-land/api/item/{id}.json") payable {}
@@ -29,25 +29,16 @@ contract SunflowerLandInventory is ERC1155Pausable, Ownable {
 
     function gameMint(
         MintInput memory input
-    ) public {
-        require(game == _msgSender(), "SunflowerLandInventory: You are not the game");
-
+    ) public onlyGame {
         _mintBatch(input.to, input.ids, input.amounts, input.data);
-
-        // Emit
     }
 
     function gameBurn(
         address to,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) public {
-        require(game == _msgSender(), "SunflowerLandInventory: You are not the game");
-
-        // Burn
+    ) public onlyGame {
         _burnBatch(to, ids, amounts);
-
-        // Emit
     }
 
     function gameTransferFrom(
@@ -56,21 +47,15 @@ contract SunflowerLandInventory is ERC1155Pausable, Ownable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) public {
-        require(game == _msgSender(), "SunflowerLandInventory: You are not the game");
-
+    ) public onlyGame {
         _safeBatchTransferFrom(from, to, ids, amounts, data);
-
-        // Emit
     }
 
     function gameSetApproval(
         address owner,
         address operator,
         bool approved
-    ) internal virtual {
-        require(game == _msgSender(), "SunflowerLandInventory: You are not the game");
-
+    ) internal virtual onlyGame {
         _setApprovalForAll(owner, operator, approved);
     }
 }
