@@ -5,10 +5,10 @@
 	@git config --get core.hooksPath > $@
 pre-reqs += .githooks.log
 
-# bin/contracts: $(wildcard contracts/*.sol)
-# 	@rm -rf $@
-# 	solc --overwrite -o bin/contracts/ --combined-json abi,bin --bin --abi --include-path node_modules/ --base-path . ./contracts/*.sol
-# pre-reqs += bin/contracts
+bin/contracts: $(wildcard contracts/*.sol)
+	@rm -rf $@
+	solc --overwrite -o bin/contracts/ --combined-json abi,bin --bin --abi --include-path node_modules/ --base-path . ./contracts/*.sol
+pre-reqs += bin/contracts
 
 node_modules: package.json
 	@yarn
