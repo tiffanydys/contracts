@@ -6,11 +6,30 @@ export default class ApiStack extends sst.Stack {
 
     const api = new sst.Api(this, "Api", {
       routes: {
-        "POST    /farm": "src/api/createFarm.handler",
-        "POST    /session": "src/api/session.handler",
-
-        "POST    /actions": "src/api/actions.handler",
-        "POST    /save": "src/api/save.handler",
+        "POST    /farm": {
+          handler: "src/api/createFarm.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+        },
+        "POST    /actions": {
+          handler: "src/api/actions.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+        },
+        "POST    /session": {
+          handler: "src/api/session.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+        },
+        "POST    /save": {
+          handler: "src/api/save.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+        },
       },
     });
 

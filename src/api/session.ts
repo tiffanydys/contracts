@@ -1,6 +1,8 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+
 import { verify } from "../lib/sign";
 import { Farm } from "../lib/types";
+import { fetchOnChainData } from "../web3/contracts";
 
 /**
  * Dummy function that returns farm from our 'DB'
@@ -32,28 +34,20 @@ export function loadSession(sender: string, sessionId: string): Farm {
     inventory: {
       wood: 5,
     },
-    level: 1,
   };
-}
-
-/**
- * Load data from Polygon
- * Use alchemy for HTTP requests (we don't have to maintain our own node/Web3 connection)
- */
-function loadFarmFromBlockchain(farmId: number) {
-  // Load the farm address from Farm.sol
-  // Load the token balance from Token.sol using the farm address
-  // Load the inventory balance from Inventory.sol using the farm address
 }
 
 type Body = {
   sessionId: string;
-  farmAddress: string;
+  farmId: number;
   sender: string;
   signature: string;
+  hash: string;
 };
 
+// Token.sol - 0x75e0ae699d64520136b047b4a82703aa5e8c01f00003046d64de9085c69b5ecb
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  console.log({ event });
   // Verify signed transaction - requester owns the farm
   if (!event.body) {
     throw new Error("No body found in event");
@@ -62,29 +56,28 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const body: Body = JSON.parse(event.body);
 
   // Verify the user is sending this transaction
-  const address = verify(body.sessionId, body.signature);
+  const address = verify(body.hash, body.signature);
 
+  console.log({ address });
   if (address !== body.sender) {
     throw new Error("Signature is invalid");
   }
 
-  // Does the user have an active session in progress - return farm
-  const farm = loadSession(body.sender, body.sessionId);
+  console.log("init farmContract");
 
-  // No session in progress - return farm from blockchain
-  if (!farm) {
-    // Farm.sol -> verify the account owns the farmAddress
-    // Token.sol -> balanceOf(farmAddress) : load token balance
-    // Inventory.sol -> balanceOf(farmAddress) : load inventory balance
-    // Save a session
-    // Return this farm
-  }
+  // TODO - check if session exists in DB - if so return that
+
+  // Load farm from blockchain
+  const session = await fetchOnChainData({
+    sender: body.sender,
+    farmId: body.farmId,
+  });
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm,
+      farm: session,
     }),
   };
 };

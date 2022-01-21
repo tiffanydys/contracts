@@ -42,9 +42,8 @@ export type Farm = {
       plantedAt: Date;
     };
   }[];
-  level: number;
   inventory: {
-    wood: number;
+    wood?: number;
   };
 };
 
