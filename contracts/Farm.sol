@@ -22,11 +22,11 @@ contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
 
     string private baseURI = "https://sunflower-land.com/api/nfts/farm/";
 
-    constructor() public ERC721("Sunflower Land Farm", "SLF") {
+    constructor() ERC721("Sunflower Land Farm", "SLF") {
         gameRoles[msg.sender] = true;
     }
 
-    function setBaseUri(string memory uri) public onlyOwner returns (bool) {
+    function setBaseUri(string memory uri) public onlyOwner {
         baseURI = uri;
     }
 
