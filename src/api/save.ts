@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { soliditySha3 } from "web3-utils";
+import { soliditySha3, toWei } from "web3-utils";
 import { diffCheck } from "../lib/diffCheck";
 import { encodeParameters, sign } from "../lib/sign";
 import { loadFarm } from "./session";
@@ -21,17 +21,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No farmId found in event");
   }
 
-  // TODO - verify session exists
+  console.log({ body });
+  // Just a test to see it actually increase
+  const mintTokens = toWei("1");
 
-  // TODO - Load the farm at the start of the session - from DB or Blockchain?
-  const oldFarm = loadFarm(body.sender, body.sessionId);
-
-  const newFarm = loadFarm(body.sender, body.sessionId);
-
-  const changeset = diffCheck({ old: oldFarm, newFarm, id: body.farmId });
-
-  changeset.mintIds = [1];
-  changeset.mintAmounts = [50];
   const shad = soliditySha3(
     {
       type: "bytes32",
@@ -43,19 +36,27 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     },
     {
       type: "uint256[]",
-      value: changeset.mintIds as any,
+      value: [1] as any,
     },
     {
       type: "uint256[]",
-      value: changeset.mintAmounts as any,
+      value: [50] as any,
     },
     {
       type: "uint256[]",
-      value: changeset.burnIds as any,
+      value: [] as any,
     },
     {
       type: "uint256[]",
-      value: changeset.burnAmounts as any,
+      value: [] as any,
+    },
+    {
+      type: "uint256",
+      value: mintTokens as any,
+    },
+    {
+      type: "uint256",
+      value: 0 as any,
     }
   );
 
@@ -68,12 +69,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       signature,
       farmId: body.farmId,
       sessionId: body.sessionId,
-      mintIds: changeset.mintIds,
-      mintAmounts: changeset.mintAmounts,
-      burnIds: changeset.burnIds,
-      burnAmounts: changeset.burnAmounts,
-      mintTokens: 500,
-      burnTokens: changeset.burnTokens,
+      mintIds: [1],
+      mintAmounts: [50],
+      burnIds: [],
+      burnAmounts: [],
+      mintTokens: mintTokens,
+      burnTokens: 0,
     }),
   };
 };

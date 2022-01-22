@@ -18,6 +18,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No charity found in event");
   }
 
+  console.log({ body });
+
   // TODO - validate amount
 
   // SunflowerLand.createFarm function signature
@@ -27,18 +29,22 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       value: body.charity,
     },
     {
-      type: "uint256",
-      value: body.donation as any,
+      type: "uint",
+      value: body.donation.toString(),
     }
   );
+  console.log({ shad });
 
   const { signature } = sign(shad as string);
+  console.log({ signature });
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       signature,
+      charity: body.charity,
+      donation: body.donation,
     }),
   };
 };
