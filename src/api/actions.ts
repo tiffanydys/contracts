@@ -1,11 +1,11 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { loadFarm } from "./session";
 import { processActions } from "../lib/reducer";
-import { GameAction } from "../types/game";
 import { verify } from "../lib/sign";
+import { GameEvent } from "../lib/events";
 
 type Body = {
-  actions: GameAction[];
+  actions: GameEvent[];
   farmId: number;
   sender: string;
   sessionId: string;
@@ -32,13 +32,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   // Verify the user signature can actually make actions
-  const address = verify(body.sessionId, body.signature);
+  // const address = verify(body.sessionId, body.signature);
 
-  if (address !== body.sender) {
-    throw new Error("Signature is invalid");
-  }
+  // if (address !== body.sender) {
+  //   throw new Error("Signature is invalid");
+  // }
 
-  const farm = loadFarm(body.sender, body.sessionId);
+  // TODO - has the session ID changed?
+
+  const farm = loadFarm(body.sender, body.farmId);
 
   if (!farm) {
     throw new Error("No session exists for this farm");
