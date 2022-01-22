@@ -1,4 +1,5 @@
-export type CropName = "sunflower" | "potato";
+import { InventoryItemName } from "./crafting";
+import { CropName } from "./crops";
 
 export type FieldItem = {
   fieldIndex: number;
@@ -33,6 +34,8 @@ type HarvestAction = Action<
 
 export type GameAction = PlantAction | HarvestAction;
 
+export type Inventory = Partial<Record<InventoryItemName, number>>;
+
 export type Farm = {
   balance: number;
   fields: {
@@ -42,29 +45,5 @@ export type Farm = {
       plantedAt: Date;
     };
   }[];
-  inventory: {
-    wood?: number;
-  };
-};
-
-export type Crop = {
-  buyPrice: number;
-  sellPrice: number;
-  harvestSeconds: number;
-};
-
-/**
- * Crops and their original prices
- */
-export const CROPS: Record<CropName, Crop> = {
-  sunflower: {
-    buyPrice: 0.01,
-    sellPrice: 0.01,
-    harvestSeconds: 1 * 60,
-  },
-  potato: {
-    buyPrice: 0.1,
-    sellPrice: 0.14,
-    harvestSeconds: 5 * 60,
-  },
+  inventory: Inventory;
 };

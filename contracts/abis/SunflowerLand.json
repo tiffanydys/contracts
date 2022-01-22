@@ -12,7 +12,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract IFarm",
+        "internalType": "contract SunflowerLandFarm",
         "name": "_farm",
         "type": "address"
       }
@@ -96,7 +96,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getSession",
+    "name": "generateSessionId",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -110,12 +110,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
       }
     ],
-    "name": "getSession",
+    "name": "getSessionId",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -137,19 +137,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
-      }
-    ],
-    "name": "passSigner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -215,9 +202,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "name": "sessions",
@@ -247,6 +234,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_signer",
+        "type": "address"
+      }
+    ],
+    "name": "transferSigner",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "hash",
         "type": "bytes32"
@@ -265,7 +265,7 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {

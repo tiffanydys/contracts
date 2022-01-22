@@ -1,4 +1,5 @@
-import { CROPS, Farm, GameAction } from "./types";
+import { CROPS } from "../types/crops";
+import { Farm, GameAction } from "../types/game";
 
 /**
  * Copy pasted from front end

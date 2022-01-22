@@ -1,4 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { soliditySha3 } from "web3-utils";
 import { encodeParameters, sign } from "../lib/sign";
 
 type Body = {
@@ -20,12 +21,18 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   // TODO - validate amount
 
   // SunflowerLand.createFarm function signature
-  const encodedParameters = encodeParameters(
-    ["address", "uint256"],
-    [body.charity, body.donation]
+  const shad = soliditySha3(
+    {
+      type: "address",
+      value: body.charity,
+    },
+    {
+      type: "uint256",
+      value: body.donation as any,
+    }
   );
 
-  const signature = sign(encodedParameters);
+  const { signature } = sign(shad as string);
 
   return {
     statusCode: 200,

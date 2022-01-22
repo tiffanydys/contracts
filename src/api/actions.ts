@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { loadSession } from "./session";
+import { loadFarm } from "./session";
 import { processActions } from "../lib/reducer";
-import { GameAction } from "../lib/types";
+import { GameAction } from "../types/game";
 import { verify } from "../lib/sign";
 
 type Body = {
@@ -38,7 +38,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("Signature is invalid");
   }
 
-  const farm = loadSession(body.sender, body.sessionId);
+  const farm = loadFarm(body.sender, body.sessionId);
 
   if (!farm) {
     throw new Error("No session exists for this farm");

@@ -1,23 +1,34 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
-import FarmABI from "../../contracts/abis/Farm.json";
 
-import { verify } from "../lib/sign";
-import { Farm } from "../lib/types";
+import FarmABI from "../../contracts/abis/Farm.json";
+import TokenABI from "../../contracts/abis/Token.json";
+import InventoryABI from "../../contracts/abis/Inventory.json";
+
+import { Farm } from "../types/game";
 
 const web3 = createAlchemyWeb3(
   // Mainnet - "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
   "https://polygon-mumbai.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
 );
 
-const TESTNET_TOKEN_ADDRESS = "0x5776d2DB624b6CFFEC7DdD5ba79885811c83A572";
-const TESTNET_FARM_ADDRESS = "0x1C7942d78A3267555a3e523bfA48ce5682206CD7";
+const TESTNET_TOKEN_ADDRESS = "0x74909542f6Aa557eC1ef30e633F3d027e18888E2";
+const TESTNET_FARM_ADDRESS = "0x7f6279D037587d647b529F1C6ACA43E4E314d392";
+const TESTNET_INVENTORY_ADDRESS = "0x28f123423a76443D45e4BA96A512ffd42759BBCb";
 
 type Options = {
   sender: string;
   farmId: number;
 };
-export async function fetchOnChainData({ sender, farmId }: Options) {
+
+type Data = {
+  balance: number;
+  inventory: any;
+};
+export async function fetchOnChainData({
+  sender,
+  farmId,
+}: Options): Promise<Data> {
   const farmContract = new web3.eth.Contract(
     FarmABI as any,
     TESTNET_FARM_ADDRESS
@@ -32,24 +43,26 @@ export async function fetchOnChainData({ sender, farmId }: Options) {
   }
 
   const tokenContract = new web3.eth.Contract(
-    FarmABI as any,
+    TokenABI as any,
     TESTNET_TOKEN_ADDRESS
   );
 
   const balance = await tokenContract.methods.balanceOf(farmNFT.account).call();
 
-  console.log({ balance });
+  const inventoryContract = new web3.eth.Contract(
+    InventoryABI as any,
+    TESTNET_INVENTORY_ADDRESS
+  );
 
-  const farm: Farm = {
-    balance,
-    fields: [],
-    inventory: {},
-  };
+  // TODO loop through all tokens and get the balances
+  const inventory = await inventoryContract.methods
+    .balanceOfBatch([farmNFT.account], [1])
+    .call();
+
+  console.log({ inventory });
+
   return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      farm,
-    }),
+    balance: Number(balance),
+    inventory: {},
   };
 }

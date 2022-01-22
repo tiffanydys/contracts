@@ -1,38 +1,26 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 
 import { verify } from "../lib/sign";
-import { Farm } from "../lib/types";
+import { Farm, FieldItem } from "../types/game";
 import { fetchOnChainData } from "../web3/contracts";
 
+const EMPTY_FIELDS: FieldItem[] = Array(22)
+  .fill(null)
+  .map((_, fieldIndex) => ({ fieldIndex }));
 /**
+ *
  * Dummy function that returns farm from our 'DB'
  */
-export function loadSession(sender: string, sessionId: string): Farm {
+export function loadFarm(sender: string, farmId: number): Farm {
   // Check if farm exists in DB
 
   // Found farm, return it
   return {
     balance: 10,
-    // 5 empty fields
-    fields: [
-      {
-        fieldIndex: 0,
-      },
-      {
-        fieldIndex: 1,
-      },
-      {
-        fieldIndex: 2,
-      },
-      {
-        fieldIndex: 3,
-      },
-      {
-        fieldIndex: 4,
-      },
-    ],
+    fields: [...EMPTY_FIELDS],
     inventory: {
-      wood: 5,
+      Wood: 5,
+      "Sunflower Seed": 3,
     },
   };
 }
@@ -65,19 +53,32 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   console.log("init farmContract");
 
-  // TODO - check if session exists in DB - if so return that
+  let farm = loadFarm(body.sender, body.farmId);
 
-  // Load farm from blockchain
-  const session = await fetchOnChainData({
-    sender: body.sender,
-    farmId: body.farmId,
-  });
+  // Does the session ID match?
+  const sessionMatches = false;
+
+  if (!sessionMatches) {
+    // No - Load farm from blockchain
+    const onChainData = await fetchOnChainData({
+      sender: body.sender,
+      farmId: body.farmId,
+    });
+
+    farm = {
+      // Keep the planted fields
+      ...farm,
+      // Load the token + NFT balances
+      balance: onChainData.balance,
+      // TODO - inventory: onChainData.inventory,
+    };
+  }
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm: session,
+      farm,
     }),
   };
 };

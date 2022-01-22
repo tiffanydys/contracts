@@ -2,7 +2,7 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { soliditySha3 } from "web3-utils";
 import { diffCheck } from "../lib/diffCheck";
 import { encodeParameters, sign } from "../lib/sign";
-import { loadSession } from "./session";
+import { loadFarm } from "./session";
 
 type Body = {
   farmId: number;
@@ -24,9 +24,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   // TODO - verify session exists
 
   // TODO - Load the farm at the start of the session - from DB or Blockchain?
-  const oldFarm = loadSession(body.sender, body.sessionId);
+  const oldFarm = loadFarm(body.sender, body.sessionId);
 
-  const newFarm = loadSession(body.sender, body.sessionId);
+  const newFarm = loadFarm(body.sender, body.sessionId);
 
   const changeset = diffCheck({ old: oldFarm, newFarm, id: body.farmId });
 
