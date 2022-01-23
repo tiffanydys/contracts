@@ -1,12 +1,10 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { INITIAL_FARM } from "../lib/constants";
 
 import { verify } from "../lib/sign";
 import { Farm, FieldItem } from "../types/game";
 import { fetchOnChainData } from "../web3/contracts";
 
-const EMPTY_FIELDS: FieldItem[] = Array(22)
-  .fill(null)
-  .map((_, fieldIndex) => ({ fieldIndex }));
 /**
  *
  * Dummy function that returns farm from our 'DB'
@@ -15,14 +13,7 @@ export function loadFarm(sender: string, farmId: number): Farm {
   // Check if farm exists in DB
 
   // Found farm, return it
-  return {
-    balance: 10,
-    fields: [...EMPTY_FIELDS],
-    inventory: {
-      Wood: 5,
-      "Sunflower Seed": 3,
-    },
-  };
+  return INITIAL_FARM;
 }
 
 type Body = {

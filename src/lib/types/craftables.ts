@@ -43,7 +43,11 @@ export type Tool =
   | "Hammer"
   | "Rod";
 
-export type Food = "Flour" | "Pumpkin Soup";
+export type Food =
+  | "Flour"
+  | "Pumpkin Soup"
+  | "Cauliflower Rice"
+  | "Cabbage Soup";
 
 export const FOODS: Record<Food, Craftable> = {
   "Pumpkin Soup": {
@@ -65,6 +69,28 @@ export const FOODS: Record<Food, Craftable> = {
     ingredients: [
       {
         item: "Wheat",
+        amount: 3,
+      },
+    ],
+  },
+  "Cauliflower Rice": {
+    name: "Cauliflower Rice",
+    description: "Riced Cauliflower",
+    price: 0.1,
+    ingredients: [
+      {
+        item: "Cauliflower",
+        amount: 3,
+      },
+    ],
+  },
+  "Cabbage Soup": {
+    name: "Cabbage Soup",
+    description: "Soup of Cabbage",
+    price: 0.1,
+    ingredients: [
+      {
+        item: "Cabbage",
         amount: 3,
       },
     ],

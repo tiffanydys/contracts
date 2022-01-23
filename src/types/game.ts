@@ -5,7 +5,7 @@ export type FieldItem = {
   fieldIndex: number;
   crop?: {
     name: CropName;
-    plantedAt: Date;
+    plantedAt: number;
   };
 };
 
@@ -38,12 +38,6 @@ export type Inventory = Partial<Record<InventoryItemName, number>>;
 
 export type Farm = {
   balance: number;
-  fields: {
-    fieldIndex: number;
-    crop?: {
-      name: CropName;
-      plantedAt: Date;
-    };
-  }[];
+  fields: FieldItem[];
   inventory: Inventory;
 };
