@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./Inventory.sol";
 import "./Token.sol";
 import "./Farm.sol";
-import "./Inventory.sol";
 
 // Do we need Ownable - what would happen if we renounced ownership?
 
@@ -18,11 +17,12 @@ contract SunflowerLand is Ownable {
 
     mapping(bytes32 => bool) public executed;
 
-    // Farm address to saved timestamp
-    mapping(address => bytes32) public sessions;
+    // Farm ID to saved timestamp
+    mapping(uint => bytes32) public sessions;
 
     function deposit() external payable {}
 
+    address private signer;
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
     SunflowerLandFarm farm;
@@ -31,16 +31,21 @@ contract SunflowerLand is Ownable {
         inventory = _inventory;
         token = _token;
         farm = _farm;
+        signer = _msgSender();
+    }
+
+    function transferSigner(address _signer) public onlyOwner {
+        signer = _signer;
     }
 
     // A unique nonce identifer for the account
-    function getSession(uint tokenId) public view returns(bytes32) {
-        return keccak256(abi.encodePacked(_msgSender(), tokenId, block.timestamp)).toEthSignedMessageHash();
+    function generateSessionId(uint tokenId) public view returns(bytes32) {
+        return keccak256(abi.encodePacked(_msgSender(), sessions[tokenId], block.timestamp)).toEthSignedMessageHash();
     }
 
     function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
-        return ethSignedHash.recover(signature) == owner();
+        return ethSignedHash.recover(signature) == signer;
     }
     
     function createFarm(
@@ -82,7 +87,7 @@ contract SunflowerLand is Ownable {
         uint256 burnTokens
     ) public {
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(sessionId, farmId, mintIds, mintAmounts, burnIds, burnAmounts));
+        bytes32 txHash = keccak256(abi.encodePacked(sessionId, farmId, mintIds, mintAmounts, burnIds, burnAmounts, mintTokens, burnTokens));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;
@@ -95,18 +100,18 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-        // Get the holding address of the farm
-        Farm memory farmNFT = farm.getFarm(farmId);
-
         // Check the session is new or has not changed (already saved or withdrew funds)
-        bytes32 farmSessionId = sessions[farmNFT.account];
+        bytes32 farmSessionId = sessions[farmId];
         require(
-            farmSessionId == 0 || farmSessionId == sessionId,
+            farmSessionId == sessionId,
             "SunflowerLand: Session has changed"
         );
 
         // Start a new session
-        sessions[farmNFT.account] = getSession(farmId);
+        sessions[farmId] = generateSessionId(farmId);
+
+        // Get the holding address of the farm
+        Farm memory farmNFT = farm.getFarm(farmId);
 
         // Update tokens
         MintInput memory input = MintInput({
@@ -145,17 +150,18 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-        Farm memory farmNFT = farm.getFarm(farmId);
-
         // Start a new session
-        sessions[farmNFT.account] = getSession(farmId);
+        sessions[farmId] = generateSessionId(farmId);
+
+        // Get the holding address of the tokens
+        Farm memory farmNFT = farm.getFarm(farmId);
 
         // Withdraw from farm
         inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
         token.gameTransfer(farmNFT.account, to, tokenAmount);
     }
 
-    function getSession(address account) public view returns(bytes32) {
-        return sessions[account];
+    function getSessionId(uint tokenId) public view returns(bytes32) {
+        return sessions[tokenId];
     }
 }

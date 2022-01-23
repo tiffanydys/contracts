@@ -1,4 +1,4 @@
-import { Farm } from "./types";
+import { Farm } from "../types/game";
 
 // Payload sent to SunflowerLand.sol
 type Difference = {

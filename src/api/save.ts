@@ -1,7 +1,8 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { soliditySha3, toWei } from "web3-utils";
 import { diffCheck } from "../lib/diffCheck";
 import { encodeParameters, sign } from "../lib/sign";
-import { loadSession } from "./session";
+import { loadFarm } from "./session";
 
 type Body = {
   farmId: number;
@@ -20,41 +21,60 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No farmId found in event");
   }
 
-  // TODO - Load the farm at the start of the session - from DB or Blockchain?
-  const oldFarm = loadSession(body.sender, body.sessionId);
+  console.log({ body });
+  // Just a test to see it actually increase
+  const mintTokens = toWei("1");
 
-  const newFarm = loadSession(body.sender, body.sessionId);
-
-  const changeset = diffCheck({ old: oldFarm, newFarm, id: body.farmId });
-
-  // SunflowerLand.save parameters
-  const encodedParameters = encodeParameters(
-    [
-      "uint256",
-      "uint256[]",
-      "uint256[]",
-      "uint256[]",
-      "uint256[]",
-      "uint256",
-      "uint256",
-    ],
-    [
-      body.farmId,
-      changeset.mintIds,
-      changeset.mintAmounts,
-      changeset.burnIds,
-      changeset.burnAmounts,
-      changeset.mintTokens,
-      changeset.burnTokens,
-    ]
+  const shad = soliditySha3(
+    {
+      type: "bytes32",
+      value: body.sessionId,
+    },
+    {
+      type: "uint256",
+      value: body.farmId.toString(),
+    },
+    {
+      type: "uint256[]",
+      value: [1] as any,
+    },
+    {
+      type: "uint256[]",
+      value: [50] as any,
+    },
+    {
+      type: "uint256[]",
+      value: [] as any,
+    },
+    {
+      type: "uint256[]",
+      value: [] as any,
+    },
+    {
+      type: "uint256",
+      value: mintTokens as any,
+    },
+    {
+      type: "uint256",
+      value: 0 as any,
+    }
   );
-  const signature = sign(encodedParameters);
+
+  const { signature } = sign(shad as string);
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       signature,
+      farmId: body.farmId,
+      sessionId: body.sessionId,
+      mintIds: [1],
+      mintAmounts: [50],
+      burnIds: [],
+      burnAmounts: [],
+      mintTokens: mintTokens,
+      burnTokens: 0,
     }),
   };
 };

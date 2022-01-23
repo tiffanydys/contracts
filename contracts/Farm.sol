@@ -2,43 +2,31 @@
 pragma solidity ^0.8.0;
 
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "./GameOwner.sol";
 
 struct Farm {
     address owner;
     address account;
+    uint256 tokenId;
 }
 
 // Should we make pausable as well?
-contract SunflowerLandFarm is ERC721Enumerable, Ownable {
-    address private game;
-
+contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
     /*
      * Each farm has its own contract address deployed
      * This enables the NFT to actually own the resources and tokens
     */
     mapping (uint => address) farms;
 
-    mapping (address => bool) gameRoles;
-
     string private baseURI = "https://sunflower-land.com/api/nfts/farm/";
 
-    constructor() public ERC721("Sunflower Land Farm", "SLF") {
+    constructor() ERC721("Sunflower Land Farm", "SLF") {
         gameRoles[msg.sender] = true;
     }
 
-
-    function addGameRole(address _game) public onlyOwner {
-        gameRoles[_game] = true;
-    }
-
-    function removeGameRole(address _game) public onlyOwner {
-        gameRoles[_game] = false;
-    }
-
-    function setBaseUri(string memory uri) public onlyOwner returns (bool) {
+    function setBaseUri(string memory uri) public onlyOwner {
         baseURI = uri;
     }
 
@@ -47,9 +35,7 @@ contract SunflowerLandFarm is ERC721Enumerable, Ownable {
     }
 
 
-    function mint(address account) public {
-        require(gameRoles[_msgSender()] == true, "SunflowerLandFarm: You are not the game");
-
+    function mint(address account) public onlyGame {
         uint256 tokenId = totalSupply() + 1;
 
         // Create identifiable farm contract
@@ -59,14 +45,40 @@ contract SunflowerLandFarm is ERC721Enumerable, Ownable {
         _mint(account, tokenId);
 	}
 
+    function gameTransfer(address from, address to, uint256 tokenId) public onlyGame {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+    function gameApprove(address to, uint256 tokenId) public onlyGame {
+        _approve(to, tokenId);
+    }
+    
+
     function getFarm(uint256 tokenId) public view returns (Farm memory) {
         address account = farms[tokenId];
         address owner = ownerOf(tokenId);
 
         return Farm({
             account: account,
-            owner: owner
+            owner: owner,
+            tokenId: tokenId
         });
+    }
+
+    function getFarms(address account) public view returns (Farm[] memory) {
+        uint balance = balanceOf(account);
+
+        Farm[] memory accountFarms = new Farm[](balance);
+        for (uint i = 0; i < balance; i++) {
+            uint tokenId = tokenOfOwnerByIndex(msg.sender, i);
+            accountFarms[i] = Farm({
+                tokenId: tokenId,
+                account: farms[tokenId],
+                owner: account
+            });
+        }
+
+        return accountFarms;
     }
 }
 
