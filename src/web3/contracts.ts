@@ -21,14 +21,10 @@ type Options = {
   farmId: number;
 };
 
-type Data = {
-  balance: number;
-  inventory: any;
-};
 export async function fetchOnChainData({
   sender,
   farmId,
-}: Options): Promise<Data> {
+}: Options): Promise<Farm> {
   const farmContract = new web3.eth.Contract(
     FarmABI as any,
     TESTNET_FARM_ADDRESS
@@ -48,6 +44,7 @@ export async function fetchOnChainData({
   );
 
   const balance = await tokenContract.methods.balanceOf(farmNFT.account).call();
+  console.log({ balance });
 
   const inventoryContract = new web3.eth.Contract(
     InventoryABI as any,
@@ -62,7 +59,10 @@ export async function fetchOnChainData({
   console.log({ inventory });
 
   return {
-    balance: Number(balance),
+    balance,
     inventory: {},
-  };
+    fields: [],
+    id: farmId,
+    address: farmNFT.account,
+  } as Farm;
 }

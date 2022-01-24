@@ -3,7 +3,9 @@ import { Farm } from "../types/game";
 export const GRID_WIDTH_PX = 42;
 
 export const INITIAL_FARM: Farm = {
+  id: 69,
   balance: 10,
+  address: "",
   fields: [
     {
       fieldIndex: 0,
@@ -111,6 +113,5 @@ export const INITIAL_FARM: Farm = {
   inventory: {
     "Sunflower Seed": 3,
     "Pumpkin Soup": 1,
-    "Cabbage Soup": 1,
   },
 };

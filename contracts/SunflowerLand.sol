@@ -56,7 +56,7 @@ contract SunflowerLand is Ownable {
         uint amount
     ) public payable {
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(charity, amount));
+        bytes32 txHash = keccak256(abi.encodePacked(charity, amount, _msgSender()));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
 
@@ -86,6 +86,16 @@ contract SunflowerLand is Ownable {
         uint256 mintTokens,
         uint256 burnTokens
     ) public {
+        // Check the session is new or has not changed (already saved or withdrew funds)
+        bytes32 farmSessionId = sessions[farmId];
+        require(
+            farmSessionId == sessionId,
+            "SunflowerLand: Session has changed"
+        );
+
+        // Start a new session
+        sessions[farmId] = generateSessionId(farmId);
+
         // Verify
         bytes32 txHash = keccak256(abi.encodePacked(sessionId, farmId, mintIds, mintAmounts, burnIds, burnAmounts, mintTokens, burnTokens));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
@@ -100,15 +110,6 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-        // Check the session is new or has not changed (already saved or withdrew funds)
-        bytes32 farmSessionId = sessions[farmId];
-        require(
-            farmSessionId == sessionId,
-            "SunflowerLand: Session has changed"
-        );
-
-        // Start a new session
-        sessions[farmId] = generateSessionId(farmId);
 
         // Get the holding address of the farm
         Farm memory farmNFT = farm.getFarm(farmId);
@@ -142,6 +143,9 @@ contract SunflowerLand is Ownable {
         uint256[] memory amounts,
         uint256 tokenAmount
     ) public  {
+        // Start a new session
+        sessions[farmId] = generateSessionId(farmId);
+
         address farmOwner = farm.ownerOf(farmId);
 
         // Check they own the farm
@@ -150,8 +154,7 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-        // Start a new session
-        sessions[farmId] = generateSessionId(farmId);
+
 
         // Get the holding address of the tokens
         Farm memory farmNFT = farm.getFarm(farmId);

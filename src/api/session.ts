@@ -13,7 +13,10 @@ export function loadFarm(sender: string, farmId: number): Farm {
   // Check if farm exists in DB
 
   // Found farm, return it
-  return INITIAL_FARM;
+  return {
+    ...INITIAL_FARM,
+    id: farmId,
+  };
 }
 
 type Body = {
@@ -62,6 +65,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       // Load the token + NFT balances
       balance: onChainData.balance,
       // TODO - inventory: onChainData.inventory,
+      address: onChainData.address,
     };
   }
 

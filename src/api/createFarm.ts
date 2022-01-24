@@ -5,6 +5,7 @@ import { encodeParameters, sign } from "../lib/sign";
 type Body = {
   charity: string;
   donation: number;
+  address: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -30,7 +31,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     },
     {
       type: "uint",
-      value: body.donation.toString(),
+      value: body.donation as any,
+    },
+    {
+      type: "address",
+      value: body.address,
     }
   );
   console.log({ shad });

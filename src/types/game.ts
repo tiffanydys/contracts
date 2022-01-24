@@ -37,6 +37,8 @@ export type GameAction = PlantAction | HarvestAction;
 export type Inventory = Partial<Record<InventoryItemName, number>>;
 
 export type Farm = {
+  id: number;
+  address: string;
   balance: number;
   fields: FieldItem[];
   inventory: Inventory;
