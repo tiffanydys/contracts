@@ -9,7 +9,12 @@ describe("SunflowerLand contract", () => {
     const donation = 0;
     const { sunflowerLand, farm } = await deploySFLContracts(web3);
 
-    const signature = await sign(web3, TestAccount.CHARITY.address, donation);
+    const signature = await sign(
+      web3,
+      TestAccount.CHARITY.address,
+      donation,
+      TestAccount.PLAYER.address
+    );
     await sunflowerLand.methods
       .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
@@ -34,7 +39,12 @@ describe("SunflowerLand contract", () => {
 
     const someOtherAddress = "0x6eF5dBF9902AD320Fe49216D086B2b50AbC9328f";
     const donation = 0;
-    const signature = await sign(web3, someOtherAddress, donation);
+    const signature = await sign(
+      web3,
+      someOtherAddress,
+      donation,
+      TestAccount.PLAYER.address
+    );
     const result = sunflowerLand.methods
       .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
@@ -81,7 +91,12 @@ describe("SunflowerLand contract", () => {
     const donation = 0;
     const { sunflowerLand, farm } = await deploySFLContracts(web3);
 
-    const signature = await sign(web3, TestAccount.CHARITY.address, donation);
+    const signature = await sign(
+      web3,
+      TestAccount.CHARITY.address,
+      donation,
+      TestAccount.PLAYER.address
+    );
     await sunflowerLand.methods
       .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
