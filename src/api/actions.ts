@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { loadFarm } from "./session";
-import { processActions } from "../lib/reducer";
-import { verify } from "../lib/sign";
-import { GameEvent } from "../lib/events";
+import { processActions } from "../gameEngine/reducer";
+import { GameEvent } from "../gameEngine/events";
+import { getFarm, createFarm, saveFarm } from "../db/farms";
+import Decimal from "decimal.js-light";
 
 type Body = {
   actions: GameEvent[];
@@ -31,6 +31,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No farmId found in event");
   }
 
+  if (!body.sender) {
+    throw new Error("Missing sender");
+  }
+
   // Verify the user signature can actually make actions
   // const address = verify(body.sessionId, body.signature);
 
@@ -38,20 +42,27 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   //   throw new Error("Signature is invalid");
   // }
 
-  // TODO - has the session ID changed?
-
-  const farm = loadFarm(body.sender, body.farmId);
-
-  if (!farm) {
-    throw new Error("No session exists for this farm");
+  const session = await getFarm(body.farmId);
+  console.log({ session });
+  if (!session) {
+    throw new Error("Farm does not exist!");
   }
 
+  // TODO - check session ID is the same
+
+  // Pass numbers into a safe format before processing.
+  const farm = {
+    ...session.farm,
+    balance: new Decimal(session.farm.balance),
+  };
+
   const updated = processActions(farm, body.actions);
-
-  // Update session in DB (insert if does not exist yet)
-
-  // Optional - store actions in DB (for auditing)
-
+  await saveFarm({
+    id: body.farmId,
+    farm: updated,
+    sessionId: body.sessionId,
+    updatedBy: body.sender,
+  });
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },

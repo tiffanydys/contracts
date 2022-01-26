@@ -5,7 +5,7 @@ import FarmABI from "../../contracts/abis/Farm.json";
 import TokenABI from "../../contracts/abis/Token.json";
 import InventoryABI from "../../contracts/abis/Inventory.json";
 
-import { Farm } from "../types/game";
+import { GameState } from "../gameEngine/types/game";
 
 const web3 = createAlchemyWeb3(
   // Mainnet - "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
@@ -24,7 +24,7 @@ type Options = {
 export async function fetchOnChainData({
   sender,
   farmId,
-}: Options): Promise<Farm> {
+}: Options): Promise<GameState> {
   const farmContract = new web3.eth.Contract(
     FarmABI as any,
     TESTNET_FARM_ADDRESS
@@ -64,5 +64,5 @@ export async function fetchOnChainData({
     fields: [],
     id: farmId,
     address: farmNFT.account,
-  } as Farm;
+  } as GameState;
 }

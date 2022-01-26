@@ -20,7 +20,7 @@ export function harvest(state: GameState, action: HarvestAction) {
   if (
     action.index >= 10 &&
     action.index <= 15 &&
-    !state.inventory["Cabbage Soup"]
+    !state.inventory["Sauerkraut"]
   ) {
     throw new Error("Goblin land!");
   }
@@ -28,7 +28,7 @@ export function harvest(state: GameState, action: HarvestAction) {
   if (
     action.index >= 16 &&
     action.index <= 21 &&
-    !state.inventory["Cauliflower Rice"]
+    !state.inventory["Roasted Cauliflower"]
   ) {
     throw new Error("Goblin land!");
   }

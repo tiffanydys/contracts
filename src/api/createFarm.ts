@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { soliditySha3 } from "web3-utils";
-import { encodeParameters, sign } from "../lib/sign";
+import { sign } from "../gameEngine/sign";
 
 type Body = {
   charity: string;

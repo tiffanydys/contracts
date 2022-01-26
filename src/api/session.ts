@@ -1,23 +1,12 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { INITIAL_FARM } from "../lib/constants";
+import Decimal from "decimal.js-light";
+import { fromWei } from "web3-utils";
+import { createFarm, DBFarm, getFarm, saveFarm } from "../db/farms";
+import { INITIAL_FARM } from "../gameEngine/lib/constants";
 
-import { verify } from "../lib/sign";
-import { Farm, FieldItem } from "../types/game";
+import { verify } from "../gameEngine/sign";
+import { GameState } from "../gameEngine/types/game";
 import { fetchOnChainData } from "../web3/contracts";
-
-/**
- *
- * Dummy function that returns farm from our 'DB'
- */
-export function loadFarm(sender: string, farmId: number): Farm {
-  // Check if farm exists in DB
-
-  // Found farm, return it
-  return {
-    ...INITIAL_FARM,
-    id: farmId,
-  };
-}
 
 type Body = {
   sessionId: string;
@@ -38,20 +27,42 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const body: Body = JSON.parse(event.body);
 
   // Verify the user is sending this transaction
-  const address = verify(body.hash, body.signature);
+  // const address = verify(body.hash, body.signature);
 
-  console.log({ address });
-  if (address !== body.sender) {
-    throw new Error("Signature is invalid");
-  }
+  // console.log({ address });
+  // if (address !== body.sender) {
+  //   throw new Error("Signature is invalid");
+  // }
 
   console.log("init farmContract");
 
-  let farm = loadFarm(body.sender, body.farmId);
+  let session = await getFarm(body.farmId);
 
+  if (!session) {
+    // TODO - in future check if farm actually exists on Blockchain
+
+    session = await createFarm({
+      id: body.farmId,
+      createdBy: body.sender,
+      farm: INITIAL_FARM,
+      // Will be 0 but still let UI pass it in
+      sessionId: body.sessionId,
+    });
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        farm: session.farm,
+      }),
+    };
+  }
+
+  let farmState: DBFarm = session.farm;
   // Does the session ID match?
-  const sessionMatches = false;
+  const sessionMatches = session.sessionId === body.sessionId;
 
+  console.log({ sessionMatches });
   if (!sessionMatches) {
     // No - Load farm from blockchain
     const onChainData = await fetchOnChainData({
@@ -59,21 +70,32 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       farmId: body.farmId,
     });
 
-    farm = {
+    await saveFarm({
+      id: body.farmId,
+      farm: onChainData,
+      sessionId: body.sessionId,
+      updatedBy: body.sender,
+    });
+
+    farmState = {
       // Keep the planted fields
-      ...farm,
+      ...session.farm,
       // Load the token + NFT balances
-      balance: onChainData.balance,
+      balance: fromWei(onChainData.balance.toString(), "ether"),
       // TODO - inventory: onChainData.inventory,
-      address: onChainData.address,
     };
   }
+
+  const safeFarm = {
+    ...farmState,
+    balance: farmState.balance.toString(),
+  };
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm,
+      farm: safeFarm,
     }),
   };
 };

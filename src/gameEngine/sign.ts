@@ -12,19 +12,6 @@ export function sign(data: string) {
   return signature;
 }
 
-export function encodeParameters(
-  parameterTypes: string[],
-  parameterValues: any[]
-) {
-  // HACK - Web3 incorrectly types the default class export: use any
-  const encodedParameters = (Encoder as any).encodeParameters(
-    parameterTypes,
-    parameterValues
-  );
-
-  return encodedParameters;
-}
-
 export function verify(data: string, signature: string) {
   // HACK - Web3 incorrectly types the default class export: use any
   const address = new (Accounts as any)().recover(data, signature);

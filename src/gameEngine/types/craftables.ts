@@ -1,5 +1,5 @@
-import { SeedName, SEEDS } from "../types/crops";
-import { InventoryItemName } from "../types/game";
+import { SeedName, SEEDS } from "./crops";
+import { InventoryItemName } from "./game";
 
 export type CraftAction = {
   type: "item.crafted";
@@ -10,6 +10,7 @@ export type CraftAction = {
 export type CraftableName = NFT | Tool | SeedName | Food;
 
 export type Craftable = {
+  id: number;
   name: CraftableName;
   description: string;
   price: number;
@@ -46,11 +47,12 @@ export type Tool =
 export type Food =
   | "Flour"
   | "Pumpkin Soup"
-  | "Cauliflower Rice"
-  | "Cabbage Soup";
+  | "Roasted Cauliflower"
+  | "Sauerkraut";
 
 export const FOODS: Record<Food, Craftable> = {
   "Pumpkin Soup": {
+    id: 501,
     name: "Pumpkin Soup",
     description: "A creamy soup that goblins love",
     price: 5,
@@ -63,6 +65,7 @@ export const FOODS: Record<Food, Craftable> = {
     limit: 1,
   },
   Flour: {
+    id: 502,
     name: "Flour",
     description: "Ground Wheat",
     price: 0.1,
@@ -73,9 +76,10 @@ export const FOODS: Record<Food, Craftable> = {
       },
     ],
   },
-  "Cauliflower Rice": {
-    name: "Cauliflower Rice",
-    description: "Riced Cauliflower",
+  "Roasted Cauliflower": {
+    id: 503,
+    name: "Roasted Cauliflower",
+    description: "A Goblin's favourite",
     price: 0.1,
     ingredients: [
       {
@@ -84,9 +88,10 @@ export const FOODS: Record<Food, Craftable> = {
       },
     ],
   },
-  "Cabbage Soup": {
-    name: "Cabbage Soup",
-    description: "Soup of Cabbage",
+  Sauerkraut: {
+    id: 504,
+    name: "Sauerkraut",
+    description: "Fermented cabbage",
     price: 0.1,
     ingredients: [
       {
@@ -99,12 +104,14 @@ export const FOODS: Record<Food, Craftable> = {
 
 export const TOOLS: Record<Tool, Craftable> = {
   Axe: {
+    id: 301,
     name: "Axe",
     description: "Used to collect wood",
     price: 1,
     ingredients: [],
   },
   Pickaxe: {
+    id: 302,
     name: "Pickaxe",
     description: "Used to collect stone",
     price: 1,
@@ -116,6 +123,7 @@ export const TOOLS: Record<Tool, Craftable> = {
     ],
   },
   "Stone Pickaxe": {
+    id: 303,
     name: "Stone Pickaxe",
     description: "Used to collect iron",
     price: 2,
@@ -131,6 +139,7 @@ export const TOOLS: Record<Tool, Craftable> = {
     ],
   },
   "Iron Pickaxe": {
+    id: 304,
     name: "Iron Pickaxe",
     description: "Used to collect gold",
     price: 5,
@@ -146,6 +155,7 @@ export const TOOLS: Record<Tool, Craftable> = {
     ],
   },
   Hammer: {
+    id: 305,
     name: "Hammer",
     description: "Used to construct buildings",
     price: 5,
@@ -162,6 +172,7 @@ export const TOOLS: Record<Tool, Craftable> = {
     disabled: true,
   },
   Rod: {
+    id: 306,
     name: "Rod",
     description: "Used to fish trout",
     price: 10,
@@ -177,6 +188,7 @@ export const TOOLS: Record<Tool, Craftable> = {
 
 export const NFTs: Record<NFT, Craftable> = {
   "Sunflower Statue": {
+    id: 401,
     name: "Sunflower Statue",
     description: "A symbol of the holy token",
     price: 5,
@@ -195,6 +207,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Potato Statue": {
+    id: 402,
     name: "Potato Statue",
     description: "The OG potato hustler flex",
     price: 0,
@@ -213,6 +226,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   Scarecrow: {
+    id: 403,
     name: "Scarecrow",
     description: "Grow wheat faster",
     price: 50,
@@ -231,6 +245,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Christmas Tree": {
+    id: 404,
     name: "Christmas Tree",
     description: "Receieve a Santa Airdrop on Christmas day",
     price: 50,
@@ -248,6 +263,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Chicken Coop": {
+    id: 405,
     name: "Chicken Coop",
     description: "Collect 3x the amount of eggs",
     price: 50,
@@ -270,6 +286,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Farm Cat": {
+    id: 406,
     name: "Farm Cat",
     description: "Keep the rats away",
     price: 50,
@@ -278,6 +295,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Farm Dog": {
+    id: 407,
     name: "Farm Dog",
     description: "Herd sheep 4x faster",
     price: 75,
@@ -286,6 +304,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   Gnome: {
+    id: 408,
     name: "Gnome",
     description: "A lucky gnome",
     price: 10,
@@ -294,6 +313,7 @@ export const NFTs: Record<NFT, Craftable> = {
     type: "NFT",
   },
   "Gold Egg": {
+    id: 409,
     name: "Gold Egg",
     description: "A rare egg, what lays inside?",
     price: 0,

@@ -1,4 +1,5 @@
-import { INITIAL_FARM } from "../constants";
+import Decimal from "decimal.js-light";
+import { INITIAL_FARM } from "../lib/constants";
 import { FieldItem, GameState } from "../types/game";
 import { harvest } from "./harvest";
 
@@ -7,8 +8,9 @@ const EMPTY_FIELDS: FieldItem[] = Array(5)
   .map((_, fieldIndex) => ({ fieldIndex }));
 
 let GAME_STATE: GameState = {
+  id: 1,
   fields: EMPTY_FIELDS,
-  balance: 0,
+  balance: new Decimal(0),
   inventory: {},
 };
 
@@ -112,7 +114,7 @@ describe("harvest", () => {
 
   it("harvests once the second goblin is gone", () => {
     const state = harvest(
-      { ...INITIAL_FARM, inventory: { "Cabbage Soup": 1 } },
+      { ...INITIAL_FARM, inventory: { Sauerkraut: 1 } },
       {
         type: "item.harvested",
         index: 10,
@@ -136,7 +138,7 @@ describe("harvest", () => {
 
   it("harvests once the third goblin is gone", () => {
     const state = harvest(
-      { ...INITIAL_FARM, inventory: { "Cauliflower Rice": 1 } },
+      { ...INITIAL_FARM, inventory: { "Roasted Cauliflower": 1 } },
       {
         type: "item.harvested",
         index: 16,
