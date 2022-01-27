@@ -5,7 +5,8 @@ import FarmABI from "../../contracts/abis/Farm.json";
 import TokenABI from "../../contracts/abis/Token.json";
 import InventoryABI from "../../contracts/abis/Inventory.json";
 
-import { GameState } from "../gameEngine/types/game";
+import { GameState } from "../domain/game/types/game";
+import { IDS } from "../domain/game/types";
 
 const web3 = createAlchemyWeb3(
   // Mainnet - "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
@@ -44,16 +45,17 @@ export async function fetchOnChainData({
   );
 
   const balance = await tokenContract.methods.balanceOf(farmNFT.account).call();
-  console.log({ balance });
 
   const inventoryContract = new web3.eth.Contract(
     InventoryABI as any,
     TESTNET_INVENTORY_ADDRESS
   );
 
+  const addresses = IDS.map(() => farmNFT.account);
+
   // TODO loop through all tokens and get the balances
   const inventory = await inventoryContract.methods
-    .balanceOfBatch([farmNFT.account], [1])
+    .balanceOfBatch(addresses, IDS)
     .call();
 
   console.log({ inventory });
@@ -61,8 +63,9 @@ export async function fetchOnChainData({
   return {
     balance,
     inventory: {},
-    fields: [],
     id: farmId,
     address: farmNFT.account,
+    // Not used
+    fields: {},
   } as GameState;
 }

@@ -1,12 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import Decimal from "decimal.js-light";
-import { fromWei } from "web3-utils";
-import { createFarm, DBFarm, getFarm, saveFarm } from "../db/farms";
-import { INITIAL_FARM } from "../gameEngine/lib/constants";
-
-import { verify } from "../gameEngine/sign";
-import { GameState } from "../gameEngine/types/game";
-import { fetchOnChainData } from "../web3/contracts";
+import { startSession } from "../domain/session/session";
 
 type Body = {
   sessionId: string;
@@ -36,66 +29,17 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   console.log("init farmContract");
 
-  let session = await getFarm(body.farmId);
-
-  if (!session) {
-    // TODO - in future check if farm actually exists on Blockchain
-
-    session = await createFarm({
-      id: body.farmId,
-      createdBy: body.sender,
-      farm: INITIAL_FARM,
-      // Will be 0 but still let UI pass it in
-      sessionId: body.sessionId,
-    });
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        farm: session.farm,
-      }),
-    };
-  }
-
-  let farmState: DBFarm = session.farm;
-  // Does the session ID match?
-  const sessionMatches = session.sessionId === body.sessionId;
-
-  console.log({ sessionMatches });
-  if (!sessionMatches) {
-    // No - Load farm from blockchain
-    const onChainData = await fetchOnChainData({
-      sender: body.sender,
-      farmId: body.farmId,
-    });
-
-    await saveFarm({
-      id: body.farmId,
-      farm: onChainData,
-      sessionId: body.sessionId,
-      updatedBy: body.sender,
-    });
-
-    farmState = {
-      // Keep the planted fields
-      ...session.farm,
-      // Load the token + NFT balances
-      balance: fromWei(onChainData.balance.toString(), "ether"),
-      // TODO - inventory: onChainData.inventory,
-    };
-  }
-
-  const safeFarm = {
-    ...farmState,
-    balance: farmState.balance.toString(),
-  };
+  const farm = await startSession({
+    farmId: body.farmId,
+    sessionId: body.sessionId,
+    sender: body.sender,
+  });
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm: safeFarm,
+      farm,
     }),
   };
 };

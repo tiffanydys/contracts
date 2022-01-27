@@ -1,5 +1,5 @@
-import { SeedName, SEEDS } from "./crops";
-import { InventoryItemName } from "./game";
+import { SeedName, SEEDS } from "../types/crops";
+import { InventoryItemName } from "../types/game";
 
 export type CraftAction = {
   type: "item.crafted";

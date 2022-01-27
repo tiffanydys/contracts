@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { soliditySha3, toWei } from "web3-utils";
-import { sign } from "../gameEngine/sign";
+import { sign } from "../web3/sign";
 
 type Body = {
   farmId: number;

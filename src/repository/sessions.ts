@@ -1,13 +1,14 @@
 import AWS from "aws-sdk";
-import { GameState } from "../gameEngine/types/game";
+import { GameState } from "../domain/game/types/game";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export type DBFarm = Omit<GameState, "balance"> & {
+//
+export type FarmSession = Omit<GameState, "balance"> & {
   balance: string;
 };
 
-type Session = {
+export type Session = {
   id: number;
   sessionId?: string;
   createdAt: string;
@@ -16,10 +17,10 @@ type Session = {
   updatedAt: string;
   // Polygon address
   updatedBy: string;
-  farm: DBFarm;
+  farm: FarmSession;
 };
 
-export async function getFarm(id: number): Promise<Session | null> {
+export async function getSessionByFarmId(id: number): Promise<Session | null> {
   const getParams = {
     TableName: process.env.tableName as string,
     Key: {
@@ -31,23 +32,28 @@ export async function getFarm(id: number): Promise<Session | null> {
   return results.Item as Session;
 }
 
+/**
+ * Santize the farm data
+ */
+function makeFarm(farm: GameState): FarmSession {
+  return {
+    ...farm,
+    balance: farm.balance.toString(),
+  };
+}
+
 type CreateFarm = {
   id: number;
   sessionId: string;
   createdBy: string;
   farm: GameState;
 };
-export async function createFarm({
+export async function createSession({
   id,
   sessionId,
   createdBy,
   farm,
 }: CreateFarm): Promise<Session> {
-  const safeFarm = {
-    ...farm,
-    balance: farm.balance.toString(),
-  };
-
   const Item: Session = {
     id: id,
     sessionId: sessionId,
@@ -55,8 +61,7 @@ export async function createFarm({
     createdBy: createdBy,
     updatedAt: new Date().toISOString(),
     updatedBy: createdBy,
-    // TODO - check that data is in right format
-    farm: safeFarm,
+    farm: makeFarm(farm),
   };
 
   const putParams = {
@@ -75,14 +80,13 @@ type UpdateFarm = {
   updatedBy: string;
   farm: GameState;
 };
-export async function saveFarm({ id, sessionId, updatedBy, farm }: UpdateFarm) {
-  const safeFarm = {
-    ...farm,
-    balance: farm.balance.toString(),
-  };
 
-  console.log({ safeFarm });
-
+export async function updateSession({
+  id,
+  sessionId,
+  updatedBy,
+  farm,
+}: UpdateFarm) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
@@ -95,7 +99,7 @@ export async function saveFarm({ id, sessionId, updatedBy, farm }: UpdateFarm) {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
       ":updatedBy": updatedBy,
-      ":farm": safeFarm,
+      ":farm": makeFarm(farm),
     },
   };
   await dynamoDb.update(updateParams).promise();

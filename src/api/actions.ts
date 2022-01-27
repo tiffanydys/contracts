@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { processActions } from "../gameEngine/reducer";
-import { GameEvent } from "../gameEngine/events";
-import { getFarm, createFarm, saveFarm } from "../db/farms";
+import { processActions } from "../domain/game/reducer";
+import { GameEvent } from "../domain/game/events";
+import { getSessionByFarmId, updateSession } from "../repository/sessions";
 import Decimal from "decimal.js-light";
 
 type Body = {
@@ -42,7 +42,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   //   throw new Error("Signature is invalid");
   // }
 
-  const session = await getFarm(body.farmId);
+  const session = await getSessionByFarmId(body.farmId);
   console.log({ session });
   if (!session) {
     throw new Error("Farm does not exist!");
@@ -56,18 +56,20 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     balance: new Decimal(session.farm.balance),
   };
 
-  const updated = processActions(farm, body.actions);
-  await saveFarm({
+  const gameState = processActions(farm, body.actions);
+
+  await updateSession({
     id: body.farmId,
-    farm: updated,
+    farm: gameState,
     sessionId: body.sessionId,
     updatedBy: body.sender,
   });
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm: updated,
+      farm: gameState,
     }),
   };
 };
