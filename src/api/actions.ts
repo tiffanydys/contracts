@@ -1,7 +1,11 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { processActions } from "../domain/game/reducer";
 import { GameEvent } from "../domain/game/events";
-import { getSessionByFarmId, updateSession } from "../repository/sessions";
+import {
+  getSessionByFarmId,
+  updateFarm,
+  updateSession,
+} from "../repository/sessions";
 import Decimal from "decimal.js-light";
 
 type Body = {
@@ -58,10 +62,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   const gameState = processActions(farm, body.actions);
 
-  await updateSession({
+  await updateFarm({
     id: body.farmId,
     farm: gameState,
-    sessionId: body.sessionId,
     updatedBy: body.sender,
   });
 

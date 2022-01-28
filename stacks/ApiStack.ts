@@ -13,6 +13,7 @@ export default class ApiStack extends sst.Stack {
         createdBy: sst.TableFieldType.STRING,
         updatedBy: sst.TableFieldType.STRING,
         state: sst.TableFieldType.STRING,
+        oldFarm: sst.TableFieldType.STRING,
       },
       primaryIndex: { partitionKey: "id" },
     });

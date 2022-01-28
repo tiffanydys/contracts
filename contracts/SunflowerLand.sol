@@ -131,7 +131,7 @@ contract SunflowerLand is Ownable {
         
         if (burnTokens > 0) {
             // Send to the burn address so total supply keeps increasing
-            token.gameTransfer(farmNFT.account, 0x0000000000000000000000000000000000000000, burnTokens);
+            token.gameTransfer(farmNFT.account, 0x000000000000000000000000000000000000dEaD, burnTokens);
         }
     }
 

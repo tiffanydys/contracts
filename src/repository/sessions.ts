@@ -3,7 +3,6 @@ import { GameState } from "../domain/game/types/game";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-//
 export type FarmSession = Omit<GameState, "balance"> & {
   balance: string;
 };
@@ -18,6 +17,7 @@ export type Session = {
   // Polygon address
   updatedBy: string;
   farm: FarmSession;
+  oldFarm: FarmSession;
 };
 
 export async function getSessionByFarmId(id: number): Promise<Session | null> {
@@ -54,6 +54,8 @@ export async function createSession({
   createdBy,
   farm,
 }: CreateFarm): Promise<Session> {
+  const safeFarm = makeFarm(farm);
+
   const Item: Session = {
     id: id,
     sessionId: sessionId,
@@ -61,7 +63,8 @@ export async function createSession({
     createdBy: createdBy,
     updatedAt: new Date().toISOString(),
     updatedBy: createdBy,
-    farm: makeFarm(farm),
+    farm: safeFarm,
+    oldFarm: safeFarm,
   };
 
   const putParams = {
@@ -76,17 +79,11 @@ export async function createSession({
 
 type UpdateFarm = {
   id: number;
-  sessionId: string;
   updatedBy: string;
   farm: GameState;
 };
 
-export async function updateSession({
-  id,
-  sessionId,
-  updatedBy,
-  farm,
-}: UpdateFarm) {
+export async function updateFarm({ id, updatedBy, farm }: UpdateFarm) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
@@ -94,12 +91,46 @@ export async function updateSession({
     },
     // Update the "tally" column
     UpdateExpression:
-      "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, farm = :farm",
+      "SET updatedAt = :updatedAt, updatedBy = :updatedBy, farm = :farm",
+    ExpressionAttributeValues: {
+      ":updatedAt": new Date().toISOString(),
+      ":updatedBy": updatedBy,
+      ":farm": makeFarm(farm),
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
+
+type UpdateSession = {
+  id: number;
+  sessionId: string;
+  updatedBy: string;
+  farm: GameState;
+  oldFarm?: GameState;
+};
+
+export async function updateSession({
+  id,
+  sessionId,
+  updatedBy,
+  farm,
+}: UpdateSession) {
+  const safeFarm = makeFarm(farm);
+
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    // Update the "tally" column
+    UpdateExpression:
+      "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, farm = :farm, oldFarm = :oldFarm",
     ExpressionAttributeValues: {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
       ":updatedBy": updatedBy,
-      ":farm": makeFarm(farm),
+      ":farm": safeFarm,
+      ":oldFarm": safeFarm,
     },
   };
   await dynamoDb.update(updateParams).promise();

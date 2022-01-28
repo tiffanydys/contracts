@@ -35,6 +35,4 @@ contract SunflowerLandToken is ERC20Pausable, GameOwner {
     _approve(_msgSender(), spender, amount);
     return true;
   }
-
-  // TODO: Taxation Fee on transferFrom
 }

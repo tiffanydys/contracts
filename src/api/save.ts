@@ -1,5 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { soliditySha3, toWei } from "web3-utils";
+import { calculateChangeset } from "../domain/session/session";
 import { sign } from "../web3/sign";
 
 type Body = {
@@ -22,7 +23,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   console.log({ body });
   // Just a test to see it actually increase
   const mintTokens = toWei("1");
+  const changeset = await calculateChangeset(Number(body.farmId));
 
+  console.log({ changeset });
   const shad = soliditySha3(
     {
       type: "bytes32",
@@ -34,31 +37,33 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     },
     {
       type: "uint256[]",
-      value: [1] as any,
+      value: changeset.mintIds as any,
     },
     {
       type: "uint256[]",
-      value: [50] as any,
+      value: changeset.mintAmounts as any,
     },
     {
       type: "uint256[]",
-      value: [] as any,
+      value: changeset.burnIds as any,
     },
     {
       type: "uint256[]",
-      value: [] as any,
+      value: changeset.burnAmounts as any,
     },
     {
       type: "uint256",
-      value: mintTokens as any,
+      value: changeset.mintTokens as any,
     },
     {
       type: "uint256",
-      value: 0 as any,
+      value: changeset.burnTokens as any,
     }
   );
 
+  console.log({ shad });
   const { signature } = sign(shad as string);
+  console.log({ signature });
 
   return {
     statusCode: 200,
@@ -67,12 +72,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       signature,
       farmId: body.farmId,
       sessionId: body.sessionId,
-      mintIds: [1],
-      mintAmounts: [50],
-      burnIds: [],
-      burnAmounts: [],
-      mintTokens: mintTokens,
-      burnTokens: 0,
+      ...changeset,
     }),
   };
 };
