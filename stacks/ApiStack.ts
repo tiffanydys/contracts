@@ -4,18 +4,26 @@ export default class ApiStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
 
-    const table = new sst.Table(this, "Farms", {
+    const sessionTable = new sst.Table(this, "Farms", {
       fields: {
+        owner: sst.TableFieldType.STRING,
         id: sst.TableFieldType.NUMBER,
         sessionId: sst.TableFieldType.STRING,
         updatedAt: sst.TableFieldType.STRING,
         createdAt: sst.TableFieldType.STRING,
-        createdBy: sst.TableFieldType.STRING,
-        updatedBy: sst.TableFieldType.STRING,
-        state: sst.TableFieldType.STRING,
-        oldFarm: sst.TableFieldType.STRING,
+        gameState: sst.TableFieldType.STRING,
+        previousGameState: sst.TableFieldType.STRING,
       },
-      primaryIndex: { partitionKey: "id" },
+      primaryIndex: { partitionKey: "owner", sortKey: "id" },
+    });
+
+    const sunflowerFarmersTable = new sst.Table(this, "SunflowerFarmersV1", {
+      fields: {
+        address: sst.TableFieldType.STRING,
+        balance: sst.TableFieldType.STRING,
+        inventory: sst.TableFieldType.STRING,
+      },
+      primaryIndex: { partitionKey: "address" },
     });
 
     const api = new sst.Api(this, "Api", {
@@ -26,7 +34,9 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: table.dynamodbTable.tableName,
+            tableName: sessionTable.dynamodbTable.tableName,
+            sunflowerFarmersTableName:
+              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /actions": {
@@ -35,7 +45,9 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: table.dynamodbTable.tableName,
+            tableName: sessionTable.dynamodbTable.tableName,
+            sunflowerFarmersTableName:
+              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /session": {
@@ -44,7 +56,9 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: table.dynamodbTable.tableName,
+            tableName: sessionTable.dynamodbTable.tableName,
+            sunflowerFarmersTableName:
+              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /save": {
@@ -53,13 +67,15 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: table.dynamodbTable.tableName,
+            tableName: sessionTable.dynamodbTable.tableName,
+            sunflowerFarmersTableName:
+              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
       },
     });
 
-    api.attachPermissions([table]);
+    api.attachPermissions([sessionTable, sunflowerFarmersTable]);
 
     this.addOutputs({
       ApiEndpoint: api.url,

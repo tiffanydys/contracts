@@ -22,6 +22,18 @@ type Options = {
   farmId: number;
 };
 
+export async function loadNFTFarm(id: number) {
+  const farmContract = new web3.eth.Contract(
+    FarmABI as any,
+    TESTNET_FARM_ADDRESS
+  );
+  const farmNFT: { owner: string; account: string } = await farmContract.methods
+    .getFarm(id)
+    .call();
+
+  return farmNFT;
+}
+
 export async function fetchOnChainData({
   sender,
   farmId,
@@ -31,9 +43,7 @@ export async function fetchOnChainData({
     TESTNET_FARM_ADDRESS
   );
 
-  const farmNFT: { owner: string; account: string } = await farmContract.methods
-    .getFarm(farmId)
-    .call();
+  const farmNFT = await loadNFTFarm(farmId);
 
   if (farmNFT.owner !== sender) {
     throw new Error("Farm is not owned by you");

@@ -7,29 +7,34 @@ export type FarmSession = Omit<GameState, "balance"> & {
   balance: string;
 };
 
-export type Session = {
+// TODO - rename?
+export type AccountFarm = {
   id: number;
+  owner: string;
   sessionId?: string;
   createdAt: string;
-  // Polygon address
-  createdBy: string;
   updatedAt: string;
-  // Polygon address
-  updatedBy: string;
-  farm: FarmSession;
-  oldFarm: FarmSession;
+  gameState: FarmSession;
+  previousGameState: FarmSession;
 };
 
-export async function getSessionByFarmId(id: number): Promise<Session | null> {
+export async function getFarmsByAccount(
+  account: string
+): Promise<AccountFarm[]> {
   const getParams = {
     TableName: process.env.tableName as string,
-    Key: {
-      id,
+    KeyConditionExpression: "#owner = :owner",
+    ExpressionAttributeNames: {
+      "#owner": "owner",
+    },
+    ExpressionAttributeValues: {
+      ":owner": account,
     },
   };
-  const results = await dynamoDb.get(getParams).promise();
 
-  return results.Item as Session;
+  const results = await dynamoDb.query(getParams).promise();
+
+  return results.Items as AccountFarm[];
 }
 
 /**
@@ -45,26 +50,25 @@ function makeFarm(farm: GameState): FarmSession {
 type CreateFarm = {
   id: number;
   sessionId: string;
-  createdBy: string;
-  farm: GameState;
+  owner: string;
+  gameState: GameState;
 };
-export async function createSession({
+export async function createFarm({
   id,
   sessionId,
-  createdBy,
-  farm,
-}: CreateFarm): Promise<Session> {
-  const safeFarm = makeFarm(farm);
+  owner,
+  gameState,
+}: CreateFarm): Promise<AccountFarm> {
+  const safeFarm = makeFarm(gameState);
 
-  const Item: Session = {
+  const Item: AccountFarm = {
     id: id,
     sessionId: sessionId,
     createdAt: new Date().toISOString(),
-    createdBy: createdBy,
+    owner,
     updatedAt: new Date().toISOString(),
-    updatedBy: createdBy,
-    farm: safeFarm,
-    oldFarm: safeFarm,
+    gameState: safeFarm,
+    previousGameState: safeFarm,
   };
 
   const putParams = {
@@ -79,23 +83,21 @@ export async function createSession({
 
 type UpdateFarm = {
   id: number;
-  updatedBy: string;
-  farm: GameState;
+  owner: string;
+  gameState: GameState;
 };
 
-export async function updateFarm({ id, updatedBy, farm }: UpdateFarm) {
+export async function updateFarm({ id, owner, gameState }: UpdateFarm) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
+      owner,
     },
-    // Update the "tally" column
-    UpdateExpression:
-      "SET updatedAt = :updatedAt, updatedBy = :updatedBy, farm = :farm",
+    UpdateExpression: "SET updatedAt = :updatedAt, gameState = :gameState",
     ExpressionAttributeValues: {
       ":updatedAt": new Date().toISOString(),
-      ":updatedBy": updatedBy,
-      ":farm": makeFarm(farm),
+      ":gameState": makeFarm(gameState),
     },
   };
   await dynamoDb.update(updateParams).promise();
@@ -103,34 +105,34 @@ export async function updateFarm({ id, updatedBy, farm }: UpdateFarm) {
 
 type UpdateSession = {
   id: number;
+  owner: string;
   sessionId: string;
-  updatedBy: string;
-  farm: GameState;
-  oldFarm?: GameState;
+  gameState: GameState;
+  previousGameState?: GameState;
 };
 
 export async function updateSession({
   id,
   sessionId,
-  updatedBy,
-  farm,
+  owner,
+  gameState,
 }: UpdateSession) {
-  const safeFarm = makeFarm(farm);
+  const safeFarm = makeFarm(gameState);
 
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
+      owner,
     },
     // Update the "tally" column
     UpdateExpression:
-      "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, farm = :farm, oldFarm = :oldFarm",
+      "SET sessionId = :sessionId, updatedAt = :updatedAt, gameState = :gameState, previousGameState = :previousGameState",
     ExpressionAttributeValues: {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
-      ":updatedBy": updatedBy,
-      ":farm": safeFarm,
-      ":oldFarm": safeFarm,
+      ":gameState": safeFarm,
+      ":previousGameState": safeFarm,
     },
   };
   await dynamoDb.update(updateParams).promise();

@@ -2,7 +2,7 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { processActions } from "../domain/game/reducer";
 import { GameEvent } from "../domain/game/events";
 import {
-  getSessionByFarmId,
+  getFarmsByAccount,
   updateFarm,
   updateSession,
 } from "../repository/sessions";
@@ -46,26 +46,31 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   //   throw new Error("Signature is invalid");
   // }
 
-  const session = await getSessionByFarmId(body.farmId);
-  console.log({ session });
-  if (!session) {
+  // Verify they are the owner of the farm - How do we do this without a web3 call?
+
+  // Anyone could just sign a farmID and pass it up to the server
+
+  const farms = await getFarmsByAccount(body.sender);
+  const farm = farms.find((f) => f.id === body.farmId);
+  console.log({ farm });
+  if (!farm) {
     throw new Error("Farm does not exist!");
   }
 
   // TODO - check session ID is the same
 
   // Pass numbers into a safe format before processing.
-  const farm = {
-    ...session.farm,
-    balance: new Decimal(session.farm.balance),
+  const gameState = {
+    ...farm.gameState,
+    balance: new Decimal(farm.gameState.balance),
   };
 
-  const gameState = processActions(farm, body.actions);
+  const newGameState = processActions(gameState, body.actions);
 
   await updateFarm({
     id: body.farmId,
-    farm: gameState,
-    updatedBy: body.sender,
+    gameState: newGameState,
+    owner: body.sender,
   });
 
   return {

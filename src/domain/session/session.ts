@@ -1,12 +1,13 @@
 import Decimal from "decimal.js-light";
 import { fromWei, toWei } from "web3-utils";
 import {
-  createSession,
-  getSessionByFarmId,
+  createFarm,
+  getFarmsByAccount,
   updateSession,
-  Session,
+  AccountFarm,
 } from "../../repository/sessions";
-import { fetchOnChainData } from "../../web3/contracts";
+import { getSnapshotByAddress } from "../../repository/sunflowerFarmers";
+import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { GameState } from "../game/types/game";
 
@@ -21,42 +22,55 @@ export async function startSession({
   sender,
   sessionId,
 }: StartSessionArgs): Promise<GameState> {
-  let session = await getSessionByFarmId(farmId);
+  let farms = await getFarmsByAccount(sender);
 
-  // No session was ever created for this farm
-  if (!session) {
-    // In case they somehow transferred resources to their farm before playing the game :/
-    const onChainData = await fetchOnChainData({
-      sender: sender,
-      farmId: farmId,
-    });
+  const farm = farms.find((farm) => farm.id === farmId);
 
-    const initialFarm: GameState = {
+  // No session was ever created for this farm + account
+  if (!farm) {
+    // We don't really care about this - they could create a session but never be able to save it
+    const nftFarm = await loadNFTFarm(farmId);
+    if (nftFarm.owner !== sender) {
+      throw new Error("You do not own this farm");
+    }
+
+    let initialFarm: GameState = {
       // Keep the planted fields
       ...INITIAL_FARM,
       // Load the token + NFT balances
-      balance: new Decimal(fromWei(onChainData.balance.toString(), "ether")),
-      // TODO - inventory: onChainData.inventory,
+      balance: new Decimal(0),
     };
 
-    session = await createSession({
+    // Make sure the user has not already created a farm (and potentially migrated)
+    if (farms.length === 0) {
+      // Load a V1 snapshot (any resources/inventory they had from the old game)
+      const sunflowerFarmersSnapshot = await getSnapshotByAddress(sender);
+
+      if (sunflowerFarmersSnapshot) {
+        initialFarm = {
+          ...initialFarm,
+          balance: new Decimal(sunflowerFarmersSnapshot.balance),
+          inventory: sunflowerFarmersSnapshot.inventory,
+        };
+      }
+    }
+
+    await createFarm({
       id: farmId,
-      createdBy: sender,
-      farm: initialFarm,
+      owner: sender,
+      gameState: initialFarm,
 
       // Will be 0 but still let UI pass it in
       sessionId: sessionId,
     });
 
-    const farm = makeFarm(session.farm);
-
-    return farm;
+    return initialFarm;
   }
 
-  let farmState = makeFarm(session.farm);
+  let farmState = makeFarm(farm.gameState);
 
   // Does the session ID match?
-  const sessionMatches = session.sessionId === sessionId;
+  const sessionMatches = farm.sessionId === sessionId;
 
   if (sessionMatches) {
     return farmState;
@@ -68,9 +82,9 @@ export async function startSession({
     farmId: farmId,
   });
 
-  const farm: GameState = {
+  const gameState: GameState = {
     // Keep the planted fields
-    ...session.farm,
+    ...farm.gameState,
     // Load the token + NFT balances
     balance: new Decimal(fromWei(onChainData.balance.toString(), "ether")),
     // TODO - inventory: onChainData.inventory,
@@ -78,20 +92,20 @@ export async function startSession({
 
   await updateSession({
     id: farmId,
-    farm,
+    gameState,
     // Set the snapshot for the beginning of the session
-    oldFarm: farm,
+    previousGameState: gameState,
     sessionId: sessionId,
-    updatedBy: sender,
+    owner: sender,
   });
 
-  return farm;
+  return gameState;
 }
 
-function makeFarm(farm: Session["farm"]): GameState {
+function makeFarm(gameState: AccountFarm["gameState"]): GameState {
   return {
-    ...farm,
-    balance: new Decimal(farm.balance),
+    ...gameState,
+    balance: new Decimal(gameState.balance),
     // TODO - inventory: farm.inventory,
   };
 }
@@ -105,20 +119,27 @@ type Changeset = {
   burnIds: string[];
   burnAmounts: string[];
 };
-export async function calculateChangeset(id: number): Promise<Changeset> {
-  let session = await getSessionByFarmId(id);
 
-  if (!session) {
+type CalculateChangesetArgs = {
+  id: number;
+  owner: string;
+};
+
+export async function calculateChangeset({
+  id,
+  owner,
+}: CalculateChangesetArgs): Promise<Changeset> {
+  let farms = await getFarmsByAccount(owner);
+  const farm = farms.find((farm) => farm.id === id);
+
+  if (!farm) {
     throw new Error("Farm does not exist");
   }
 
-  const farm = makeFarm(session.farm);
-  const snapshot = makeFarm(session.oldFarm);
+  const gameState = makeFarm(farm.gameState);
+  const snapshot = makeFarm(farm.previousGameState);
 
-  const balance = farm.balance.minus(snapshot.balance);
-  console.log({ balance: balance.toString() });
-  console.log({ farm: farm.balance.toString() });
-  console.log({ snapshot: farm.balance.toString() });
+  const balance = gameState.balance.minus(snapshot.balance);
 
   const wei = toWei(balance.abs().toString());
 
@@ -131,3 +152,34 @@ export async function calculateChangeset(id: number): Promise<Changeset> {
     burnAmounts: [],
   };
 }
+
+/**
+
+  DynamoDB use the farmID + owner (sort key) to identify the session
+
+ */
+
+/** 
+--farms
+  --farmId
+    --address
+      --sessionId
+        start.json
+        farm.json
+        timestamp.json
+
+-- farms
+  --123
+    --0x750a0as0asc0ac (42 characters)
+      --0xc64a915fad97e6756d78050482ec (Sliced to 63 characters)
+        -start.json
+        -farm.json
+        -1023910129202.json
+        -1813910129202.json
+      --0xc64a915fad97e6756d78050482ec (Sliced to 63 characters)
+        -start.json
+        -farm.json
+        -1023910129202.json
+        -1813910129202.json
+      
+*/

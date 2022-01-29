@@ -20,6 +20,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   console.log({ body });
+  // Whitelist farms
 
   // TODO - validate amount
 

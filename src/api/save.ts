@@ -21,9 +21,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   console.log({ body });
-  // Just a test to see it actually increase
-  const mintTokens = toWei("1");
-  const changeset = await calculateChangeset(Number(body.farmId));
+
+  const changeset = await calculateChangeset({
+    id: Number(body.farmId),
+    owner: body.sender,
+  });
 
   console.log({ changeset });
   const shad = soliditySha3(
