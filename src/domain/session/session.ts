@@ -6,21 +6,25 @@ import {
   updateSession,
   AccountFarm,
 } from "../../repository/sessions";
-import { getSnapshotByAddress } from "../../repository/sunflowerFarmers";
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { GameState } from "../game/types/game";
+import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 
 type StartSessionArgs = {
   farmId: number;
   sessionId: string;
   sender: string;
+  hasV1Farm: boolean;
+  hasV1Tokens: boolean;
 };
 
 export async function startSession({
   farmId,
   sender,
   sessionId,
+  hasV1Farm,
+  hasV1Tokens,
 }: StartSessionArgs): Promise<GameState> {
   let farms = await getFarmsByAccount(sender);
 
@@ -44,7 +48,11 @@ export async function startSession({
     // Make sure the user has not already created a farm (and potentially migrated)
     if (farms.length === 0) {
       // Load a V1 snapshot (any resources/inventory they had from the old game)
-      const sunflowerFarmersSnapshot = await getSnapshotByAddress(sender);
+      const sunflowerFarmersSnapshot = await getV1GameState({
+        address: sender,
+        hasFarm: hasV1Farm,
+        hasTokens: hasV1Tokens,
+      });
 
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
@@ -59,6 +67,9 @@ export async function startSession({
       id: farmId,
       owner: sender,
       gameState: initialFarm,
+
+      // We want to be able to calculate the changeset for the farm
+      previousGameState: INITIAL_FARM,
 
       // Will be 0 but still let UI pass it in
       sessionId: sessionId,

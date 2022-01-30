@@ -4,13 +4,18 @@ import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import FarmABI from "../../contracts/abis/Farm.json";
 import TokenABI from "../../contracts/abis/Token.json";
 import InventoryABI from "../../contracts/abis/Inventory.json";
+import SunflowerFarmersABI from "../../contracts/abis/SunflowerFarmers.json";
 
 import { GameState } from "../domain/game/types/game";
 import { IDS } from "../domain/game/types";
+import Decimal from "decimal.js-light";
 
-const web3 = createAlchemyWeb3(
-  // Mainnet - "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
+const testnet = createAlchemyWeb3(
   "https://polygon-mumbai.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
+);
+
+const mainnet = createAlchemyWeb3(
+  "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
 );
 
 const TESTNET_TOKEN_ADDRESS = "0x74909542f6Aa557eC1ef30e633F3d027e18888E2";
@@ -23,7 +28,7 @@ type Options = {
 };
 
 export async function loadNFTFarm(id: number) {
-  const farmContract = new web3.eth.Contract(
+  const farmContract = new testnet.eth.Contract(
     FarmABI as any,
     TESTNET_FARM_ADDRESS
   );
@@ -38,7 +43,7 @@ export async function fetchOnChainData({
   sender,
   farmId,
 }: Options): Promise<GameState> {
-  const farmContract = new web3.eth.Contract(
+  const farmContract = new testnet.eth.Contract(
     FarmABI as any,
     TESTNET_FARM_ADDRESS
   );
@@ -49,14 +54,14 @@ export async function fetchOnChainData({
     throw new Error("Farm is not owned by you");
   }
 
-  const tokenContract = new web3.eth.Contract(
+  const tokenContract = new testnet.eth.Contract(
     TokenABI as any,
     TESTNET_TOKEN_ADDRESS
   );
 
   const balance = await tokenContract.methods.balanceOf(farmNFT.account).call();
 
-  const inventoryContract = new web3.eth.Contract(
+  const inventoryContract = new testnet.eth.Contract(
     InventoryABI as any,
     TESTNET_INVENTORY_ADDRESS
   );
@@ -78,4 +83,54 @@ export async function fetchOnChainData({
     // Not used
     fields: {},
   } as GameState;
+}
+
+const SFF_TOKEN_ADDRESS = "0xdf9B4b57865B403e08c85568442f95c26b7896b0";
+const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
+
+// Announced Block number to pause the game
+const BLOCK_NUMBER = 23451693;
+
+export async function loadV1Balance(address: string): Promise<string> {
+  const tokenContract = new mainnet.eth.Contract(
+    // Use other ABI as it is also a ERC20 token
+    TokenABI as any,
+    SFF_TOKEN_ADDRESS
+  );
+  console.log("INITIED###");
+
+  const balance = await tokenContract.methods
+    .balanceOf(address)
+    .call({ blockNumber: BLOCK_NUMBER }, BLOCK_NUMBER);
+  console.log({ balance });
+  return balance;
+}
+
+export enum V1Fruit {
+  None = "0",
+  Sunflower = "1",
+  Potato = "2",
+  Pumpkin = "3",
+  Beetroot = "4",
+  Cauliflower = "5",
+  Parsnip = "6",
+  Radish = "7",
+}
+
+interface Square {
+  fruit: V1Fruit;
+  createdAt: number;
+}
+
+export async function loadV1Farm(address: string): Promise<Square[]> {
+  const farmContract = new mainnet.eth.Contract(
+    SunflowerFarmersABI as any,
+    SFF_FARM_ADDRESS
+  );
+
+  const fields = await farmContract.methods
+    .getLand(address)
+    .call({ blockNumber: BLOCK_NUMBER }, BLOCK_NUMBER);
+
+  return fields;
 }

@@ -7,6 +7,8 @@ type Body = {
   sender: string;
   signature: string;
   hash: string;
+  hasV1Farm: boolean;
+  hasV1Tokens: boolean;
 };
 
 // Token.sol - 0x75e0ae699d64520136b047b4a82703aa5e8c01f00003046d64de9085c69b5ecb
@@ -33,6 +35,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     farmId: body.farmId,
     sessionId: body.sessionId,
     sender: body.sender,
+    hasV1Farm: body.hasV1Farm,
+    hasV1Tokens: body.hasV1Tokens,
   });
 
   return {

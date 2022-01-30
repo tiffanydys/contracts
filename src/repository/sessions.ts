@@ -52,23 +52,23 @@ type CreateFarm = {
   sessionId: string;
   owner: string;
   gameState: GameState;
+  previousGameState: GameState;
 };
 export async function createFarm({
   id,
   sessionId,
   owner,
   gameState,
+  previousGameState,
 }: CreateFarm): Promise<AccountFarm> {
-  const safeFarm = makeFarm(gameState);
-
   const Item: AccountFarm = {
     id: id,
     sessionId: sessionId,
     createdAt: new Date().toISOString(),
     owner,
     updatedAt: new Date().toISOString(),
-    gameState: safeFarm,
-    previousGameState: safeFarm,
+    gameState: makeFarm(gameState),
+    previousGameState: makeFarm(previousGameState),
   };
 
   const putParams = {

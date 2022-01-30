@@ -17,15 +17,6 @@ export default class ApiStack extends sst.Stack {
       primaryIndex: { partitionKey: "owner", sortKey: "id" },
     });
 
-    const sunflowerFarmersTable = new sst.Table(this, "SunflowerFarmersV1", {
-      fields: {
-        address: sst.TableFieldType.STRING,
-        balance: sst.TableFieldType.STRING,
-        inventory: sst.TableFieldType.STRING,
-      },
-      primaryIndex: { partitionKey: "address" },
-    });
-
     const api = new sst.Api(this, "Api", {
       routes: {
         "POST    /farm": {
@@ -35,8 +26,6 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
-            sunflowerFarmersTableName:
-              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /actions": {
@@ -46,8 +35,6 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
-            sunflowerFarmersTableName:
-              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /session": {
@@ -57,8 +44,6 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
-            sunflowerFarmersTableName:
-              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
         "POST    /save": {
@@ -68,14 +53,12 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
-            sunflowerFarmersTableName:
-              sunflowerFarmersTable.dynamodbTable.tableName,
           },
         },
       },
     });
 
-    api.attachPermissions([sessionTable, sunflowerFarmersTable]);
+    api.attachPermissions([sessionTable]);
 
     this.addOutputs({
       ApiEndpoint: api.url,
