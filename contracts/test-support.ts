@@ -52,7 +52,17 @@ export async function deploySFLContracts(web3: Web3) {
     [inventory.options.address, token.options.address, farm.options.address]
   );
 
+  const beta = await deployContract(
+    web3,
+    abijson.contracts["contracts/Beta.sol:SunflowerLandBeta"],
+    TestAccount.TEAM.address,
+    [farm.options.address]
+  );
+
   await Promise.all([
+    farm.methods
+      .addGameRole(beta.options.address)
+      .send({ from: TestAccount.TEAM.address }),
     farm.methods
       .addGameRole(sunflowerLand.options.address)
       .send({ from: TestAccount.TEAM.address }),
@@ -64,7 +74,7 @@ export async function deploySFLContracts(web3: Web3) {
       .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { sunflowerLand, farm, token, inventory };
+  return { sunflowerLand, farm, token, inventory, beta };
 }
 
 async function deployContract(

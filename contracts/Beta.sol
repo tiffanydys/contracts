@@ -50,20 +50,22 @@ contract SunflowerLandBeta is Ownable {
     ) public payable {
         // Verify
         bytes32 txHash = keccak256(abi.encodePacked(nonce, charity, amount, _msgSender()));
-        require(!executed[txHash], "Land: Tx Executed");
-        require(verify(txHash, signature), "Land: Unauthorised");
+        require(!executed[txHash], "Beta: Tx Executed");
+        require(verify(txHash, signature), "Beta: Unauthorised");
 
         executed[txHash] = true;
 
-        // 90% to team
-        uint teamAmount = amount * 90 / 100;
-        (bool teamSent,) = team.call{value: teamAmount}("");
-        require(teamSent, "Land: Team Donation Failed");
+        if (amount > 0) {
+            // 90% to team
+            uint teamAmount = amount * 90 / 100;
+            (bool teamSent,) = team.call{value: teamAmount}("");
+            require(teamSent, "Beta: Team Donation Failed");
 
-        // 10% to charity
-        uint charityAmount = amount - teamAmount;
-        (bool charitySent,) = charity.call{value: charityAmount}("");
-        require(charitySent, "Land: Charity Donation Failed");
+            // 10% to charity
+            uint charityAmount = amount - teamAmount;
+            (bool charitySent,) = charity.call{value: charityAmount}("");
+            require(charitySent, "Beta: Charity Donation Failed");
+        }
 
         farm.mint(_msgSender());
     }
