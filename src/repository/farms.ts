@@ -7,7 +7,6 @@ export type FarmSession = Omit<GameState, "balance"> & {
   balance: string;
 };
 
-// TODO - rename?
 export type AccountFarm = {
   id: number;
   owner: string;

@@ -5,7 +5,7 @@ import {
   getFarmsByAccount,
   updateSession,
   AccountFarm,
-} from "../../repository/sessions";
+} from "../../repository/farms";
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { GameState } from "../game/types/game";
@@ -122,13 +122,9 @@ function makeFarm(gameState: AccountFarm["gameState"]): GameState {
 }
 
 type Changeset = {
-  mintTokens: string;
-  burnTokens: string;
-  // Inventory
-  mintIds: string[];
-  mintAmounts: string[];
-  burnIds: string[];
-  burnAmounts: string[];
+  sfl: number;
+  ids: number[];
+  amounts: number[];
 };
 
 type CalculateChangesetArgs = {
@@ -152,15 +148,12 @@ export async function calculateChangeset({
 
   const balance = gameState.balance.minus(snapshot.balance);
 
-  const wei = toWei(balance.abs().toString());
+  const wei = Number(toWei(balance.abs().toString()));
 
   return {
-    mintTokens: balance.isPositive() ? wei : "0",
-    burnTokens: balance.isNegative() ? wei : "0",
-    mintIds: [],
-    mintAmounts: [],
-    burnIds: [],
-    burnAmounts: [],
+    sfl: wei,
+    ids: [],
+    amounts: [],
   };
 }
 

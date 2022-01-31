@@ -1,12 +1,21 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { soliditySha3, toWei } from "web3-utils";
+import Joi from "joi";
 import { calculateChangeset } from "../domain/session/session";
-import { sign } from "../web3/sign";
+import { saveSignature, verifyAccount } from "../web3/sign";
+
+const schema = Joi.object({
+  sessionId: Joi.string(),
+  farmId: Joi.number(),
+  sender: Joi.string(),
+  signature: Joi.string(),
+});
 
 type Body = {
   farmId: number;
   sessionId: string;
   sender: string;
+  signature: string;
+  hash: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -15,57 +24,28 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: Body = JSON.parse(event.body);
-
-  if (!body.farmId) {
-    throw new Error("No farmId found in event");
+  const valid = schema.validate(body);
+  if (valid.error) {
+    throw new Error(valid.error.message);
   }
 
-  console.log({ body });
+  verifyAccount({
+    address: body.sender,
+    farmId: body.farmId,
+    signature: body.signature,
+  });
 
   const changeset = await calculateChangeset({
     id: Number(body.farmId),
     owner: body.sender,
   });
 
-  console.log({ changeset });
-  const shad = soliditySha3(
-    {
-      type: "bytes32",
-      value: body.sessionId,
-    },
-    {
-      type: "uint256",
-      value: body.farmId.toString(),
-    },
-    {
-      type: "uint256[]",
-      value: changeset.mintIds as any,
-    },
-    {
-      type: "uint256[]",
-      value: changeset.mintAmounts as any,
-    },
-    {
-      type: "uint256[]",
-      value: changeset.burnIds as any,
-    },
-    {
-      type: "uint256[]",
-      value: changeset.burnAmounts as any,
-    },
-    {
-      type: "uint256",
-      value: changeset.mintTokens as any,
-    },
-    {
-      type: "uint256",
-      value: changeset.burnTokens as any,
-    }
-  );
-
-  console.log({ shad });
-  const { signature } = sign(shad as string);
-  console.log({ signature });
+  const signature = saveSignature({
+    sender: body.sender,
+    farmId: body.farmId,
+    sessionId: body.sessionId,
+    ...changeset,
+  });
 
   return {
     statusCode: 200,

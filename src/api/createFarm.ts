@@ -1,6 +1,13 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { soliditySha3 } from "web3-utils";
-import { sign } from "../web3/sign";
+import Joi from "joi";
+
+import { createFarmSignature } from "../web3/sign";
+
+const schema = Joi.object({
+  charity: Joi.string(),
+  donation: Joi.number(),
+  sender: Joi.string(),
+});
 
 type Body = {
   charity: string;
@@ -14,35 +21,20 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: Body = JSON.parse(event.body);
-
-  if (!body.charity) {
-    throw new Error("No charity found in event");
+  const valid = schema.validate(body);
+  if (valid.error) {
+    throw new Error(valid.error.message);
   }
 
-  console.log({ body });
+  // No signature validation as not needed
+
   // Whitelist farms
 
-  // TODO - validate amount
-
-  // SunflowerLand.createFarm function signature
-  const shad = soliditySha3(
-    {
-      type: "address",
-      value: body.charity,
-    },
-    {
-      type: "uint",
-      value: body.donation as any,
-    },
-    {
-      type: "address",
-      value: body.address,
-    }
-  );
-  console.log({ shad });
-
-  const { signature } = sign(shad as string);
-  console.log({ signature });
+  const { signature } = createFarmSignature({
+    address: body.address,
+    donation: body.donation,
+    charity: body.charity,
+  });
 
   return {
     statusCode: 200,

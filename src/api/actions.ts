@@ -1,12 +1,25 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import Joi from "joi";
+
 import { processActions } from "../domain/game/reducer";
 import { GameEvent } from "../domain/game/events";
 import {
   getFarmsByAccount,
   updateFarm,
   updateSession,
-} from "../repository/sessions";
+} from "../repository/farms";
 import Decimal from "decimal.js-light";
+import { verifyAccount } from "../web3/sign";
+import { save } from "../domain/game/game";
+
+const schema = Joi.object({
+  // TODO type these?
+  actions: Joi.array(),
+  farmId: Joi.number(),
+  sender: Joi.string(),
+  sessionId: Joi.string(),
+  signature: Joi.string(),
+});
 
 type Body = {
   actions: GameEvent[];
@@ -20,64 +33,33 @@ type Body = {
  * Handler which processes actions and returns the new state of the farm
  */
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  // Verify signed transaction - requester owns the farm
   if (!event.body) {
     throw new Error("No body found in event");
   }
 
   const body: Body = JSON.parse(event.body);
-
-  if (!body.actions) {
-    throw new Error("No actions found in event");
+  const valid = schema.validate(body);
+  if (valid.error) {
+    throw new Error(valid.error.message);
   }
 
-  if (!body.farmId) {
-    throw new Error("No farmId found in event");
-  }
+  verifyAccount({
+    address: body.sender,
+    farmId: body.farmId,
+    signature: body.signature,
+  });
 
-  if (!body.sender) {
-    throw new Error("Missing sender");
-  }
-
-  // Verify the user signature can actually make actions
-  // const address = verify(body.sessionId, body.signature);
-
-  // if (address !== body.sender) {
-  //   throw new Error("Signature is invalid");
-  // }
-
-  // Verify they are the owner of the farm - How do we do this without a web3 call?
-
-  // Anyone could just sign a farmID and pass it up to the server
-
-  const farms = await getFarmsByAccount(body.sender);
-  const farm = farms.find((f) => f.id === body.farmId);
-  console.log({ farm });
-  if (!farm) {
-    throw new Error("Farm does not exist!");
-  }
-
-  // TODO - check session ID is the same
-
-  // Pass numbers into a safe format before processing.
-  const gameState = {
-    ...farm.gameState,
-    balance: new Decimal(farm.gameState.balance),
-  };
-
-  const newGameState = processActions(gameState, body.actions);
-
-  await updateFarm({
-    id: body.farmId,
-    gameState: newGameState,
-    owner: body.sender,
+  const game = await save({
+    farmId: body.farmId,
+    account: body.sender,
+    actions: body.actions,
   });
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm: gameState,
+      farm: game,
     }),
   };
 };
