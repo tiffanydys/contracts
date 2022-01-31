@@ -4,9 +4,9 @@ import Joi from "joi";
 import { createFarmSignature } from "../web3/sign";
 
 const schema = Joi.object({
-  charity: Joi.string(),
-  donation: Joi.number(),
-  sender: Joi.string(),
+  charity: Joi.string().required(),
+  donation: Joi.number().required(),
+  sender: Joi.string().required(),
 });
 
 type Body = {

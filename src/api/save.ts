@@ -4,10 +4,10 @@ import { calculateChangeset } from "../domain/session/session";
 import { saveSignature, verifyAccount } from "../web3/sign";
 
 const schema = Joi.object({
-  sessionId: Joi.string(),
-  farmId: Joi.number(),
-  sender: Joi.string(),
-  signature: Joi.string(),
+  sessionId: Joi.string().required(),
+  farmId: Joi.number().required(),
+  sender: Joi.string().required(),
+  signature: Joi.string().required(),
 });
 
 type Body = {

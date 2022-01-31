@@ -1,5 +1,5 @@
 import Decimal from "decimal.js-light";
-import { getFarmsByAccount, updateFarm } from "../../repository/sessions";
+import { getFarmsByAccount, updateFarm } from "../../repository/farms";
 import { GameEvent, processEvent } from "./events";
 import { GameState } from "./types/game";
 

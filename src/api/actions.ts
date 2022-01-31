@@ -1,24 +1,45 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { processActions } from "../domain/game/reducer";
 import { GameEvent } from "../domain/game/events";
-import {
-  getFarmsByAccount,
-  updateFarm,
-  updateSession,
-} from "../repository/farms";
-import Decimal from "decimal.js-light";
+
 import { verifyAccount } from "../web3/sign";
 import { save } from "../domain/game/game";
 
 const schema = Joi.object({
-  // TODO type these?
-  actions: Joi.array(),
-  farmId: Joi.number(),
-  sender: Joi.string(),
-  sessionId: Joi.string(),
-  signature: Joi.string(),
+  actions: Joi.array()
+    .items(
+      Joi.alternatives().try(
+        Joi.object({
+          type: Joi.string().equal("item.crafted"),
+          item: Joi.string(),
+          amount: Joi.number().min(1).max(10).integer(),
+          createdAt: Joi.string(),
+        }),
+        Joi.object({
+          type: Joi.string().equal("item.sell"),
+          item: Joi.string(),
+          amount: Joi.number().min(1).max(10).integer(),
+          createdAt: Joi.string(),
+        }),
+        Joi.object({
+          type: Joi.string().equal("item.planted"),
+          item: Joi.string(),
+          index: Joi.number().min(0).max(21).integer(),
+          createdAt: Joi.string(),
+        }),
+        Joi.object({
+          type: Joi.string().equal("item.harvested"),
+          index: Joi.number().min(0).max(21).integer(),
+          createdAt: Joi.string(),
+        })
+      )
+    )
+    .required(),
+  farmId: Joi.number().required(),
+  sender: Joi.string().required(),
+  sessionId: Joi.string().required(),
+  signature: Joi.string().required(),
 });
 
 type Body = {
@@ -43,12 +64,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
+  console.log("Validated");
   verifyAccount({
     address: body.sender,
     farmId: body.farmId,
     signature: body.signature,
   });
 
+  console.log({ actions: body.actions });
   const game = await save({
     farmId: body.farmId,
     account: body.sender,

@@ -4,12 +4,12 @@ import { startSession } from "../domain/session/session";
 import { verifyAccount } from "../web3/sign";
 
 const schema = Joi.object({
-  sessionId: Joi.string(),
-  farmId: Joi.number(),
-  sender: Joi.string(),
-  signature: Joi.string(),
-  hasV1Farm: Joi.boolean(),
-  hasV1Tokens: Joi.boolean(),
+  sessionId: Joi.string().required(),
+  farmId: Joi.number().required(),
+  sender: Joi.string().required(),
+  signature: Joi.string().required(),
+  hasV1Farm: Joi.boolean().required(),
+  hasV1Tokens: Joi.boolean().required(),
 });
 
 type Body = {
