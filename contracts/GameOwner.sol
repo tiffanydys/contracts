@@ -16,7 +16,7 @@ contract GameOwner is Ownable {
   }
 
   modifier onlyGame {
-    require(gameRoles[_msgSender()] == true, "SunflowerLandToken: You are not the game");
+    require(gameRoles[_msgSender()] == true, "SunflowerLandGame: You are not the game");
     _;
   }
 

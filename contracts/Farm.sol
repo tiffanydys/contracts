@@ -3,7 +3,9 @@ pragma solidity ^0.8.0;
 
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "./GameOwner.sol";
 
 struct Farm {
@@ -13,7 +15,7 @@ struct Farm {
 }
 
 // Should we make pausable as well?
-contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
+contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
     /*
      * Each farm has its own contract address deployed
      * This enables the NFT to actually own the resources and tokens
@@ -34,26 +36,39 @@ contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
         return baseURI;
     }
 
+    function pause() public onlyOwner {
+        return _pause();
+    }
+
+    function unpause() public onlyOwner {
+        return _unpause();
+    }
+
 
     function mint(address account) public onlyGame {
         uint256 tokenId = totalSupply() + 1;
+        _mint(account, tokenId);
 
         // Create identifiable farm contract
         FarmHolder farm = new FarmHolder();
         farms[tokenId] = address(farm);
-
-        _mint(account, tokenId);
 	}
 
     function gameTransfer(address from, address to, uint256 tokenId) public onlyGame {
-        safeTransferFrom(from, to, tokenId, "");
+        _transfer(from, to, tokenId);
     }
 
     function gameApprove(address to, uint256 tokenId) public onlyGame {
         _approve(to, tokenId);
     }
-    
 
+    function gameBurn(uint256 tokenId) public onlyGame {
+        _burn(tokenId);
+    }
+    
+    /**
+     * Load a farm, the owner and its identifiable address (account) on the blockchain
+     */
     function getFarm(uint256 tokenId) public view returns (Farm memory) {
         address account = farms[tokenId];
         address owner = ownerOf(tokenId);
@@ -65,6 +80,9 @@ contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
         });
     }
 
+    /**
+     * Get multiple farms for a single owner
+     */
     function getFarms(address account) public view returns (Farm[] memory) {
         uint balance = balanceOf(account);
 
@@ -79,6 +97,16 @@ contract SunflowerLandFarm is ERC721Enumerable, GameOwner {
         }
 
         return accountFarms;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
+
+        require(!paused(), "ERC721Pausable: token transfer while paused");
     }
 }
 
