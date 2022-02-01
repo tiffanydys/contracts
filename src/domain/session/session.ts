@@ -172,15 +172,20 @@ export async function calculateChangeset({
     ]),
   ];
 
-  const inventory = items.reduce(
-    (inv, name) => ({
+  const inventory = items.reduce((inv, name) => {
+    const amount = (gameState.inventory[name] || new Decimal(0)).sub(
+      snapshot.inventory[name] || new Decimal(0)
+    );
+
+    if (amount.equals(0)) {
+      return inv;
+    }
+
+    return {
       ...inv,
-      [KNOWN_IDS[name]]: (gameState.inventory[name] || new Decimal(0)).sub(
-        snapshot.inventory[name] || new Decimal(0)
-      ),
-    }),
-    {}
-  );
+      [KNOWN_IDS[name]]: amount.toNumber(),
+    };
+  }, {});
 
   return {
     sfl: wei,

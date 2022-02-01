@@ -51,15 +51,15 @@ export async function getV1GameState({
     const fields = await loadV1Farm(address);
 
     if (fields.length > 5) {
-      gameState.inventory["Pumpkin Soup"] = 1;
+      gameState.inventory["Pumpkin Soup"] = new Decimal(1);
     }
 
     if (fields.length > 8) {
-      gameState.inventory["Sauerkraut"] = 1;
+      gameState.inventory["Sauerkraut"] = new Decimal(1);
     }
 
     if (fields.length > 11) {
-      gameState.inventory["Roasted Cauliflower"] = 1;
+      gameState.inventory["Roasted Cauliflower"] = new Decimal(1);
     }
 
     if (fields.length > 14) {
@@ -68,7 +68,9 @@ export async function getV1GameState({
 
     fields.forEach((field) => {
       const seed = CROP_CONVERSION[field.fruit];
-      gameState.inventory[seed] = (gameState.inventory[seed] || 0) + 1;
+      gameState.inventory[seed] = (
+        gameState.inventory[seed] || new Decimal(0)
+      ).add(1);
     });
   }
 

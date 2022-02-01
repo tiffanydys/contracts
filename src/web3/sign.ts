@@ -67,7 +67,8 @@ type SaveArgs = {
   sender: string;
   farmId: number;
   sfl: number;
-  inventory: Record<number, number>;
+  ids: number[];
+  amounts: number[];
 };
 
 export function saveSignature({
@@ -75,11 +76,9 @@ export function saveSignature({
   sender,
   farmId,
   sfl,
-  inventory,
+  ids,
+  amounts,
 }: SaveArgs) {
-  const ids = Object.keys(inventory);
-  const amounts = Object.values(inventory);
-
   const shad = soliditySha3(
     {
       type: "bytes32",

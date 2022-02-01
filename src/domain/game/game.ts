@@ -1,7 +1,7 @@
 import Decimal from "decimal.js-light";
 import { getFarmsByAccount, updateFarm } from "../../repository/farms";
 import { GameEvent, processEvent } from "./events";
-import { GameState } from "./types/game";
+import { GameState, InventoryItemName } from "./types/game";
 
 function processActions(state: GameState, actions: GameEvent[]) {
   // Validate actions
@@ -26,10 +26,21 @@ export async function save({ farmId, account, actions }: SaveArgs) {
     throw new Error("Farm does not exist!");
   }
 
+  // Reuse deserialization
+
   // Pass numbers into a safe format before processing.
-  const gameState = {
+  const gameState: GameState = {
     ...farm.gameState,
     balance: new Decimal(farm.gameState.balance),
+    inventory: Object.keys(farm.gameState.inventory).reduce(
+      (items, itemName) => ({
+        ...items,
+        [itemName]: new Decimal(
+          gameState.inventory[itemName as InventoryItemName] || 0
+        ),
+      }),
+      {} as Record<InventoryItemName, Decimal>
+    ),
   };
 
   const newGameState = processActions(gameState, actions);
