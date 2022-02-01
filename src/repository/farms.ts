@@ -1,13 +1,16 @@
 import AWS from "aws-sdk";
-import { GameState } from "../domain/game/types/game";
+import { KNOWN_IDS } from "../domain/game/types";
+import { GameState, InventoryItemName } from "../domain/game/types/game";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export type FarmSession = Omit<GameState, "balance"> & {
+// Store decimal values as strings instead
+export type FarmSession = Omit<GameState, "balance" | "inventory"> & {
   balance: string;
+  inventory: Record<InventoryItemName, string>;
 };
 
-export type AccountFarm = {
+export type Account = {
   id: number;
   owner: string;
   sessionId?: string;
@@ -17,9 +20,7 @@ export type AccountFarm = {
   previousGameState: FarmSession;
 };
 
-export async function getFarmsByAccount(
-  account: string
-): Promise<AccountFarm[]> {
+export async function getFarmsByAccount(account: string): Promise<Account[]> {
   const getParams = {
     TableName: process.env.tableName as string,
     KeyConditionExpression: "#owner = :owner",
@@ -33,16 +34,37 @@ export async function getFarmsByAccount(
 
   const results = await dynamoDb.query(getParams).promise();
 
-  return results.Items as AccountFarm[];
+  return results.Items as Account[];
+}
+
+function inventoryToIDs(
+  inventory: GameState["inventory"]
+): Record<number, string> {
+  return Object.keys(inventory).reduce(
+    (items, itemName) => ({
+      ...items,
+      [KNOWN_IDS[itemName as InventoryItemName]]: "0",
+    }),
+    {} as Record<number, string>
+  );
 }
 
 /**
  * Santize the farm data
  */
 function makeFarm(farm: GameState): FarmSession {
+  const inventory = Object.keys(farm.inventory).reduce(
+    (items, itemName) => ({
+      ...items,
+      [itemName]: farm.inventory[itemName as InventoryItemName]?.toString(),
+    }),
+    {} as Record<InventoryItemName, string>
+  );
+
   return {
     ...farm,
     balance: farm.balance.toString(),
+    inventory,
   };
 }
 
@@ -59,8 +81,8 @@ export async function createFarm({
   owner,
   gameState,
   previousGameState,
-}: CreateFarm): Promise<AccountFarm> {
-  const Item: AccountFarm = {
+}: CreateFarm): Promise<Account> {
+  const Item: Account = {
     id: id,
     sessionId: sessionId,
     createdAt: new Date().toISOString(),

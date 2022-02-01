@@ -64,25 +64,30 @@ export function createFarmSignature({
 
 type SaveArgs = {
   sessionId: string;
-  farmId: number;
   sender: string;
+  farmId: number;
   sfl: number;
-  ids: number[];
-  amounts: number[];
+  inventory: Record<number, number>;
 };
 
 export function saveSignature({
   sessionId,
-  farmId,
   sender,
+  farmId,
   sfl,
-  ids,
-  amounts,
+  inventory,
 }: SaveArgs) {
+  const ids = Object.keys(inventory);
+  const amounts = Object.values(inventory);
+
   const shad = soliditySha3(
     {
       type: "bytes32",
       value: sessionId,
+    },
+    {
+      type: "address",
+      value: sender,
     },
     {
       type: "uint256",

@@ -4,11 +4,12 @@ import {
   createFarm,
   getFarmsByAccount,
   updateSession,
-  AccountFarm,
+  Account,
 } from "../../repository/farms";
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { INITIAL_FARM } from "../game/lib/constants";
-import { GameState } from "../game/types/game";
+import { KNOWN_IDS, KNOWN_ITEMS } from "../game/types";
+import { GameState, InventoryItemName } from "../game/types/game";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 
 type StartSessionArgs = {
@@ -93,12 +94,16 @@ export async function startSession({
     farmId: farmId,
   });
 
+  // TODO - validate the sessionID is the same
+  // This is to prevent race conditons of someone withdrawing and trying to create a new session quickly
+
   const gameState: GameState = {
     // Keep the planted fields
     ...farm.gameState,
     // Load the token + NFT balances
     balance: new Decimal(fromWei(onChainData.balance.toString(), "ether")),
     // TODO - inventory: onChainData.inventory,
+    inventory: {},
   };
 
   await updateSession({
@@ -113,18 +118,29 @@ export async function startSession({
   return gameState;
 }
 
-function makeFarm(gameState: AccountFarm["gameState"]): GameState {
+function makeFarm(gameState: Account["gameState"]): GameState {
+  console.log({ gameState });
+  // Convert the string values into decimals
+  const inventory = Object.keys(gameState.inventory).reduce(
+    (items, itemName) => ({
+      ...items,
+      [itemName]: new Decimal(
+        gameState.inventory[itemName as InventoryItemName]
+      ),
+    }),
+    {} as Record<InventoryItemName, Decimal>
+  );
+
   return {
     ...gameState,
     balance: new Decimal(gameState.balance),
-    // TODO - inventory: farm.inventory,
+    inventory,
   };
 }
 
 type Changeset = {
   sfl: number;
-  ids: number[];
-  amounts: number[];
+  inventory: Record<number, number>;
 };
 
 type CalculateChangesetArgs = {
@@ -147,13 +163,28 @@ export async function calculateChangeset({
   const snapshot = makeFarm(farm.previousGameState);
 
   const balance = gameState.balance.minus(snapshot.balance);
-
   const wei = Number(toWei(balance.abs().toString()));
+
+  const items = [
+    ...new Set([
+      ...(Object.keys(gameState.inventory) as InventoryItemName[]),
+      ...(Object.keys(snapshot.inventory) as InventoryItemName[]),
+    ]),
+  ];
+
+  const inventory = items.reduce(
+    (inv, name) => ({
+      ...inv,
+      [KNOWN_IDS[name]]: (gameState.inventory[name] || new Decimal(0)).sub(
+        snapshot.inventory[name] || new Decimal(0)
+      ),
+    }),
+    {}
+  );
 
   return {
     sfl: wei,
-    ids: [],
-    amounts: [],
+    inventory,
   };
 }
 
