@@ -40,8 +40,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     owner: body.sender,
   });
 
-  const ids = Object.keys(changeset.inventory);
-  const amounts = Object.values(changeset.inventory);
+  const ids = Object.keys(changeset.inventory).map(Number);
+  const amounts = Object.values(changeset.inventory).map(Number);
 
   const signature = saveSignature({
     sender: body.sender,

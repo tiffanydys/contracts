@@ -183,7 +183,7 @@ export async function calculateChangeset({
 
     return {
       ...inv,
-      [KNOWN_IDS[name]]: amount.toNumber(),
+      [KNOWN_IDS[name]]: Number(toWei(amount.toString())),
     };
   }, {});
 
