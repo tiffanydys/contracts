@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { startSession } from "../domain/session/session";
-import { verifyAccount } from "../web3/sign";
+import { verifyAccount } from "../web3/signatures";
 
 const schema = Joi.object({
   sessionId: Joi.string().required(),

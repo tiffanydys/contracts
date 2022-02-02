@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { createFarmSignature } from "../web3/sign";
+import { createFarmSignature } from "../web3/signatures";
 
 const schema = Joi.object({
   charity: Joi.string().required(),
@@ -30,7 +30,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   // Whitelist farms
 
-  const { signature } = createFarmSignature({
+  const { signature } = await createFarmSignature({
     address: body.address,
     donation: body.donation,
     charity: body.charity,

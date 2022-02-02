@@ -43,13 +43,12 @@ contract SunflowerLandBeta is Ownable {
     function createFarm(
         // Verification
         bytes memory signature,
-        uint nonce,
         // Data
         address charity,
         uint amount
     ) public payable {
-        // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(nonce, charity, amount, _msgSender()));
+        // Verify - TODO (add nonce)
+        bytes32 txHash = keccak256(abi.encodePacked(charity, amount, _msgSender()));
         require(!executed[txHash], "Beta: Tx Executed");
         require(verify(txHash, signature), "Beta: Unauthorised");
 

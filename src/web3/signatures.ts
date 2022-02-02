@@ -1,16 +1,13 @@
 import Accounts from "web3-eth-accounts";
-import { sha3, soliditySha3 } from "web3-utils";
-
-// Fake key for testing
-const PRIVATE_KEY =
-  "8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f";
-const PUBLIC_KEY = "0x63FaC9201494f0bd17B9892B9fae4d52fe3BD377";
+import { soliditySha3 } from "web3-utils";
+import { sign } from "../services/kms";
 
 type VerifyAccountArgs = {
   farmId: number;
   address: string;
   signature: string;
 };
+
 export function verifyAccount({
   farmId,
   address,
@@ -25,23 +22,18 @@ export function verifyAccount({
   }
 }
 
-function sign(data: string) {
-  // HACK - Web3 incorrectly types the default class export: use any
-  const signature = new (Accounts as any)().sign(data, PRIVATE_KEY);
-  return signature;
-}
-
 type CreateFarmArgs = {
   charity: string;
   donation: number;
   address: string;
 };
 
-export function createFarmSignature({
+export async function createFarmSignature({
   charity,
   donation,
   address,
 }: CreateFarmArgs) {
+  console.log({ charity, donation, address });
   const shad = soliditySha3(
     {
       type: "address",
@@ -57,9 +49,9 @@ export function createFarmSignature({
     }
   );
 
-  const { signature } = sign(shad as string);
+  const { signature } = await sign(shad as string);
 
-  return signature;
+  return { signature };
 }
 
 type SaveArgs = {
@@ -71,7 +63,7 @@ type SaveArgs = {
   amounts: number[];
 };
 
-export function saveSignature({
+export async function saveSignature({
   sessionId,
   sender,
   farmId,
@@ -106,7 +98,7 @@ export function saveSignature({
     }
   );
 
-  const { signature } = sign(shad as string);
+  const { signature } = await sign(shad as string);
 
   return signature;
 }

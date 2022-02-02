@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/node14",
-  "include": ["stacks", "src"],
+  "include": ["stacks", "src", "types"],
   "compilerOptions": {
     "resolveJsonModule": true
   }

@@ -3,7 +3,7 @@ import Joi from "joi";
 
 import { GameEvent } from "../domain/game/events";
 
-import { verifyAccount } from "../web3/sign";
+import { verifyAccount } from "../web3/signatures";
 import { save } from "../domain/game/game";
 
 const schema = Joi.object({

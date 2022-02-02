@@ -25,6 +25,7 @@ export async function save({ farmId, account, actions }: SaveArgs) {
   if (!farm) {
     throw new Error("Farm does not exist!");
   }
+  console.log({ farm });
 
   // Reuse deserialization
 
@@ -36,12 +37,16 @@ export async function save({ farmId, account, actions }: SaveArgs) {
       (items, itemName) => ({
         ...items,
         [itemName]: new Decimal(
-          gameState.inventory[itemName as InventoryItemName] || 0
+          farm.gameState.inventory[itemName as InventoryItemName] || 0
         ),
       }),
       {} as Record<InventoryItemName, Decimal>
     ),
   };
+
+  console.log({
+    process: gameState,
+  });
 
   const newGameState = processActions(gameState, actions);
 
