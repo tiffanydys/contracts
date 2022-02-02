@@ -9,17 +9,15 @@ describe("Beta contract", () => {
     const donation = 0;
     const { beta, farm } = await deploySFLContracts(web3);
 
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.TEAM.privateKey,
-      nonce,
       TestAccount.CHARITY.address,
       donation,
       TestAccount.PLAYER.address
     );
     await beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -54,17 +52,15 @@ describe("Beta contract", () => {
     const marketingBalance = await web3.eth.getBalance(marketingWallet);
 
     const donation = 100;
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.TEAM.privateKey,
-      nonce,
       TestAccount.CHARITY.address,
       donation,
       TestAccount.PLAYER.address
     );
     await beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -95,17 +91,15 @@ describe("Beta contract", () => {
 
     const someOtherAddress = "0x6eF5dBF9902AD320Fe49216D086B2b50AbC9328f";
     const donation = 0;
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.TEAM.privateKey,
-      nonce,
       someOtherAddress,
       donation,
       TestAccount.PLAYER.address
     );
     const result = beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -125,16 +119,14 @@ describe("Beta contract", () => {
 
     const someOtherDonation = 1;
     const donation = 0;
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.TEAM.privateKey,
-      nonce,
       TestAccount.CHARITY.address,
       someOtherDonation
     );
     const result = beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -153,17 +145,15 @@ describe("Beta contract", () => {
     const donation = 0;
     const { beta, farm } = await deploySFLContracts(web3);
 
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.TEAM.privateKey,
-      nonce,
       TestAccount.CHARITY.address,
       donation,
       TestAccount.PLAYER.address
     );
     await beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -171,7 +161,7 @@ describe("Beta contract", () => {
       });
 
     const result = beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -190,18 +180,16 @@ describe("Beta contract", () => {
     const { beta, farm } = await deploySFLContracts(web3);
 
     const donation = 0;
-    const nonce = new Date().getTime();
     const signature = await sign(
       web3,
       TestAccount.CHARITY.privateKey,
-      nonce,
       TestAccount.CHARITY.address,
       donation,
       TestAccount.PLAYER.address
     );
 
     const result = beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -219,7 +207,7 @@ describe("Beta contract", () => {
     });
 
     await beta.methods
-      .createFarm(signature, nonce, TestAccount.CHARITY.address, donation)
+      .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
