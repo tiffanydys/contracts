@@ -5,6 +5,7 @@ import { SeedName } from "../game/types/crops";
 import { GameState, Inventory, InventoryItemName } from "../game/types/game";
 
 import { balances } from "./constants/balances";
+import { POOL_BALANCE } from "./constants/liquidityPools";
 
 const CROP_CONVERSION: Record<V1Fruit, SeedName> = {
   // Even give them some sunflower seeds for their empty fields <3
@@ -48,11 +49,18 @@ export async function getV1GameState({
     gameState.inventory = Object.keys(inventorySnapshot).reduce(
       (acc, key) => ({
         ...acc,
-        [key]: new Decimal(inventorySnapshot[key]),
+        [key]: new Decimal(
+          inventorySnapshot[key as InventoryItemName] as string
+        ),
       }),
       {} as Inventory
     ) as Inventory;
     console.log({ converted: gameState.inventory });
+  }
+
+  const liquidityPool = POOL_BALANCE[address];
+  if (liquidityPool) {
+    gameState.balance.add(liquidityPool);
   }
 
   if (hasTokens) {

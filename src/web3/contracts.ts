@@ -93,8 +93,13 @@ export async function fetchOnChainData({
 const SFF_TOKEN_ADDRESS = "0xdf9B4b57865B403e08c85568442f95c26b7896b0";
 const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
 
-// Announced Block number to pause the game
-const BLOCK_NUMBER = 23451693;
+/**
+ * Random block chosen
+ * (Jan-28-2022 02:00:44 AM +UTC)
+ * Gives leeway for people who accidentally exchanged tokens
+ * Also gave time for people to withdraw LP
+ */
+const BLOCK_NUMBER = 24247919;
 
 export async function loadV1Balance(address: string): Promise<string> {
   const tokenContract = new mainnet.eth.Contract(
