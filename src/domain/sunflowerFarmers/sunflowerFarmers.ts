@@ -2,7 +2,9 @@ import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
 import { loadV1Balance, loadV1Farm, V1Fruit } from "../../web3/contracts";
 import { SeedName } from "../game/types/crops";
-import { GameState } from "../game/types/game";
+import { GameState, Inventory, InventoryItemName } from "../game/types/game";
+
+import { balances } from "./constants/balances";
 
 const CROP_CONVERSION: Record<V1Fruit, SeedName> = {
   // Even give them some sunflower seeds for their empty fields <3
@@ -37,7 +39,21 @@ export async function getV1GameState({
   // Load any liquidity they had at the time of the snapshot
   // Hard coded file
 
+  // TODO FT values with wei conversion?
+
   // Preload inventory from hard coded file
+  const inventorySnapshot = balances[address];
+  if (inventorySnapshot) {
+    console.log({ inventorySnapshot });
+    gameState.inventory = Object.keys(inventorySnapshot).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: new Decimal(inventorySnapshot[key]),
+      }),
+      {} as Inventory
+    ) as Inventory;
+    console.log({ converted: gameState.inventory });
+  }
 
   if (hasTokens) {
     const balance = await loadV1Balance(address);
@@ -64,6 +80,7 @@ export async function getV1GameState({
 
     if (fields.length > 14) {
       // TODO give them statue
+      gameState.inventory["Sunflower Tombstone"] = new Decimal(1);
     }
 
     fields.forEach((field) => {
