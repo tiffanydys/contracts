@@ -14,7 +14,6 @@ struct Farm {
     uint256 tokenId;
 }
 
-// Should we make pausable as well?
 contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
     /*
      * Each farm has its own contract address deployed

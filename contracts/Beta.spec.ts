@@ -16,6 +16,13 @@ describe("Beta contract", () => {
       donation,
       TestAccount.PLAYER.address
     );
+
+    expect(
+      await beta.methods
+        .farmCreatedAt(TestAccount.PLAYER.address)
+        .call({ from: TestAccount.PLAYER.address })
+    ).toEqual("0");
+
     await beta.methods
       .createFarm(signature, TestAccount.CHARITY.address, donation)
       .send({
@@ -23,6 +30,12 @@ describe("Beta contract", () => {
         gasPrice: await web3.eth.getGasPrice(),
         gas: gasLimit,
       });
+
+    expect(
+      await beta.methods
+        .farmCreatedAt(TestAccount.PLAYER.address)
+        .call({ from: TestAccount.PLAYER.address })
+    ).not.toEqual("0");
 
     expect(
       await farm.methods.totalSupply().call({ from: TestAccount.TEAM.address })
@@ -138,7 +151,7 @@ describe("Beta contract", () => {
     ).rejects.toContain("Beta: Unauthorised");
   });
 
-  it("requires a unique signature in order to create a farm", async () => {
+  it("only creates a farm once per user", async () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
     );
@@ -170,7 +183,7 @@ describe("Beta contract", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Beta: Tx Executed");
+    ).rejects.toContain("Beta: Farm already created");
   });
 
   it("transfers the signing role", async () => {

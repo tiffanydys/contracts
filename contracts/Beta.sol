@@ -10,7 +10,7 @@ import "./Farm.sol";
 contract SunflowerLandBeta is Ownable {
     using ECDSA for bytes32;
 
-    mapping(bytes32 => bool) public executed;
+    mapping(address => uint) public createdAt;
 
     function deposit() external payable {}
 
@@ -47,12 +47,11 @@ contract SunflowerLandBeta is Ownable {
         address charity,
         uint amount
     ) public payable {
-        // Verify - TODO (add nonce)
         bytes32 txHash = keccak256(abi.encodePacked(charity, amount, _msgSender()));
-        require(!executed[txHash], "Beta: Tx Executed");
         require(verify(txHash, signature), "Beta: Unauthorised");
 
-        executed[txHash] = true;
+        require(createdAt[_msgSender()] == 0, "Beta: Farm already created");
+        createdAt[_msgSender()] = block.timestamp;
 
         if (amount > 0) {
             // 90% to team
@@ -60,12 +59,16 @@ contract SunflowerLandBeta is Ownable {
             (bool teamSent,) = team.call{value: teamAmount}("");
             require(teamSent, "Beta: Team Donation Failed");
 
-            // 10% to charity
+            // Rest to charity
             uint charityAmount = amount - teamAmount;
             (bool charitySent,) = charity.call{value: charityAmount}("");
             require(charitySent, "Beta: Charity Donation Failed");
         }
 
         farm.mint(_msgSender());
+    }
+
+    function farmCreatedAt(address account) public view returns (uint) {
+        return createdAt[account];
     }
 }

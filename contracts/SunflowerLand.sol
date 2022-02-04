@@ -159,6 +159,9 @@ contract SunflowerLand is Ownable {
         // Get the holding address of the tokens
         Farm memory farmNFT = farm.getFarm(farmId);
 
+        // TODO - validate the max limits on the withrdraw
+            // E.g. No more than 10,000 tokens at a time
+
         // Withdraw from farm
         inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
         token.gameTransfer(farmNFT.account, to, tokenAmount);
