@@ -9,6 +9,7 @@ import SunflowerFarmersABI from "../../contracts/abis/SunflowerFarmers.json";
 import { GameState } from "../domain/game/types/game";
 import { IDS } from "../domain/game/types";
 import Decimal from "decimal.js-light";
+import { fromWei } from "web3-utils";
 
 const testnet = createAlchemyWeb3(
   "https://polygon-mumbai.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
@@ -59,7 +60,10 @@ export async function fetchOnChainData({
     TESTNET_TOKEN_ADDRESS
   );
 
-  const balance = await tokenContract.methods.balanceOf(farmNFT.account).call();
+  const balanceString = await tokenContract.methods
+    .balanceOf(farmNFT.account)
+    .call();
+  const balance = new Decimal(fromWei(balanceString, "ether"));
 
   const inventoryContract = new testnet.eth.Contract(
     InventoryABI as any,
@@ -77,6 +81,7 @@ export async function fetchOnChainData({
 
   return {
     balance,
+    // TODO
     inventory: {},
     id: farmId,
     address: farmNFT.account,

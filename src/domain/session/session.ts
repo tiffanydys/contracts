@@ -58,7 +58,7 @@ export async function startSession({
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
           ...initialFarm,
-          balance: new Decimal(sunflowerFarmersSnapshot.balance),
+          balance: sunflowerFarmersSnapshot.balance,
           inventory: sunflowerFarmersSnapshot.inventory,
         };
       }
@@ -101,7 +101,7 @@ export async function startSession({
     // Keep the planted fields
     ...farm.gameState,
     // Load the token + NFT balances
-    balance: new Decimal(fromWei(onChainData.balance.toString(), "ether")),
+    balance: onChainData.balance,
     // TODO - inventory: onChainData.inventory,
     inventory: {},
   };
