@@ -45,7 +45,7 @@ contract WishingWell is ERC20Pausable {
         uint[] memory values = uniswapV2Router.getAmountsIn(msg.value, path);
 
         // Transfer the sender's tokens here
-        token.gameTransfer(msg.sender, address(this), values[0]);
+        token.gameTransfer(farmNFT.account, address(this), values[0]);
 
         // Approve the router just in case
         token.gameApprove(address(uniswapV2Router), values[0]);
@@ -63,16 +63,18 @@ contract WishingWell is ERC20Pausable {
         // Mint a wrapped WishingWell token representing liquidity given and send to farm
         _mint(farmNFT.account, liquidity);
 
-        rewardsOpenedAt[msg.sender] = block.timestamp;
+        rewardsOpenedAt[farmNFT.account] = block.timestamp;
   }
 
-    function searchWell(address account) public view returns (uint amount) {        
+  function isPatient(address account) public view returns (bool) {
         uint lastOpenDate = rewardsOpenedAt[account];
 
         // Block timestamp is seconds based
         uint oneDayAgo = block.timestamp.sub(60 * 60 * 24 * 1); 
-        require(lastOpenDate < oneDayAgo, "NOTHING_IN_WELL");
-        
+        return lastOpenDate < oneDayAgo;
+  }
+
+    function searchWell(address account) public view returns (uint amount) {        
         // 10 / 100 = 0.10%
         uint luck = balanceOf(account).div(totalSupply());
 
@@ -89,15 +91,15 @@ contract WishingWell is ERC20Pausable {
         // Check they own the farm
         require(
             farmNFT.owner == _msgSender(),
-            "SunflowerLand: You do not own this farm"
+            "WishingWell: You do not own this farm"
         );
 
+        require (isPatient(farmNFT.account), "WishingWell: Good things come for those that are patient");
+        rewardsOpenedAt[farmNFT.account] = block.timestamp;
+
         uint amount = searchWell(farmNFT.account);
+        require(amount > 0, "WishingWell: Nothing today");
 
-        require(amount > 0, "NO_REWARD_AMOUNT");
-
-        rewardsOpenedAt[msg.sender] = block.timestamp;
-
-        token.gameTransfer(address(this), msg.sender, amount);
+        token.gameTransfer(address(this), farmNFT.account, amount);
     }
 }
