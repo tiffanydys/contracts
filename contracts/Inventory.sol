@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "./GameOwner.sol";
 
 struct MintInput {
@@ -11,6 +12,13 @@ struct MintInput {
     uint256[] amounts;
     bytes data;
 }
+
+// TODO - use https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/presets/ERC1155PresetMinterPauser.sol
+// The preset has everything we need!
+    // Except burn batch/transfer batch
+    // Has the TotalSupply (which we will want)
+
+// Look into using AccessControlEnumerable
 
 contract SunflowerLandInventory is ERC1155Pausable, GameOwner {
     address private game;

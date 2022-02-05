@@ -1,15 +1,20 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import Decimal from "decimal.js-light";
+import { fromWei, toWei } from "web3-utils";
 
 import FarmABI from "../../contracts/abis/Farm.json";
 import TokenABI from "../../contracts/abis/Token.json";
 import InventoryABI from "../../contracts/abis/Inventory.json";
 import SunflowerFarmersABI from "../../contracts/abis/SunflowerFarmers.json";
 
-import { GameState } from "../domain/game/types/game";
-import { IDS } from "../domain/game/types";
-import Decimal from "decimal.js-light";
-import { fromWei } from "web3-utils";
+import {
+  GameState,
+  Inventory,
+  InventoryItemName,
+} from "../domain/game/types/game";
+import { IDS, KNOWN_IDS } from "../domain/game/types";
+
+import { getItemUnit } from "./utils";
 
 const testnet = createAlchemyWeb3(
   "https://polygon-mumbai.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
@@ -40,15 +45,31 @@ export async function loadNFTFarm(id: number) {
   return farmNFT;
 }
 
+/**
+ * Convert an onchain inventory into the supported game inventory
+ * Returned as wei - ['0', '0', '0' ]
+ */
+export function makeInventory(amounts: string[]): Inventory {
+  const inventoryItems = Object.keys(KNOWN_IDS) as InventoryItemName[];
+
+  const inventory = amounts.reduce((items, amount, index) => {
+    const name = inventoryItems[index];
+    const unit = getItemUnit(name);
+    const value = new Decimal(fromWei(amount, unit));
+
+    return {
+      ...items,
+      [name]: value,
+    };
+  }, {} as Inventory);
+
+  return inventory;
+}
+
 export async function fetchOnChainData({
   sender,
   farmId,
 }: Options): Promise<GameState> {
-  const farmContract = new testnet.eth.Contract(
-    FarmABI as any,
-    TESTNET_FARM_ADDRESS
-  );
-
   const farmNFT = await loadNFTFarm(farmId);
 
   if (farmNFT.owner !== sender) {
@@ -77,15 +98,13 @@ export async function fetchOnChainData({
     .balanceOfBatch(addresses, IDS)
     .call();
 
-  console.log({ inventory });
+  const friendlyInventory = makeInventory(inventory);
 
   return {
     balance,
-    // TODO
-    inventory: {},
+    inventory: friendlyInventory,
     id: farmId,
     address: farmNFT.account,
-    // Not used
     fields: {},
   } as GameState;
 }

@@ -7,6 +7,7 @@ import {
   Account,
 } from "../../repository/farms";
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
+import { getItemUnit } from "../../web3/utils";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { KNOWN_IDS, KNOWN_ITEMS } from "../game/types";
 import { GameState, InventoryItemName } from "../game/types/game";
@@ -30,6 +31,12 @@ export async function startSession({
   let farms = await getFarmsByAccount(sender);
 
   const farm = farms.find((farm) => farm.id === farmId);
+
+  // We are out of sync with the Blockchain
+  await fetchOnChainData({
+    sender: sender,
+    farmId: farmId,
+  });
 
   // No session was ever created for this farm + account
   if (!farm) {
@@ -181,9 +188,11 @@ export async function calculateChangeset({
       return inv;
     }
 
+    const unit = getItemUnit(name);
+
     return {
       ...inv,
-      [KNOWN_IDS[name]]: Number(toWei(amount.toString())),
+      [KNOWN_IDS[name]]: Number(toWei(amount.toString(), unit)),
     };
   }, {});
 
