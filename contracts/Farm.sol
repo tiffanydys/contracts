@@ -49,7 +49,7 @@ contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
         _mint(account, tokenId);
 
         // Create identifiable farm contract
-        FarmHolder farm = new FarmHolder();
+        FarmHolder farm = new FarmHolder(this, tokenId);
         farms[tokenId] = address(farm);
 	}
 
@@ -110,6 +110,14 @@ contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
 }
 
 contract FarmHolder is ERC165, IERC1155Receiver {
+    SunflowerLandFarm private farm;
+    uint private id;
+
+    constructor(SunflowerLandFarm _farm, uint _id) {
+        farm = _farm;
+        id = _id;
+    }
+
     function onERC1155Received(
         address,
         address,
@@ -132,5 +140,11 @@ contract FarmHolder is ERC165, IERC1155Receiver {
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return interfaceId == type(IERC1155Receiver).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    // Fallback function to help someone accidentally sending eth to this contract
+    function withdraw() public {
+        require(farm.ownerOf(id) == msg.sender, "You are not the owner");
+        payable(msg.sender).transfer(address(this).balance);
     }
 }

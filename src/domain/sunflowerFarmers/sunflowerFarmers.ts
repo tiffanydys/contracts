@@ -1,22 +1,27 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
-import { loadV1Balance, loadV1Farm, V1Fruit } from "../../web3/contracts";
-import { SeedName } from "../game/types/crops";
+import {
+  loadV1Balance,
+  loadV1Farm,
+  Square,
+  V1Fruit,
+} from "../../web3/contracts";
+import { CropName, SeedName } from "../game/types/crops";
 import { GameState, Inventory, InventoryItemName } from "../game/types/game";
 
 import { balances } from "./constants/balances";
 import { POOL_BALANCE } from "./constants/liquidityPools";
 
-const CROP_CONVERSION: Record<V1Fruit, SeedName> = {
+const CROP_CONVERSION: Record<V1Fruit, CropName> = {
   // Even give them some sunflower seeds for their empty fields <3
-  "0": "Sunflower Seed",
-  "1": "Sunflower Seed",
-  "2": "Potato Seed",
-  "3": "Pumpkin Seed",
-  "4": "Carrot Seed",
-  "5": "Cabbage Seed",
-  "6": "Beetroot Seed",
-  "7": "Cauliflower Seed",
+  "0": "Sunflower",
+  "1": "Sunflower",
+  "2": "Potato",
+  "3": "Pumpkin",
+  "4": "Carrot",
+  "5": "Cabbage",
+  "6": "Beetroot",
+  "7": "Cauliflower",
 };
 
 type Options = {
@@ -37,20 +42,14 @@ export async function getV1GameState({
     inventory: {},
   };
 
-  // Load any liquidity they had at the time of the snapshot
-  // Hard coded file
-
-  // TODO FT values with wei conversion?
-
-  // Preload inventory from hard coded file
   const inventorySnapshot = balances[address];
   if (inventorySnapshot) {
     console.log({ inventorySnapshot });
     gameState.inventory = Object.keys(inventorySnapshot).reduce(
-      (acc, key) => ({
-        ...acc,
-        [key]: new Decimal(
-          inventorySnapshot[key as InventoryItemName] as string
+      (items, itemName) => ({
+        ...items,
+        [itemName]: new Decimal(
+          inventorySnapshot[itemName as InventoryItemName] as string
         ),
       }),
       {} as Inventory
@@ -74,30 +73,38 @@ export async function getV1GameState({
   if (hasFarm) {
     const fields = await loadV1Farm(address);
 
-    if (fields.length > 5) {
-      gameState.inventory["Pumpkin Soup"] = new Decimal(1);
-    }
-
-    if (fields.length > 8) {
-      gameState.inventory["Sauerkraut"] = new Decimal(1);
-    }
-
-    if (fields.length > 11) {
-      gameState.inventory["Roasted Cauliflower"] = new Decimal(1);
-    }
-
-    if (fields.length > 14) {
-      // TODO give them statue
-      gameState.inventory["Sunflower Tombstone"] = new Decimal(1);
-    }
-
-    fields.forEach((field) => {
-      const seed = CROP_CONVERSION[field.fruit];
-      gameState.inventory[seed] = (
-        gameState.inventory[seed] || new Decimal(0)
-      ).add(1);
-    });
+    gameState.inventory = makeInventory(fields, gameState.inventory);
   }
 
   return gameState;
+}
+
+/**
+ * Generates an inventory based on the V1 fields they had
+ */
+export function makeInventory(fields: Square[], inventory: Inventory) {
+  const updatedInventory = { ...inventory };
+  if (fields.length > 5) {
+    updatedInventory["Pumpkin Soup"] = new Decimal(1);
+  }
+
+  if (fields.length > 8) {
+    updatedInventory["Sauerkraut"] = new Decimal(1);
+  }
+
+  if (fields.length > 11) {
+    updatedInventory["Roasted Cauliflower"] = new Decimal(1);
+  }
+
+  if (fields.length > 14) {
+    // TODO give them statue
+    updatedInventory["Sunflower Tombstone"] = new Decimal(1);
+  }
+
+  fields.forEach((field) => {
+    const crop = CROP_CONVERSION[field.fruit];
+    updatedInventory[crop] = (updatedInventory[crop] || new Decimal(0)).add(1);
+  });
+
+  return updatedInventory;
 }

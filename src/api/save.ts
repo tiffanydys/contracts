@@ -1,6 +1,8 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { calculateChangeset } from "../domain/session/session";
+import { calculateChangeset } from "../domain/game/game";
+import { KNOWN_IDS } from "../domain/game/types";
+import { InventoryItemName } from "../domain/game/types/game";
 import { saveSignature, verifyAccount } from "../web3/signatures";
 
 const schema = Joi.object({
@@ -42,15 +44,21 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   console.log({ changeset });
 
-  const ids = Object.keys(changeset.inventory).map(Number);
-  const amounts = Object.values(changeset.inventory).map(Number);
+  const ids = Object.keys(changeset.inventory).map(
+    (id) => KNOWN_IDS[id as InventoryItemName]
+  );
+  const amounts = Object.values(changeset.inventory).map((val) =>
+    val.toNumber()
+  );
+
+  const sfl = changeset.balance.toNumber();
 
   console.log({ ids, amounts });
   const signature = saveSignature({
     sender: body.sender,
     farmId: body.farmId,
     sessionId: body.sessionId,
-    sfl: changeset.sfl,
+    sfl,
     ids,
     amounts,
   });
@@ -62,7 +70,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       signature,
       farmId: body.farmId,
       sessionId: body.sessionId,
-      sfl: changeset.sfl,
+      sfl,
       ids,
       amounts,
     }),

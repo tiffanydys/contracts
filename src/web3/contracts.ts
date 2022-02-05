@@ -146,7 +146,7 @@ export enum V1Fruit {
   Radish = "7",
 }
 
-interface Square {
+export interface Square {
   fruit: V1Fruit;
   createdAt: number;
 }

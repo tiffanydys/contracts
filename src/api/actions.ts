@@ -1,10 +1,14 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { GameEvent } from "../domain/game/events";
-
 import { verifyAccount } from "../web3/signatures";
-import { save } from "../domain/game/game";
+import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/game";
+
+const eventTimeValidation = () =>
+  Joi.date()
+    .iso()
+    .greater(Date.now() - MILLISECONDS_TO_SAVE)
+    .less("now");
 
 const schema = Joi.object({
   actions: Joi.array()
@@ -14,24 +18,24 @@ const schema = Joi.object({
           type: Joi.string().equal("item.crafted"),
           item: Joi.string(),
           amount: Joi.number().min(1).max(10).integer(),
-          createdAt: Joi.string(),
+          createdAt: eventTimeValidation,
         }),
         Joi.object({
           type: Joi.string().equal("item.sell"),
           item: Joi.string(),
           amount: Joi.number().min(1).max(10).integer(),
-          createdAt: Joi.string(),
+          createdAt: eventTimeValidation,
         }),
         Joi.object({
           type: Joi.string().equal("item.planted"),
           item: Joi.string(),
           index: Joi.number().min(0).max(21).integer(),
-          createdAt: Joi.string(),
+          createdAt: eventTimeValidation,
         }),
         Joi.object({
           type: Joi.string().equal("item.harvested"),
           index: Joi.number().min(0).max(21).integer(),
-          createdAt: Joi.string(),
+          createdAt: eventTimeValidation,
         })
       )
     )
@@ -43,7 +47,7 @@ const schema = Joi.object({
 });
 
 type Body = {
-  actions: GameEvent[];
+  actions: GameAction[];
   farmId: number;
   sender: string;
   sessionId: string;

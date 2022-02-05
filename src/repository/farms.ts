@@ -37,29 +37,22 @@ export async function getFarmsByAccount(account: string): Promise<Account[]> {
   return results.Items as Account[];
 }
 
-function inventoryToIDs(
-  inventory: GameState["inventory"]
-): Record<number, string> {
-  return Object.keys(inventory).reduce(
-    (items, itemName) => ({
-      ...items,
-      [KNOWN_IDS[itemName as InventoryItemName]]: "0",
-    }),
-    {} as Record<number, string>
-  );
-}
-
 /**
  * Santize the farm data
  */
-function makeFarm(farm: GameState): FarmSession {
-  const inventory = Object.keys(farm.inventory).reduce(
-    (items, itemName) => ({
+function makeDBItem(farm: GameState): FarmSession {
+  const inventory = Object.keys(farm.inventory).reduce((items, itemName) => {
+    const value = farm.inventory[itemName as InventoryItemName];
+
+    if (!value || value.lessThanOrEqualTo(0)) {
+      return items;
+    }
+
+    return {
       ...items,
-      [itemName]: farm.inventory[itemName as InventoryItemName]?.toString(),
-    }),
-    {} as Record<InventoryItemName, string>
-  );
+      [itemName]: value.toString(),
+    };
+  }, {} as Record<InventoryItemName, string>);
 
   return {
     ...farm,
@@ -88,8 +81,8 @@ export async function createFarm({
     createdAt: new Date().toISOString(),
     owner,
     updatedAt: new Date().toISOString(),
-    gameState: makeFarm(gameState),
-    previousGameState: makeFarm(previousGameState),
+    gameState: makeDBItem(gameState),
+    previousGameState: makeDBItem(previousGameState),
   };
 
   const putParams = {
@@ -118,7 +111,7 @@ export async function updateFarm({ id, owner, gameState }: UpdateFarm) {
     UpdateExpression: "SET updatedAt = :updatedAt, gameState = :gameState",
     ExpressionAttributeValues: {
       ":updatedAt": new Date().toISOString(),
-      ":gameState": makeFarm(gameState),
+      ":gameState": makeDBItem(gameState),
     },
   };
   await dynamoDb.update(updateParams).promise();
@@ -138,7 +131,7 @@ export async function updateSession({
   owner,
   gameState,
 }: UpdateSession) {
-  const safeFarm = makeFarm(gameState);
+  const safeFarm = makeDBItem(gameState);
 
   const updateParams = {
     TableName: process.env.tableName as string,
