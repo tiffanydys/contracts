@@ -30,7 +30,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   // Whitelist farms
 
-  const { signature } = await createFarmSignature({
+  const { signature, charity, donation } = await createFarmSignature({
     address: body.address,
     donation: body.donation,
     charity: body.charity,
@@ -41,8 +41,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       signature,
-      charity: body.charity,
-      donation: body.donation,
+      charity,
+      donation,
     }),
   };
 };

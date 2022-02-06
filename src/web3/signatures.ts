@@ -1,5 +1,5 @@
 import Accounts from "web3-eth-accounts";
-import { soliditySha3 } from "web3-utils";
+import { soliditySha3, toWei } from "web3-utils";
 import { sign } from "../services/kms";
 
 type VerifyAccountArgs = {
@@ -34,6 +34,8 @@ export async function createFarmSignature({
   address,
 }: CreateFarmArgs) {
   console.log({ charity, donation, address });
+  const wei = toWei(donation.toString());
+
   const shad = soliditySha3(
     {
       type: "address",
@@ -41,7 +43,7 @@ export async function createFarmSignature({
     },
     {
       type: "uint",
-      value: donation as any,
+      value: wei as any,
     },
     {
       type: "address",
@@ -51,7 +53,7 @@ export async function createFarmSignature({
 
   const { signature } = await sign(shad as string);
 
-  return { signature };
+  return { signature, donation: wei, charity };
 }
 
 type SaveArgs = {
