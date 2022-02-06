@@ -24,7 +24,7 @@
 .sst
 
 # environments
-.env*.local
+.env
 
 *.log
 
