@@ -29,10 +29,9 @@ jobs:
 
       - name: Deploy stack
         run: yarn deploy
-        with:
-          NETWORK: mumbai
+        env:
+          NETWORK: mainnet
           ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
-          # TODO
           TOKEN_ADDRESS: "0x74909542f6Aa557eC1ef30e633F3d027e18888E2"
           FARM_ADDRESS: "0x7f6279D037587d647b529F1C6ACA43E4E314d392"
           INVENTORY_ADDRESS: "0x28f123423a76443D45e4BA96A512ffd42759BBCb"
