@@ -11,7 +11,7 @@ import * as asn1 from "asn1.js";
 import BN from "bn.js";
 
 const kms = new KMS();
-const keyId = "be934479-ce0b-41ab-871e-de078bd6b7fd";
+const keyId = process.env.KMS_KEY_ID;
 
 // Generated public key is - 0x76b88de108e64b835b415353a03406164b912794
 
