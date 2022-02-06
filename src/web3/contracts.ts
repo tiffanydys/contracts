@@ -16,17 +16,16 @@ import { IDS, KNOWN_IDS } from "../domain/game/types";
 
 import { getItemUnit } from "./utils";
 
-const testnet = createAlchemyWeb3(
-  "https://polygon-mumbai.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
+const alchemyKey = process.env.ALCHEMY_KEY;
+const network = process.env.NETWORK;
+
+const sunflowerLandWeb3 = createAlchemyWeb3(
+  `https://polygon-${network}.g.alchemy.com/v2/${alchemyKey}`
 );
 
-const mainnet = createAlchemyWeb3(
-  "https://polygon-mainnet.g.alchemy.com/v2/8IHJGDFw1iw3FQE8lCYAgp1530mXzT1-"
-);
-
-const TESTNET_TOKEN_ADDRESS = "0x74909542f6Aa557eC1ef30e633F3d027e18888E2";
-const TESTNET_FARM_ADDRESS = "0x7f6279D037587d647b529F1C6ACA43E4E314d392";
-const TESTNET_INVENTORY_ADDRESS = "0x28f123423a76443D45e4BA96A512ffd42759BBCb";
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
+const FARM_ADDRESS = process.env.FARM_ADDRESS;
+const INVENTORY_ADDRESS = process.env.INVENTORY_ADDRESS;
 
 type Options = {
   sender: string;
@@ -34,9 +33,9 @@ type Options = {
 };
 
 export async function loadNFTFarm(id: number) {
-  const farmContract = new testnet.eth.Contract(
+  const farmContract = new sunflowerLandWeb3.eth.Contract(
     FarmABI as any,
-    TESTNET_FARM_ADDRESS
+    FARM_ADDRESS
   );
   const farmNFT: { owner: string; account: string } = await farmContract.methods
     .getFarm(id)
@@ -76,9 +75,9 @@ export async function fetchOnChainData({
     throw new Error("Farm is not owned by you");
   }
 
-  const tokenContract = new testnet.eth.Contract(
+  const tokenContract = new sunflowerLandWeb3.eth.Contract(
     TokenABI as any,
-    TESTNET_TOKEN_ADDRESS
+    TOKEN_ADDRESS
   );
 
   const balanceString = await tokenContract.methods
@@ -86,9 +85,9 @@ export async function fetchOnChainData({
     .call();
   const balance = new Decimal(fromWei(balanceString, "ether"));
 
-  const inventoryContract = new testnet.eth.Contract(
+  const inventoryContract = new sunflowerLandWeb3.eth.Contract(
     InventoryABI as any,
-    TESTNET_INVENTORY_ADDRESS
+    INVENTORY_ADDRESS
   );
 
   const addresses = IDS.map(() => farmNFT.account);
@@ -109,6 +108,10 @@ export async function fetchOnChainData({
   } as GameState;
 }
 
+const sunflowerFarmersWeb3 = createAlchemyWeb3(
+  `https://polygon-mainnet.g.alchemy.com/v2/${alchemyKey}`
+);
+
 const SFF_TOKEN_ADDRESS = "0xdf9B4b57865B403e08c85568442f95c26b7896b0";
 const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
 
@@ -121,7 +124,7 @@ const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
 const BLOCK_NUMBER = 24247919;
 
 export async function loadV1Balance(address: string): Promise<string> {
-  const tokenContract = new mainnet.eth.Contract(
+  const tokenContract = new sunflowerFarmersWeb3.eth.Contract(
     // Use other ABI as it is also a ERC20 token
     TokenABI as any,
     SFF_TOKEN_ADDRESS
@@ -152,7 +155,7 @@ export interface Square {
 }
 
 export async function loadV1Farm(address: string): Promise<Square[]> {
-  const farmContract = new mainnet.eth.Contract(
+  const farmContract = new sunflowerFarmersWeb3.eth.Contract(
     SunflowerFarmersABI as any,
     SFF_FARM_ADDRESS
   );
