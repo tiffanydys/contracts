@@ -108,6 +108,7 @@ export async function fetchOnChainData({
   } as GameState;
 }
 
+// Always from mainnet
 const sunflowerFarmersWeb3 = createAlchemyWeb3(
   `https://polygon-mainnet.g.alchemy.com/v2/${alchemyKey}`
 );
@@ -121,7 +122,7 @@ const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
  * Gives leeway for people who accidentally exchanged tokens
  * Also gave time for people to withdraw LP
  */
-const BLOCK_NUMBER = 24247919;
+const RECOVERY_BLOCK_NUMBER = 24247919;
 
 export async function loadV1Balance(address: string): Promise<string> {
   const tokenContract = new sunflowerFarmersWeb3.eth.Contract(
@@ -133,7 +134,7 @@ export async function loadV1Balance(address: string): Promise<string> {
 
   const balance = await tokenContract.methods
     .balanceOf(address)
-    .call({ blockNumber: BLOCK_NUMBER }, BLOCK_NUMBER);
+    .call({ blockNumber: RECOVERY_BLOCK_NUMBER }, RECOVERY_BLOCK_NUMBER);
   console.log({ balance });
   return balance;
 }
@@ -162,7 +163,7 @@ export async function loadV1Farm(address: string): Promise<Square[]> {
 
   const fields = await farmContract.methods
     .getLand(address)
-    .call({ blockNumber: BLOCK_NUMBER }, BLOCK_NUMBER);
+    .call({ blockNumber: RECOVERY_BLOCK_NUMBER }, RECOVERY_BLOCK_NUMBER);
 
   return fields;
 }
