@@ -68,14 +68,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  console.log("Validated");
   verifyAccount({
     address: body.sender,
     farmId: body.farmId,
     signature: body.signature,
   });
 
-  console.log({ actions: body.actions });
   const game = await save({
     farmId: body.farmId,
     account: body.sender,

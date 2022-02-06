@@ -192,7 +192,7 @@ export async function calculateChangeset({
 }
 
 export type GameAction = GameEvent & {
-  createdAt: number;
+  createdAt: string;
 };
 
 function processEvent(state: GameState, action: GameAction): GameState {
@@ -204,7 +204,7 @@ function processEvent(state: GameState, action: GameAction): GameState {
 
   return handler({
     state,
-    createdAt: action.createdAt,
+    createdAt: new Date(action.createdAt).getTime(),
     // TODO - fix this type error
     action: action as never,
   });
@@ -220,18 +220,20 @@ export function processActions(state: GameState, actions: GameAction[]) {
   }
 
   return actions.reduce((farm, action, index) => {
+    const createdAt = new Date(action.createdAt);
     if (index > 0) {
       const previousAction = actions[index - 1];
-      if (previousAction.createdAt > action.createdAt) {
+      if (new Date(previousAction.createdAt) > createdAt) {
         throw new Error("Events must be in chronological order");
       }
     }
 
-    if (action.createdAt > Date.now()) {
+    const now = new Date();
+    if (createdAt > now) {
       throw new Error("Event cannot be in the future");
     }
 
-    if (action.createdAt < Date.now() - MILLISECONDS_TO_SAVE) {
+    if (createdAt.getTime() < now.getTime() - MILLISECONDS_TO_SAVE) {
       throw new Error("Event is too old");
     }
 
