@@ -17,7 +17,6 @@ type Handlers = {
     state: GameState;
     // Extract the correct event payload from the list of events
     action: Extract<GameEvent, { type: Name }>;
-    createdAt?: number;
   }) => GameState;
 };
 
