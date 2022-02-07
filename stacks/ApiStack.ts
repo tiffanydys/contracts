@@ -66,6 +66,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            ...web3EnvironmentVariables,
           },
         },
       },

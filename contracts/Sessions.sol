@@ -12,7 +12,7 @@ import "./Farm.sol";
 
 // Do we need Ownable - what would happen if we renounced ownership?
 
-contract SunflowerLand is Ownable {
+contract SunflowerLandSession is Ownable {
     using ECDSA for bytes32;
 
     mapping(bytes32 => bool) public executed;
@@ -43,49 +43,33 @@ contract SunflowerLand is Ownable {
         return keccak256(abi.encodePacked(_msgSender(), sessions[tokenId], block.timestamp)).toEthSignedMessageHash();
     }
 
+    function getSessionId(uint tokenId) public view returns(bytes32) {
+        return sessions[tokenId];
+    }
+
     function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
         return ethSignedHash.recover(signature) == signer;
     }
     
-    function createFarm(
-        // Verification
-        bytes memory signature,
-        // Data
-        address charity,
-        uint amount
-    ) public payable {
-        // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(charity, amount, _msgSender()));
-        require(!executed[txHash], "SunflowerLand: Tx Executed");
-        require(verify(txHash, signature), "SunflowerLand: Unauthorised");
-
-        executed[txHash] = true;
-
-        if (amount > 0) {
-            (bool sent,) = charity.call{value: amount}("");
-            require(sent, "SunflowerLand: Donation Failed");
-        }
-
-        farm.mint(_msgSender());
-    }
-
     /**
      * Bring off chain data on chain
      */
-    function save(
+    function sync(
         // Verification
         bytes memory signature,
         bytes32 sessionId,
+        uint deadline,
         // Data
         uint farmId,
         uint256[] memory mintIds,
         uint256[] memory mintAmounts,
         uint256[] memory burnIds,
         uint256[] memory burnAmounts,
-        uint256 mintTokens,
-        uint256 burnTokens
+        int256 tokens
     ) public {
+       require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
+
         // Check the session is new or has not changed (already saved or withdrew funds)
         bytes32 farmSessionId = sessions[farmId];
         require(
@@ -97,7 +81,7 @@ contract SunflowerLand is Ownable {
         sessions[farmId] = generateSessionId(farmId);
 
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(sessionId, farmId, mintIds, mintAmounts, burnIds, burnAmounts, mintTokens, burnTokens));
+        bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, mintIds, mintAmounts, burnIds, burnAmounts, tokens));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;
@@ -110,64 +94,68 @@ contract SunflowerLand is Ownable {
             "SunflowerLand: You do not own this farm"
         );
 
-
         // Get the holding address of the farm
         Farm memory farmNFT = farm.getFarm(farmId);
 
-        // Update tokens
-        MintInput memory input = MintInput({
-            to: farmNFT.account,
-            ids: mintIds,
-            amounts: mintAmounts,
-            data: signature
-        });
+        updateBalance(farmNFT.account, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
+    }
 
-        inventory.gameMint(input);
-        inventory.gameBurn(farmNFT.account, burnIds, burnAmounts);
+    function updateBalance(
+        address account,
+        uint256[] memory mintIds,
+        uint256[] memory mintAmounts,
+        uint256[] memory burnIds,
+        uint256[] memory burnAmounts,
+        int256 tokens
+    ) private {
+        if (mintIds.length > 0) {
+            inventory.gameMint(account, mintIds, mintAmounts, "");
+        }
 
-        if (mintTokens > 0) {
-            token.gameMint(farmNFT.account, mintTokens);
+        if (burnIds.length > 0) {
+            inventory.gameBurn(account, burnIds, burnAmounts);
+        }
+
+        if (tokens > 0) {
+            token.gameMint(account, uint256(tokens));
         }
         
-        if (burnTokens > 0) {
+        if (tokens < 0) {
             // Send to the burn address so total supply keeps increasing
-            token.gameTransfer(farmNFT.account, 0x000000000000000000000000000000000000dEaD, burnTokens);
+            token.gameTransfer(account, 0x000000000000000000000000000000000000dEaD, uint256(-tokens));
         }
     }
 
+    // TODO!
     // Withdraw resources from farm to another account
-    function withdraw(
-        uint256 farmId,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        uint256 tokenAmount
-    ) public  {
-        // Start a new session
-        sessions[farmId] = generateSessionId(farmId);
+    // function withdraw(
+    //     uint256 farmId,
+    //     address to,
+    //     uint256[] memory ids,
+    //     uint256[] memory amounts,
+    //     uint256 tokenAmount
+    // ) public  {
+    //     // Start a new session
+    //     sessions[farmId] = generateSessionId(farmId);
 
-        address farmOwner = farm.ownerOf(farmId);
+    //     address farmOwner = farm.ownerOf(farmId);
 
-        // Check they own the farm
-        require(
-            farmOwner == _msgSender(),
-            "SunflowerLand: You do not own this farm"
-        );
+    //     // Check they own the farm
+    //     require(
+    //         farmOwner == _msgSender(),
+    //         "SunflowerLand: You do not own this farm"
+    //     );
 
 
 
-        // Get the holding address of the tokens
-        Farm memory farmNFT = farm.getFarm(farmId);
+    //     // Get the holding address of the tokens
+    //     Farm memory farmNFT = farm.getFarm(farmId);
 
-        // TODO - validate the max limits on the withrdraw
-            // E.g. No more than 10,000 tokens at a time
+    //     // TODO - validate the max limits on the withrdraw
+    //         // E.g. No more than 10,000 tokens at a time
 
-        // Withdraw from farm
-        inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
-        token.gameTransfer(farmNFT.account, to, tokenAmount);
-    }
-
-    function getSessionId(uint tokenId) public view returns(bytes32) {
-        return sessions[tokenId];
-    }
+    //     // Withdraw from farm
+    //     inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
+    //     token.gameTransfer(farmNFT.account, to, tokenAmount);
+    // }
 }

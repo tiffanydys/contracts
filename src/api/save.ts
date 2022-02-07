@@ -3,7 +3,7 @@ import Joi from "joi";
 import { calculateChangeset } from "../domain/game/game";
 import { KNOWN_IDS } from "../domain/game/types";
 import { InventoryItemName } from "../domain/game/types/game";
-import { saveSignature, verifyAccount } from "../web3/signatures";
+import { syncSignature, verifyAccount } from "../web3/signatures";
 
 const schema = Joi.object({
   sessionId: Joi.string().required(),
@@ -44,35 +44,26 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   console.log({ changeset });
 
-  const ids = Object.keys(changeset.inventory).map(
-    (id) => KNOWN_IDS[id as InventoryItemName]
-  );
-  const amounts = Object.values(changeset.inventory).map((val) =>
-    val.toNumber()
-  );
+  console.log({ KNOWN_IDS });
+  console.log({ keys: Object.keys(changeset.inventory) });
 
   const sfl = changeset.balance.toNumber();
 
-  console.log({ ids, amounts });
-  const signature = saveSignature({
+  const signature = await syncSignature({
     sender: body.sender,
     farmId: body.farmId,
     sessionId: body.sessionId,
     sfl,
-    ids,
-    amounts,
+    inventory: changeset.inventory,
   });
+
+  console.log({ signature });
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      signature,
-      farmId: body.farmId,
-      sessionId: body.sessionId,
-      sfl,
-      ids,
-      amounts,
+      ...signature,
     }),
   };
 };

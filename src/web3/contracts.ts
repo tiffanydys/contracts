@@ -56,6 +56,10 @@ export function makeInventory(amounts: string[]): Inventory {
     const unit = getItemUnit(name);
     const value = new Decimal(fromWei(amount, unit));
 
+    if (value.equals(0)) {
+      return items;
+    }
+
     return {
       ...items,
       [name]: value,

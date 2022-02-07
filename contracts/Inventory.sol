@@ -2,33 +2,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 import "./GameOwner.sol";
 
-struct MintInput {
-    address to;
-    uint256[] ids;
-    uint256[] amounts;
-    bytes data;
-}
-
-// TODO - use https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/presets/ERC1155PresetMinterPauser.sol
-// The preset has everything we need!
-    // Except burn batch/transfer batch
-    // Has the TotalSupply (which we will want)
-
-// Look into using AccessControlEnumerable
-
-contract SunflowerLandInventory is ERC1155Pausable, GameOwner {
-    address private game;
-
-    constructor() ERC1155("https://sunflower-land/api/item/{id}.json") payable {}
-
-    function passGameRole(address _game) public onlyOwner returns (bool) {
-        game = _game;
-
-        return true;
+contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
+    constructor() ERC1155("https://sunflower-land.com/play/erc1155/{id}.json") payable {
+        gameRoles[msg.sender] = true;
     }
 
     function setURI(string memory newuri) public onlyOwner {
@@ -36,9 +17,12 @@ contract SunflowerLandInventory is ERC1155Pausable, GameOwner {
     }
 
     function gameMint(
-        MintInput memory input
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
     ) public onlyGame {
-        _mintBatch(input.to, input.ids, input.amounts, input.data);
+        _mintBatch(to, ids, amounts, data);
     }
 
     function gameBurn(
@@ -65,5 +49,25 @@ contract SunflowerLandInventory is ERC1155Pausable, GameOwner {
         bool approved
     ) internal virtual onlyGame {
         _setApprovalForAll(owner, operator, approved);
+    }
+
+    /**
+     * @dev See {ERC1155-_beforeTokenTransfer}.
+     *
+     * Requirements:
+     *
+     * - the contract must not be paused.
+     */
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+
+        require(!paused(), "ERC1155Pausable: token transfer while paused");
     }
 }

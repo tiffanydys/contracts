@@ -101,6 +101,8 @@ export async function startSession({
     farmId: farmId,
   });
 
+  console.log({ onChainData });
+
   const gameState: GameState = {
     ...farm.gameState,
     balance: onChainData.balance,
@@ -180,7 +182,7 @@ export async function calculateChangeset({
 
     return {
       ...inv,
-      name: new Decimal(toWei(amount.toString(), unit)),
+      [name]: new Decimal(toWei(amount.toString(), unit)),
     };
   }, {});
 

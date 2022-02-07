@@ -45,9 +45,9 @@ export async function deploySFLContracts(web3: Web3) {
     ),
   ]);
 
-  const sunflowerLand = await deployContract(
+  const session = await deployContract(
     web3,
-    abijson.contracts["contracts/SunflowerLand.sol:SunflowerLand"],
+    abijson.contracts["contracts/Sessions.sol:SunflowerLandSession"],
     TestAccount.TEAM.address,
     [inventory.options.address, token.options.address, farm.options.address]
   );
@@ -64,17 +64,17 @@ export async function deploySFLContracts(web3: Web3) {
       .addGameRole(beta.options.address)
       .send({ from: TestAccount.TEAM.address }),
     farm.methods
-      .addGameRole(sunflowerLand.options.address)
+      .addGameRole(session.options.address)
       .send({ from: TestAccount.TEAM.address }),
     token.methods
-      .addGameRole(sunflowerLand.options.address)
+      .addGameRole(session.options.address)
       .send({ from: TestAccount.TEAM.address }),
     inventory.methods
-      .passGameRole(sunflowerLand.options.address)
+      .addGameRole(session.options.address)
       .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { sunflowerLand, farm, token, inventory, beta };
+  return { session, farm, token, inventory, beta };
 }
 
 async function deployContract(
