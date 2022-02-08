@@ -1,5 +1,4 @@
 import Decimal from "decimal.js-light";
-import { fromWei } from "web3-utils";
 import { GameState } from "../types/game";
 
 export const GRID_WIDTH_PX = 42;
