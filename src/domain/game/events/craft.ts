@@ -23,7 +23,6 @@ function isCraftable(
   item: CraftableName,
   names: CraftableName[]
 ): item is CraftableName {
-  console.log({ item, names });
   return names.includes(item);
 }
 
@@ -34,7 +33,6 @@ type Options = {
 };
 
 export function craft({ state, action, available }: Options) {
-  console.log({ action });
   if (!isCraftable(action.item, available || VALID_ITEMS)) {
     throw new Error(`This item is not craftable: ${action.item}`);
   }
