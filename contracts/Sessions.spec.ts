@@ -4,7 +4,7 @@ import { deploySFLContracts, gasLimit, TestAccount } from "./test-support";
 
 describe("Session contract", () => {
   // 10 seconds in the future
-  const validDeadline = Math.floor(Date.now() / 1000 + 10);
+  const validDeadline = Math.floor(Date.now() / 1000 + 100);
 
   describe("sync", () => {
     it("requires the transaction is submitted before the deadline", async () => {

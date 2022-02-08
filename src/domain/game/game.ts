@@ -272,10 +272,6 @@ export async function save({ farmId, account, actions }: SaveArgs) {
 
   const newGameState = processActions(gameState, actions);
 
-  newGameState.inventory = Object.keys(KNOWN_IDS).reduce(
-    (items, name) => ({ ...items, [name]: new Decimal(10000) }),
-    {}
-  );
   await updateFarm({
     id: farmId,
     gameState: newGameState,
