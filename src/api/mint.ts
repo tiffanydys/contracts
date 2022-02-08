@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { calculateChangeset } from "../domain/game/game";
+
+import { calculateChangeset, getChangeset, mint } from "../domain/game/game";
 import { KNOWN_IDS } from "../domain/game/types";
 import { InventoryItemName } from "../domain/game/types/game";
 import { syncSignature, verifyAccount } from "../web3/signatures";
@@ -10,6 +11,7 @@ const schema = Joi.object({
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
   signature: Joi.string().required(),
+  item: Joi.string().required(),
 });
 
 type Body = {
@@ -18,6 +20,7 @@ type Body = {
   sender: string;
   signature: string;
   hash: string;
+  item: InventoryItemName;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -37,23 +40,21 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     signature: body.signature,
   });
 
-  const changeset = await calculateChangeset({
-    id: Number(body.farmId),
-    owner: body.sender,
+  const changeset = await mint({
+    farmId: Number(body.farmId),
+    account: body.sender,
+    item: body.item,
   });
 
+  // TODO - check the total supply limit
   console.log({ changeset });
 
-  console.log({ KNOWN_IDS });
-  console.log({ keys: Object.keys(changeset.inventory) });
-
-  const sfl = changeset.balance.toNumber();
-
+  // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({
     sender: body.sender,
     farmId: body.farmId,
     sessionId: body.sessionId,
-    sfl,
+    sfl: changeset.balance,
     inventory: changeset.inventory,
   });
 

@@ -40,8 +40,8 @@ export default class ApiStack extends sst.Stack {
             ...web3EnvironmentVariables,
           },
         },
-        "POST    /actions": {
-          handler: "src/api/actions.handler",
+        "POST    /autosave": {
+          handler: "src/api/autosave.handler",
           bundle: {
             externalModules: ["electron"],
           },
@@ -59,8 +59,18 @@ export default class ApiStack extends sst.Stack {
             ...web3EnvironmentVariables,
           },
         },
-        "POST    /save": {
-          handler: "src/api/save.handler",
+        "POST    /sync": {
+          handler: "src/api/sync.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+          environment: {
+            tableName: sessionTable.dynamodbTable.tableName,
+            ...web3EnvironmentVariables,
+          },
+        },
+        "POST    /mint": {
+          handler: "src/api/mint.handler",
           bundle: {
             externalModules: ["electron"],
           },

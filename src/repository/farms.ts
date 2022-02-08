@@ -37,6 +37,23 @@ export async function getFarmsByAccount(account: string): Promise<Account[]> {
   return results.Items as Account[];
 }
 
+export async function getFarmById(
+  account: string,
+  id: number
+): Promise<Account> {
+  const getParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      owner: account,
+      id,
+    },
+  };
+
+  const results = await dynamoDb.get(getParams).promise();
+
+  return results.Item as Account;
+}
+
 /**
  * Santize the farm data
  */

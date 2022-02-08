@@ -1,3 +1,4 @@
+import Decimal from "decimal.js-light";
 import Accounts from "web3-eth-accounts";
 import { soliditySha3, toWei } from "web3-utils";
 import { KNOWN_IDS } from "../domain/game/types";
@@ -127,7 +128,7 @@ type SyncSignature = {
   sessionId: string;
   sender: string;
   farmId: number;
-  sfl: number;
+  sfl: Decimal;
   inventory: Inventory;
 };
 
@@ -145,6 +146,9 @@ export async function syncSignature({
   const deadline = Math.floor(Date.now() / 1000 + SYNC_DEADLINE_MINUTES * 60);
 
   const names = Object.keys(inventory) as InventoryItemName[];
+
+  // TODO - somewhere else
+  Decimal.config({ toExpPos: 30 });
 
   // Convert the inventory into the parameters required for the smart contract function
   const inventoryChange: InventoryArgs = names.reduce(
@@ -164,7 +168,7 @@ export async function syncSignature({
         return {
           ...changes,
           burnIds: [...changes.burnIds, id],
-          burnAmounts: [...changes.burnAmounts, amount?.toString()],
+          burnAmounts: [...changes.burnAmounts, amount.abs().toString()],
         };
       }
 
@@ -186,6 +190,8 @@ export async function syncSignature({
     deadline,
     ...inventoryChange,
   };
+
+  console.log({ args });
   const shad = encodeSyncFunction(args);
 
   const { signature } = await sign(shad as string);

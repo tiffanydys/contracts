@@ -7,14 +7,18 @@ import {
   updateFarm,
   createFarm,
   updateSession,
+  getFarmById,
 } from "../../repository/farms";
 import { EVENTS, GameEvent } from "./events";
 import { GameState, InventoryItemName, Inventory } from "./types/game";
+import { LimitedItems, CraftableName } from "./types/craftables";
 
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { getItemUnit } from "../../web3/utils";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
+import { KNOWN_IDS } from "./types";
+import { craft } from "./events/craft";
 
 type StartSessionArgs = {
   farmId: number;
@@ -145,33 +149,41 @@ type CalculateChangesetArgs = {
   owner: string;
 };
 
-export async function calculateChangeset({
+export async function getChangeset({
   id,
   owner,
 }: CalculateChangesetArgs): Promise<GameState> {
-  let farms = await getFarmsByAccount(owner);
-  const farm = farms.find((farm) => farm.id === id);
-
+  let farm = await getFarmById(owner, id);
   if (!farm) {
     throw new Error("Farm does not exist");
   }
 
-  const gameState = makeGame(farm.gameState);
-  const snapshot = makeGame(farm.previousGameState);
+  const current = makeGame(farm.gameState);
+  const previous = makeGame(farm.previousGameState);
 
-  const balance = gameState.balance.minus(snapshot.balance);
+  return calculateChangeset({ current, previous });
+}
+
+export async function calculateChangeset({
+  current,
+  previous,
+}: {
+  current: GameState;
+  previous: GameState;
+}): Promise<GameState> {
+  const balance = current.balance.minus(previous.balance);
   const wei = new Decimal(toWei(balance.abs().toString()));
 
   const items = [
     ...new Set([
-      ...(Object.keys(gameState.inventory) as InventoryItemName[]),
-      ...(Object.keys(snapshot.inventory) as InventoryItemName[]),
+      ...(Object.keys(current.inventory) as InventoryItemName[]),
+      ...(Object.keys(previous.inventory) as InventoryItemName[]),
     ]),
   ];
 
   const inventory: Inventory = items.reduce((inv, name) => {
-    const amount = (gameState.inventory[name] || new Decimal(0)).sub(
-      snapshot.inventory[name] || new Decimal(0)
+    const amount = (current.inventory[name] || new Decimal(0)).sub(
+      previous.inventory[name] || new Decimal(0)
     );
 
     if (amount.equals(0)) {
@@ -187,7 +199,7 @@ export async function calculateChangeset({
   }, {});
 
   return {
-    ...gameState,
+    ...current,
     balance: wei,
     inventory,
   };
@@ -250,10 +262,9 @@ type SaveArgs = {
 };
 
 export async function save({ farmId, account, actions }: SaveArgs) {
-  const farms = await getFarmsByAccount(account);
-  const farm = farms.find((f) => f.id === farmId);
+  let farm = await getFarmById(account, farmId);
   if (!farm) {
-    throw new Error("Farm does not exist!");
+    throw new Error("Farm does not exist");
   }
 
   // Pass numbers into a safe format before processing.
@@ -261,6 +272,10 @@ export async function save({ farmId, account, actions }: SaveArgs) {
 
   const newGameState = processActions(gameState, actions);
 
+  newGameState.inventory = Object.keys(KNOWN_IDS).reduce(
+    (items, name) => ({ ...items, [name]: new Decimal(10000) }),
+    {}
+  );
   await updateFarm({
     id: farmId,
     gameState: newGameState,
@@ -268,4 +283,40 @@ export async function save({ farmId, account, actions }: SaveArgs) {
   });
 
   return newGameState;
+}
+
+type MintOptions = {
+  farmId: number;
+  account: string;
+  item: CraftableName;
+};
+
+/**
+ * Creates the changeset
+ */
+export async function mint({ farmId, account, item }: MintOptions) {
+  let farm = await getFarmById(account, farmId);
+  if (!farm) {
+    throw new Error("Farm does not exist");
+  }
+
+  // Pass numbers into a safe format before processing.
+  const gameState = makeGame(farm.gameState);
+
+  const newGameState = craft({
+    state: gameState,
+    action: {
+      type: "item.crafted",
+      item,
+      amount: 1,
+    },
+    available: Object.keys(LimitedItems) as CraftableName[],
+  });
+
+  const changeset = calculateChangeset({
+    current: newGameState,
+    previous: makeGame(farm.previousGameState),
+  });
+
+  return changeset;
 }

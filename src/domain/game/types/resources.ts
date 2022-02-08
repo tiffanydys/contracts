@@ -26,6 +26,6 @@ export const RESOURCES: Record<ResourceName, Resource> = {
     description: "Used to craft items",
   },
   Chicken: {
-    description: "Used to craft items",
+    description: "Used to lay eggs",
   },
 };
