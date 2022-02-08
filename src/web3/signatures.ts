@@ -208,7 +208,6 @@ export function generateMessage({ address, farmId }: HashArgs) {
     "This request will not trigger a blockchain transaction or cost any gas fees.",
     "Your authentication status will reset after each session.",
     `Wallet address: ${address}`,
-    `Farm ID: ${farmId}`,
   ].join("\n\n");
 
   return MESSAGE;

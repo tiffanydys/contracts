@@ -52,6 +52,23 @@ contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
     }
 
     /**
+     * Fetch supply for multiple tokens
+     */
+    function totalSupplyBatch(uint256[] memory ids)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint256[] memory batchSupply = new uint256[](ids.length);
+
+        for (uint256 i = 0; i < ids.length; ++i) {
+            batchSupply[i] = totalSupply(ids[i]);
+        }
+
+        return batchSupply;
+    }
+
+    /**
      * @dev See {ERC1155-_beforeTokenTransfer}.
      *
      * Requirements:
