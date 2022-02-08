@@ -1,5 +1,4 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import Decimal from "decimal.js-light";
 import Joi from "joi";
 import { getChangeset } from "../domain/game/game";
 import { KNOWN_IDS } from "../domain/game/types";
@@ -47,10 +46,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     farmId: body.farmId,
     sessionId: body.sessionId,
     sfl: changeset.balance,
-    inventory: Object.keys(KNOWN_IDS).reduce(
-      (items, name) => ({ ...items, [name]: new Decimal(10000) }),
-      {}
-    ),
+    inventory: changeset.inventory,
   });
 
   return {
