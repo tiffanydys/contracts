@@ -91,6 +91,23 @@ describe("game", () => {
         )
       ).toThrow("Event is too old");
     });
+
+    it("ensures events are feasible in the time period", () => {
+      expect(() =>
+        processActions(
+          { ...INITIAL_FARM, inventory: { "Sunflower Seed": new Decimal(1) } },
+          [
+            {
+              type: "item.planted",
+              index: 4,
+              item: "Sunflower Seed",
+              // 10 minutes ago
+              createdAt: new Date(Date.now() - 60 * 10 * 1000).toISOString(),
+            },
+          ]
+        )
+      ).toThrow("Event is too old");
+    });
   });
 
   describe("save", () => {
