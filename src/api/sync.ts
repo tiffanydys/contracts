@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { getChangeset } from "../domain/game/game";
-import { KNOWN_IDS } from "../domain/game/types";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
+import { canSync } from "../constants/whitelist";
 
 const schema = Joi.object<SyncBody>({
   sessionId: Joi.string().required(),
@@ -17,6 +17,8 @@ export type SyncBody = {
   sender: string;
   signature: string;
 };
+
+const network = process.env.NETWORK;
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (!event.body) {
@@ -34,6 +36,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     farmId: body.farmId,
     signature: body.signature,
   });
+
+  if (network !== "mumbai") {
+    if (!canSync(body.sender)) {
+      throw new Error("Not on whitelist");
+    }
+  }
 
   const changeset = await getChangeset({
     id: Number(body.farmId),

@@ -29,4 +29,5 @@ export const getFarmByIdMock = jest.fn(
 jest.doMock("../farms", () => ({
   getFarmById: getFarmByIdMock,
   getFarmsByAccount: getFarmsByAccountMock,
+  updateFarm: jest.fn(),
 }));

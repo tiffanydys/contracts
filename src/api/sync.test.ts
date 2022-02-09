@@ -5,7 +5,7 @@ import "../services/__mocks__/kms";
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, SyncBody } from "./sync";
 
-describe("api.mint", () => {
+describe("api.sync", () => {
   it("requires sender", async () => {
     const body: SyncBody = {
       farmId: 1,

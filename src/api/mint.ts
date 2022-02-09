@@ -3,7 +3,7 @@ import {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import Joi from "joi";
-import { canSync } from "../constants/whitelist";
+import { canMint } from "../constants/whitelist";
 
 import { mint } from "../domain/game/game";
 import { LimitedItem } from "../domain/game/types/craftables";
@@ -59,7 +59,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   });
 
   if (network !== "mumbai") {
-    if (!canSync(body.sender)) {
+    if (!canMint(body.sender)) {
       throw new Error("Not on whitelist");
     }
   }
