@@ -36,7 +36,6 @@ export async function createFarmSignature({
   donation,
   address,
 }: CreateFarmArgs) {
-  console.log({ charity, donation, address });
   const wei = toWei(donation.toString());
 
   const shad = soliditySha3(

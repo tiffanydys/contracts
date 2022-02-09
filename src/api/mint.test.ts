@@ -196,6 +196,7 @@ describe("api.mint", () => {
       mintAmounts: ["1"],
       burnIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
       burnAmounts: ["1000", "50000000000000000000"],
+      signature: "0x0asd0j234nsd0",
     });
   });
 });
