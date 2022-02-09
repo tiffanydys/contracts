@@ -1,6 +1,6 @@
 import { signMock } from "../services/__mocks__/kms";
 
-import { SyncSignature } from "../web3/signatures";
+import { SyncSignature } from "../services/web3/signatures";
 import { handler, CreateFarmBody } from "./createFarm";
 
 describe("api.createFarm", () => {

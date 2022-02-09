@@ -2,9 +2,9 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { getChangeset } from "../domain/game/game";
 import { KNOWN_IDS } from "../domain/game/types";
-import { syncSignature, verifyAccount } from "../web3/signatures";
+import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
-const schema = Joi.object({
+const schema = Joi.object<SyncBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),

@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { verifyAccount } from "../web3/signatures";
+import { verifyAccount } from "../services/web3/signatures";
 import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/game";
 
 const eventTimeValidation = () =>
@@ -10,7 +10,7 @@ const eventTimeValidation = () =>
     .greater(Date.now() - MILLISECONDS_TO_SAVE)
     .less("now");
 
-const schema = Joi.object({
+const schema = Joi.object<AutosaveBody>({
   actions: Joi.array()
     .items(
       Joi.alternatives().try(
@@ -45,7 +45,7 @@ const schema = Joi.object({
   signature: Joi.string().required(),
 });
 
-type Body = {
+export type AutosaveBody = {
   actions: GameAction[];
   farmId: number;
   sender: string;
@@ -60,7 +60,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
+  const body: AutosaveBody = JSON.parse(event.body);
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);

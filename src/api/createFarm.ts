@@ -4,9 +4,9 @@ import Joi from "joi";
 import { CHARITIES } from "../constants/charities";
 import { canCreateFarm } from "../constants/whitelist";
 
-import { createFarmSignature } from "../web3/signatures";
+import { createFarmSignature } from "../services/web3/signatures";
 
-const schema = Joi.object({
+const schema = Joi.object<CreateFarmBody>({
   charity: Joi.string()
     .required()
     .valid(...CHARITIES),

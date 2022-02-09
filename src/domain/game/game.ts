@@ -1,5 +1,5 @@
 import Decimal from "decimal.js-light";
-import { toWei } from "web3-utils";
+import { fromWei, toWei } from "web3-utils";
 
 import {
   Account,
@@ -13,11 +13,16 @@ import { EVENTS, GameEvent } from "./events";
 import { GameState, InventoryItemName, Inventory } from "./types/game";
 import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
-import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
-import { getItemUnit } from "../../web3/utils";
+import {
+  loadNFTFarm,
+  loadInventory,
+  loadBalance,
+} from "../../services/web3/polygon";
+
+import { getItemUnit } from "../../services/web3/utils";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
-import { KNOWN_IDS } from "./types";
+import { IDS, KNOWN_IDS } from "./types";
 import { craft } from "./events/craft";
 
 type StartSessionArgs = {
@@ -86,6 +91,7 @@ export async function startSession({
     return initialFarm;
   }
 
+  console.log("loaded");
   let farmState = makeGame(farm.gameState);
 
   // Does the session ID match?
@@ -100,8 +106,6 @@ export async function startSession({
     sender: sender,
     farmId: farmId,
   });
-
-  console.log({ onChainData });
 
   const gameState: GameState = {
     ...farm.gameState,
@@ -311,4 +315,57 @@ export async function mint({ farmId, account, item }: MintOptions) {
   });
 
   return changeset;
+}
+
+/**
+ * Convert an onchain inventory into the supported game inventory
+ * Returned as wei - ['0', '0', '0' ]
+ */
+export function makeInventory(amounts: string[]): Inventory {
+  const inventoryItems = Object.keys(KNOWN_IDS) as InventoryItemName[];
+
+  const inventory = amounts.reduce((items, amount, index) => {
+    const name = inventoryItems[index];
+    const unit = getItemUnit(name);
+    const value = new Decimal(fromWei(amount, unit));
+
+    if (value.equals(0)) {
+      return items;
+    }
+
+    return {
+      ...items,
+      [name]: value,
+    };
+  }, {} as Inventory);
+
+  return inventory;
+}
+
+export async function fetchOnChainData({
+  sender,
+  farmId,
+}: {
+  sender: string;
+  farmId: number;
+}) {
+  const farmNFT = await loadNFTFarm(farmId);
+
+  if (farmNFT.owner !== sender) {
+    throw new Error("Farm is not owned by you");
+  }
+
+  const balanceString = await loadBalance(farmNFT.account);
+  const balance = new Decimal(fromWei(balanceString, "ether"));
+
+  const inventory = await loadInventory(IDS, farmNFT.account);
+  const friendlyInventory = makeInventory(inventory);
+
+  return {
+    balance,
+    inventory: friendlyInventory,
+    id: farmId,
+    address: farmNFT.account,
+    fields: {},
+  } as GameState;
 }

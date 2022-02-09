@@ -5,7 +5,7 @@ import {
   loadV1Farm,
   Square,
   V1Fruit,
-} from "../../web3/contracts";
+} from "../../services/web3/polygon";
 import { CropName, SeedName } from "../game/types/crops";
 import { GameState, Inventory, InventoryItemName } from "../game/types/game";
 

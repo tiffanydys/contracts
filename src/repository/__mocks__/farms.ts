@@ -1,5 +1,6 @@
 import { Account } from "../types";
 
+export const getFarmsByAccountMock = jest.fn();
 export const getFarmByIdMock = jest.fn(
   (): Account => ({
     createdAt: new Date().toISOString(),
@@ -27,4 +28,5 @@ export const getFarmByIdMock = jest.fn(
 
 jest.doMock("../farms", () => ({
   getFarmById: getFarmByIdMock,
+  getFarmsByAccount: getFarmsByAccountMock,
 }));

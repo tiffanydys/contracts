@@ -1,9 +1,9 @@
 import Decimal from "decimal.js-light";
 import Accounts from "web3-eth-accounts";
 import { soliditySha3, toWei } from "web3-utils";
-import { KNOWN_IDS } from "../domain/game/types";
-import { Inventory, InventoryItemName } from "../domain/game/types/game";
-import { sign } from "../services/kms";
+import { KNOWN_IDS } from "../../domain/game/types";
+import { Inventory, InventoryItemName } from "../../domain/game/types/game";
+import { sign } from "../kms";
 
 type VerifyAccountArgs = {
   farmId: number;

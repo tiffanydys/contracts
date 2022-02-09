@@ -7,7 +7,7 @@ import { canSync } from "../constants/whitelist";
 
 import { mint } from "../domain/game/game";
 import { LimitedItem } from "../domain/game/types/craftables";
-import { syncSignature, verifyAccount } from "../web3/signatures";
+import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
 const VALID_ITEMS: LimitedItem[] = [
   "Chicken Coop",
@@ -19,7 +19,7 @@ const VALID_ITEMS: LimitedItem[] = [
   "Sunflower Statue",
 ];
 
-const schema = Joi.object({
+const schema = Joi.object<MintBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),

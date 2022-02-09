@@ -2,7 +2,7 @@ import { KNOWN_IDS } from "../domain/game/types";
 import { getFarmByIdMock } from "../repository/__mocks__/farms";
 import "../services/__mocks__/kms";
 
-import { SyncSignature } from "../web3/signatures";
+import { SyncSignature } from "../services/web3/signatures";
 import { handler, MintBody } from "./mint";
 
 describe("api.mint", () => {
