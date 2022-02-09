@@ -6,7 +6,11 @@ describe("game", () => {
   describe("processActions", () => {
     it("processes an event", () => {
       const state = processActions(INITIAL_FARM, [
-        { type: "item.harvested", index: 0, createdAt: Date.now() },
+        {
+          type: "item.harvested",
+          index: 0,
+          createdAt: new Date().toISOString(),
+        },
       ]);
 
       expect(state.inventory.Sunflower).toEqual(new Decimal(1));
@@ -21,12 +25,12 @@ describe("game", () => {
             type: "item.planted",
             index: 4,
             item: "Sunflower Seed",
-            createdAt: Date.now() - 60 * 1000,
+            createdAt: new Date(Date.now() - 60 * 1000).toISOString(),
           },
           {
             type: "item.harvested",
             index: 4,
-            createdAt: Date.now(),
+            createdAt: new Date().toISOString(),
           },
         ]
       );
@@ -43,12 +47,12 @@ describe("game", () => {
               type: "item.planted",
               index: 4,
               item: "Sunflower Seed",
-              createdAt: Date.now(),
+              createdAt: new Date().toISOString(),
             },
             {
               type: "item.harvested",
               index: 4,
-              createdAt: Date.now() - 60 * 1000,
+              createdAt: new Date(Date.now() - 60 * 1000).toISOString(),
             },
           ]
         )
@@ -64,7 +68,7 @@ describe("game", () => {
               type: "item.planted",
               index: 4,
               item: "Sunflower Seed",
-              createdAt: Date.now() + 5,
+              createdAt: new Date(Date.now() + 5).toISOString(),
             },
           ]
         )
@@ -81,7 +85,7 @@ describe("game", () => {
               index: 4,
               item: "Sunflower Seed",
               // 10 minutes ago
-              createdAt: Date.now() - 60 * 10 * 1000,
+              createdAt: new Date(Date.now() - 60 * 10 * 1000).toISOString(),
             },
           ]
         )

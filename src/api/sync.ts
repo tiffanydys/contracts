@@ -1,22 +1,21 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { getChangeset } from "../domain/game/game";
-import { KNOWN_IDS } from "../domain/game/types";
-import { syncSignature, verifyAccount } from "../web3/signatures";
+import { syncSignature, verifyAccount } from "../services/web3/signatures";
+import { canSync } from "../constants/whitelist";
 
-const schema = Joi.object({
+const schema = Joi.object<SyncBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
   signature: Joi.string().required(),
 });
 
-type Body = {
+export type SyncBody = {
   farmId: number;
   sessionId: string;
   sender: string;
   signature: string;
-  hash: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -24,7 +23,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
+  const body: SyncBody = JSON.parse(event.body);
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);
@@ -32,9 +31,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   verifyAccount({
     address: body.sender,
-    farmId: body.farmId,
     signature: body.signature,
   });
+
+  if (process.env.NETWORK !== "mumbai") {
+    if (!canSync(body.sender)) {
+      throw new Error("Not on whitelist");
+    }
+  }
 
   const changeset = await getChangeset({
     id: Number(body.farmId),

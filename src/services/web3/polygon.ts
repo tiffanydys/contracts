@@ -1,20 +1,9 @@
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
-import Decimal from "decimal.js-light";
-import { fromWei, toWei } from "web3-utils";
 
-import FarmABI from "../../contracts/abis/Farm.json";
-import TokenABI from "../../contracts/abis/Token.json";
-import InventoryABI from "../../contracts/abis/Inventory.json";
-import SunflowerFarmersABI from "../../contracts/abis/SunflowerFarmers.json";
-
-import {
-  GameState,
-  Inventory,
-  InventoryItemName,
-} from "../domain/game/types/game";
-import { IDS, KNOWN_IDS } from "../domain/game/types";
-
-import { getItemUnit } from "./utils";
+import FarmABI from "../../../contracts/abis/Farm.json";
+import TokenABI from "../../../contracts/abis/Token.json";
+import InventoryABI from "../../../contracts/abis/Inventory.json";
+import SunflowerFarmersABI from "../../../contracts/abis/SunflowerFarmers.json";
 
 const alchemyKey = process.env.ALCHEMY_KEY;
 const network = process.env.NETWORK;
@@ -27,16 +16,12 @@ const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
 const FARM_ADDRESS = process.env.FARM_ADDRESS;
 const INVENTORY_ADDRESS = process.env.INVENTORY_ADDRESS;
 
-type Options = {
-  sender: string;
-  farmId: number;
-};
-
 export async function loadNFTFarm(id: number) {
   const farmContract = new sunflowerLandWeb3.eth.Contract(
     FarmABI as any,
     FARM_ADDRESS
   );
+
   const farmNFT: { owner: string; account: string } = await farmContract.methods
     .getFarm(id)
     .call();
@@ -44,72 +29,33 @@ export async function loadNFTFarm(id: number) {
   return farmNFT;
 }
 
-/**
- * Convert an onchain inventory into the supported game inventory
- * Returned as wei - ['0', '0', '0' ]
- */
-export function makeInventory(amounts: string[]): Inventory {
-  const inventoryItems = Object.keys(KNOWN_IDS) as InventoryItemName[];
-
-  const inventory = amounts.reduce((items, amount, index) => {
-    const name = inventoryItems[index];
-    const unit = getItemUnit(name);
-    const value = new Decimal(fromWei(amount, unit));
-
-    if (value.equals(0)) {
-      return items;
-    }
-
-    return {
-      ...items,
-      [name]: value,
-    };
-  }, {} as Inventory);
-
-  return inventory;
-}
-
-export async function fetchOnChainData({
-  sender,
-  farmId,
-}: Options): Promise<GameState> {
-  const farmNFT = await loadNFTFarm(farmId);
-
-  if (farmNFT.owner !== sender) {
-    throw new Error("Farm is not owned by you");
-  }
-
+export async function loadBalance(address: string): Promise<string> {
   const tokenContract = new sunflowerLandWeb3.eth.Contract(
     TokenABI as any,
     TOKEN_ADDRESS
   );
 
-  const balanceString = await tokenContract.methods
-    .balanceOf(farmNFT.account)
-    .call();
-  const balance = new Decimal(fromWei(balanceString, "ether"));
+  const balance: string = await tokenContract.methods.balanceOf(address).call();
 
+  return balance;
+}
+
+export async function loadInventory(
+  ids: number[],
+  address: string
+): Promise<string[]> {
   const inventoryContract = new sunflowerLandWeb3.eth.Contract(
     InventoryABI as any,
     INVENTORY_ADDRESS
   );
 
-  const addresses = IDS.map(() => farmNFT.account);
+  const addresses = ids.map(() => address);
 
-  // TODO loop through all tokens and get the balances
-  const inventory = await inventoryContract.methods
-    .balanceOfBatch(addresses, IDS)
+  const inventory: string[] = await inventoryContract.methods
+    .balanceOfBatch(addresses, ids)
     .call();
 
-  const friendlyInventory = makeInventory(inventory);
-
-  return {
-    balance,
-    inventory: friendlyInventory,
-    id: farmId,
-    address: farmNFT.account,
-    fields: {},
-  } as GameState;
+  return inventory;
 }
 
 // Always from mainnet
@@ -134,12 +80,11 @@ export async function loadV1Balance(address: string): Promise<string> {
     TokenABI as any,
     SFF_TOKEN_ADDRESS
   );
-  console.log("INITIED###");
 
   const balance = await tokenContract.methods
     .balanceOf(address)
     .call({ blockNumber: RECOVERY_BLOCK_NUMBER }, RECOVERY_BLOCK_NUMBER);
-  console.log({ balance });
+
   return balance;
 }
 

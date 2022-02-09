@@ -7,7 +7,8 @@
 import { KMS } from "aws-sdk";
 import { keccak256 } from "js-sha3";
 import * as ethutil from "ethereumjs-util";
-import * as asn1 from "asn1.js";
+// HACK - CI build fails using import for these build types so use require
+const asn1 = require("asn1.js");
 import BN from "bn.js";
 
 const kms = new KMS();
@@ -41,6 +42,7 @@ async function kmsSign(msgHash: Buffer, keyId: string) {
   return res;
 }
 
+// TODO - to save funds we could hardcode this key
 async function getPublicKey(keyPairId: string) {
   return kms
     .getPublicKey({
@@ -71,7 +73,7 @@ function getEthereumAddress(publicKey: Buffer): string {
 }
 
 export async function findEthereumSig(plaintext: Buffer) {
-  let signature = await kmsSign(plaintext, keyId);
+  let signature = await kmsSign(plaintext, keyId as string);
   if (signature.Signature == undefined) {
     throw new Error("Signature is undefined.");
   }
@@ -148,7 +150,7 @@ function findRightKey(msg: Buffer, r: BN, s: BN, expectedEthAddr: string) {
 
 export async function sign(data: string) {
   // KMS does not store Crypto keys - convert the key to a hex string
-  let pubKey = await getPublicKey(keyId);
+  let pubKey = await getPublicKey(keyId as string);
   let ethAddr = getEthereumAddress(pubKey.PublicKey as Buffer);
 
   // Hash the data the same way the web3 clients do

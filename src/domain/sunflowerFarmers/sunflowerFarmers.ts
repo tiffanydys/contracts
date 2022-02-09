@@ -5,7 +5,7 @@ import {
   loadV1Farm,
   Square,
   V1Fruit,
-} from "../../web3/contracts";
+} from "../../services/web3/polygon";
 import { CropName, SeedName } from "../game/types/crops";
 import { GameState, Inventory, InventoryItemName } from "../game/types/game";
 
@@ -26,16 +26,12 @@ const CROP_CONVERSION: Record<V1Fruit, CropName> = {
 
 type Options = {
   address: string;
-  hasFarm: boolean;
-  hasTokens: boolean;
 };
 
 type PartialGame = Pick<GameState, "balance" | "inventory">;
 
 export async function getV1GameState({
   address,
-  hasFarm,
-  hasTokens,
 }: Options): Promise<PartialGame> {
   const gameState: PartialGame = {
     balance: new Decimal(0),
@@ -62,19 +58,13 @@ export async function getV1GameState({
     gameState.balance.add(liquidityPool);
   }
 
-  if (hasTokens) {
-    const balance = await loadV1Balance(address);
-
-    if (balance) {
-      gameState.balance = new Decimal(fromWei(balance));
-    }
+  const balance = await loadV1Balance(address);
+  if (balance) {
+    gameState.balance = new Decimal(fromWei(balance));
   }
 
-  if (hasFarm) {
-    const fields = await loadV1Farm(address);
-
-    gameState.inventory = makeInventory(fields, gameState.inventory);
-  }
+  const fields = await loadV1Farm(address);
+  gameState.inventory = makeInventory(fields, gameState.inventory);
 
   return gameState;
 }

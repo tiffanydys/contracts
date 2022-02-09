@@ -1,22 +1,17 @@
 import Decimal from "decimal.js-light";
 import Accounts from "web3-eth-accounts";
 import { soliditySha3, toWei } from "web3-utils";
-import { KNOWN_IDS } from "../domain/game/types";
-import { Inventory, InventoryItemName } from "../domain/game/types/game";
-import { sign } from "../services/kms";
+import { KNOWN_IDS } from "../../domain/game/types";
+import { Inventory, InventoryItemName } from "../../domain/game/types/game";
+import { sign } from "../kms";
 
 type VerifyAccountArgs = {
-  farmId: number;
   address: string;
   signature: string;
 };
 
-export function verifyAccount({
-  farmId,
-  address,
-  signature,
-}: VerifyAccountArgs) {
-  const message = generateMessage({ farmId, address });
+export function verifyAccount({ address, signature }: VerifyAccountArgs) {
+  const message = generateMessage({ address });
   // HACK - Web3 incorrectly types the default class export: use any
   const owner = new (Accounts as any)().recover(message, signature);
 
@@ -36,7 +31,6 @@ export async function createFarmSignature({
   donation,
   address,
 }: CreateFarmArgs) {
-  console.log({ charity, donation, address });
   const wei = toWei(donation.toString());
 
   const shad = soliditySha3(
@@ -124,7 +118,7 @@ export function encodeSyncFunction({
 
 const SYNC_DEADLINE_MINUTES = 5;
 
-type SyncSignature = {
+export type SyncSignature = {
   sessionId: string;
   sender: string;
   farmId: number;
@@ -191,7 +185,6 @@ export async function syncSignature({
     ...inventoryChange,
   };
 
-  console.log({ args });
   const shad = encodeSyncFunction(args);
 
   const { signature } = await sign(shad as string);
@@ -204,10 +197,9 @@ export async function syncSignature({
 
 type HashArgs = {
   address: string;
-  farmId: number;
 };
 
-export function generateMessage({ address, farmId }: HashArgs) {
+export function generateMessage({ address }: HashArgs) {
   const MESSAGE = [
     "Welcome to Sunflower Land!",
     "Click to sign in and accept the Sunflower Land Terms of Service: https://docs.sunflower-land.com/support/terms-of-service",

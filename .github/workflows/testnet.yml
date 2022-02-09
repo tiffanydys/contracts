@@ -15,6 +15,18 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Run tests
+        run: yarn test src
+        env:
+          NETWORK: mumbai
+          ALCHEMY_KEY: 4T5dBlUAMteKwnzZUp4Y8zcryDPEQQLH
+          TOKEN_ADDRESS: "0x2A46262e9340132F7958812c76D23E0b370824b1"
+          FARM_ADDRESS: "0x7f6279D037587d647b529F1C6ACA43E4E314d392"
+          INVENTORY_ADDRESS: "0x2996fB9F66222D57d79D057d2ac8C4166254d4aA"
+          SFF_TOKEN_ADDRESS: "0xdf9B4b57865B403e08c85568442f95c26b7896b0"
+          SFF_FARM_ADDRESS: "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0"
+          KMS_KEY_ID: be934479-ce0b-41ab-871e-de078bd6b7fd
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1.5.9
         with:

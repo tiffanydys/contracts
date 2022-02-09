@@ -1,6 +1,6 @@
-import { InventoryItemName } from "../domain/game/types/game";
-import { TOOLS } from "../domain/game/types/craftables";
-import { RESOURCES } from "../domain/game/types/resources";
+import { InventoryItemName } from "../../domain/game/types/game";
+import { TOOLS } from "../../domain/game/types/craftables";
+import { RESOURCES } from "../../domain/game/types/resources";
 
 /**
  * Tools and resources have 18 decimal places

@@ -1,5 +1,5 @@
 import Decimal from "decimal.js-light";
-import { toWei } from "web3-utils";
+import { fromWei, toWei } from "web3-utils";
 
 import {
   Account,
@@ -11,33 +11,36 @@ import {
 } from "../../repository/farms";
 import { EVENTS, GameEvent } from "./events";
 import { GameState, InventoryItemName, Inventory } from "./types/game";
-import { LimitedItems, CraftableName } from "./types/craftables";
+import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
-import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
-import { getItemUnit } from "../../web3/utils";
+import {
+  loadNFTFarm,
+  loadInventory,
+  loadBalance,
+} from "../../services/web3/polygon";
+
+import { getItemUnit } from "../../services/web3/utils";
 import { INITIAL_FARM } from "../game/lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
-import { KNOWN_IDS } from "./types";
+import { IDS, KNOWN_IDS } from "./types";
 import { craft } from "./events/craft";
 
 type StartSessionArgs = {
   farmId: number;
   sessionId: string;
   sender: string;
-  hasV1Farm: boolean;
-  hasV1Tokens: boolean;
 };
 
 export async function startSession({
   farmId,
   sender,
   sessionId,
-  hasV1Farm,
-  hasV1Tokens,
 }: StartSessionArgs): Promise<GameState> {
   let farms = await getFarmsByAccount(sender);
 
   const farm = farms.find((farm) => farm.id === farmId);
+
+  // TODO - also check session ID is 0x0000000000...
 
   // No session was ever created for this farm + account
   if (!farm) {
@@ -62,8 +65,6 @@ export async function startSession({
       // Load a V1 snapshot (any resources/inventory they had from the old game)
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
-        hasFarm: hasV1Farm,
-        hasTokens: hasV1Tokens,
       });
 
       if (sunflowerFarmersSnapshot) {
@@ -90,6 +91,7 @@ export async function startSession({
     return initialFarm;
   }
 
+  console.log("loaded");
   let farmState = makeGame(farm.gameState);
 
   // Does the session ID match?
@@ -104,8 +106,6 @@ export async function startSession({
     sender: sender,
     farmId: farmId,
   });
-
-  console.log({ onChainData });
 
   const gameState: GameState = {
     ...farm.gameState,
@@ -216,12 +216,14 @@ function processEvent(state: GameState, action: GameAction): GameState {
     throw new Error(`Unknown event type: ${action}`);
   }
 
-  return handler({
+  const payload = {
     state,
     createdAt: new Date(action.createdAt).getTime(),
     // TODO - fix this type error
     action: action as never,
-  });
+  };
+
+  return handler(payload);
 }
 
 // An event must be saved within 5 minutes before it is considered stale
@@ -284,7 +286,7 @@ export async function save({ farmId, account, actions }: SaveArgs) {
 type MintOptions = {
   farmId: number;
   account: string;
-  item: CraftableName;
+  item: LimitedItem;
 };
 
 /**
@@ -315,4 +317,57 @@ export async function mint({ farmId, account, item }: MintOptions) {
   });
 
   return changeset;
+}
+
+/**
+ * Convert an onchain inventory into the supported game inventory
+ * Returned as wei - ['0', '0', '0' ]
+ */
+export function makeInventory(amounts: string[]): Inventory {
+  const inventoryItems = Object.keys(KNOWN_IDS) as InventoryItemName[];
+
+  const inventory = amounts.reduce((items, amount, index) => {
+    const name = inventoryItems[index];
+    const unit = getItemUnit(name);
+    const value = new Decimal(fromWei(amount, unit));
+
+    if (value.equals(0)) {
+      return items;
+    }
+
+    return {
+      ...items,
+      [name]: value,
+    };
+  }, {} as Inventory);
+
+  return inventory;
+}
+
+export async function fetchOnChainData({
+  sender,
+  farmId,
+}: {
+  sender: string;
+  farmId: number;
+}) {
+  const farmNFT = await loadNFTFarm(farmId);
+
+  if (farmNFT.owner !== sender) {
+    throw new Error("Farm is not owned by you");
+  }
+
+  const balanceString = await loadBalance(farmNFT.account);
+  const balance = new Decimal(fromWei(balanceString, "ether"));
+
+  const inventory = await loadInventory(IDS, farmNFT.account);
+  const friendlyInventory = makeInventory(inventory);
+
+  return {
+    balance,
+    inventory: friendlyInventory,
+    id: farmId,
+    address: farmNFT.account,
+    fields: {},
+  } as GameState;
 }

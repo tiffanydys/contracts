@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { verifyAccount } from "../web3/signatures";
+import { verifyAccount } from "../services/web3/signatures";
 import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/game";
 
 const eventTimeValidation = () =>
@@ -10,47 +10,48 @@ const eventTimeValidation = () =>
     .greater(Date.now() - MILLISECONDS_TO_SAVE)
     .less("now");
 
-const schema = Joi.object({
-  actions: Joi.array()
-    .items(
-      Joi.alternatives().try(
-        Joi.object({
-          type: Joi.string().equal("item.crafted"),
-          item: Joi.string(),
-          amount: Joi.number().min(1).max(10).integer(),
-          createdAt: eventTimeValidation,
-        }),
-        Joi.object({
-          type: Joi.string().equal("item.sell"),
-          item: Joi.string(),
-          amount: Joi.number().min(1).max(10).integer(),
-          createdAt: eventTimeValidation,
-        }),
-        Joi.object({
-          type: Joi.string().equal("item.planted"),
-          item: Joi.string(),
-          index: Joi.number().min(0).max(21).integer(),
-          createdAt: eventTimeValidation,
-        }),
-        Joi.object({
-          type: Joi.string().equal("item.harvested"),
-          index: Joi.number().min(0).max(21).integer(),
-          createdAt: eventTimeValidation,
-        })
+// Thunk it so we can get the current time on runtime
+const schema = () =>
+  Joi.object<AutosaveBody>({
+    actions: Joi.array()
+      .items(
+        Joi.alternatives().try(
+          Joi.object({
+            type: Joi.string().equal("item.crafted"),
+            item: Joi.string(),
+            amount: Joi.number().min(1).max(10).integer(),
+            createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("item.sell"),
+            item: Joi.string(),
+            amount: Joi.number().min(1).max(10).integer(),
+            createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("item.planted"),
+            item: Joi.string(),
+            index: Joi.number().min(0).max(21).integer(),
+            createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("item.harvested"),
+            index: Joi.number().min(0).max(21).integer(),
+            createdAt: eventTimeValidation(),
+          })
+        )
       )
-    )
-    .required(),
-  farmId: Joi.number().required(),
-  sender: Joi.string().required(),
-  sessionId: Joi.string().required(),
-  signature: Joi.string().required(),
-});
+      .required()
+      .min(1),
+    farmId: Joi.number().required(),
+    sender: Joi.string().required(),
+    signature: Joi.string().required(),
+  });
 
-type Body = {
+export type AutosaveBody = {
   actions: GameAction[];
   farmId: number;
   sender: string;
-  sessionId: string;
   signature: string;
 };
 
@@ -62,15 +63,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
-  const valid = schema.validate(body);
+  const body: AutosaveBody = JSON.parse(event.body);
+  const valid = schema().validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);
   }
 
   verifyAccount({
     address: body.sender,
-    farmId: body.farmId,
     signature: body.signature,
   });
 

@@ -1,34 +1,50 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import {
+  APIGatewayProxyHandlerV2,
+  APIGatewayProxyStructuredResultV2,
+} from "aws-lambda";
 import Joi from "joi";
+import { canMint } from "../constants/whitelist";
 
-import { calculateChangeset, getChangeset, mint } from "../domain/game/game";
-import { KNOWN_IDS } from "../domain/game/types";
-import { InventoryItemName } from "../domain/game/types/game";
-import { syncSignature, verifyAccount } from "../web3/signatures";
+import { mint } from "../domain/game/game";
+import { LimitedItem } from "../domain/game/types/craftables";
+import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
-const schema = Joi.object({
+const VALID_ITEMS: LimitedItem[] = [
+  "Chicken Coop",
+  "Gold Egg",
+  "Golden Cauliflower",
+  "Potato Statue",
+  "Scarecrow",
+  "Sunflower Rock",
+  "Sunflower Statue",
+];
+
+const schema = Joi.object<MintBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
   signature: Joi.string().required(),
-  item: Joi.string().required(),
+  item: Joi.string()
+    .required()
+    .valid(...VALID_ITEMS),
 });
 
-type Body = {
+export type MintBody = {
   farmId: number;
   sessionId: string;
   sender: string;
   signature: string;
-  hash: string;
-  item: InventoryItemName;
+  item: LimitedItem;
 };
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler: APIGatewayProxyHandlerV2 = async (
+  event
+): Promise<APIGatewayProxyStructuredResultV2> => {
   if (!event.body) {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
+  const body: MintBody = JSON.parse(event.body);
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);
@@ -36,9 +52,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   verifyAccount({
     address: body.sender,
-    farmId: body.farmId,
     signature: body.signature,
   });
+
+  if (process.env.NETWORK !== "mumbai") {
+    if (!canMint(body.sender)) {
+      throw new Error("Not on whitelist");
+    }
+  }
 
   const changeset = await mint({
     farmId: Number(body.farmId),
@@ -47,7 +68,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   });
 
   // TODO - check the total supply limit
-  console.log({ changeset });
 
   // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({
@@ -57,8 +77,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     sfl: changeset.balance,
     inventory: changeset.inventory,
   });
-
-  console.log({ signature });
 
   return {
     statusCode: 200,
