@@ -191,7 +191,6 @@ export async function syncSignature({
     ...inventoryChange,
   };
 
-  console.log({ args });
   const shad = encodeSyncFunction(args);
 
   const { signature } = await sign(shad as string);

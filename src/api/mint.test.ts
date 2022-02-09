@@ -1,5 +1,6 @@
-import AWSMock from "aws-sdk-mock";
-import AWS from "aws-sdk";
+import { KNOWN_IDS } from "../domain/game/types";
+import { getFarmByIdMock } from "../repository/__mocks__/farms";
+import "../services/__mocks__/kms";
 
 import { SyncSignature } from "../web3/signatures";
 import { handler, MintBody } from "./mint";
@@ -136,17 +137,35 @@ describe("api.mint", () => {
     ).rejects.toContain("Unable to verify account");
   });
 
-  it.only("mints an item", async () => {
-    process.env.tableName = "Farm";
-    AWSMock.setSDKInstance(AWS);
-    AWSMock.mock(
-      "DynamoDB",
-      "getItem",
-      (params: GetItemInput, callback: Function) => {
-        console.log("DynamoDB", "getItem", "mock called");
-        callback(null, { pk: "foo", sk: "bar" });
-      }
-    );
+  it("mints an item", async () => {
+    getFarmByIdMock.mockReturnValue({
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      gameState: {
+        balance: "100000",
+        fields: {},
+        id: 2,
+        inventory: {
+          Sunflower: "10000",
+          Stone: "1000",
+        },
+        address: "0x291019282",
+      },
+      id: 2,
+      owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      previousGameState: {
+        balance: "100000",
+        fields: {},
+        id: 2,
+        inventory: {
+          Sunflower: "10000",
+          Stone: "1000",
+        },
+        address: "0x291019282",
+      },
+      // TODO real ID
+      sessionId: "0x8123",
+    });
 
     const body: MintBody = {
       sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
@@ -157,16 +176,26 @@ describe("api.mint", () => {
       sessionId: "0x123",
     };
 
-    const result = handler(
+    const result = (await handler(
       {
         body: JSON.stringify(body),
       } as any,
       {} as any,
       () => {}
-    ) as Promise<SyncSignature>;
+    )) as any;
 
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain('"Unable to verify account');
+    expect(result.statusCode).toEqual(200);
+
+    expect(JSON.parse(result.body)).toEqual({
+      sessionId: body.sessionId,
+      farmId: body.farmId,
+      sender: body.sender,
+      tokens: "5000000000000000000",
+      deadline: expect.any(Number),
+      mintIds: [KNOWN_IDS["Sunflower Statue"]],
+      mintAmounts: ["1"],
+      burnIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
+      burnAmounts: ["1000", "50000000000000000000"],
+    });
   });
 });

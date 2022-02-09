@@ -54,19 +54,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     farmId: body.farmId,
     signature: body.signature,
   });
-  console.log({ verified: true });
-
-  const db = new AWS.DynamoDB.DocumentClient();
 
   const changeset = await mint({
     farmId: Number(body.farmId),
     account: body.sender,
     item: body.item,
-    db,
   });
 
   // TODO - check the total supply limit
-  console.log({ changeset });
 
   // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({
@@ -76,8 +71,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     sfl: changeset.balance,
     inventory: changeset.inventory,
   });
-
-  console.log({ signature });
 
   return {
     statusCode: 200,

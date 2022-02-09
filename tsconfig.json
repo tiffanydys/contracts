@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node14",
   "include": ["stacks", "src", "types"],
+  "exclude": ["src/domain/sunflowerFarmers/balances.ts"],
   "compilerOptions": {
     "resolveJsonModule": true
   }

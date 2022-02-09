@@ -1,24 +1,14 @@
 import AWS from "aws-sdk";
 import { GameState, InventoryItemName } from "../domain/game/types/game";
 
-// Store decimal values as strings instead
-export type FarmSession = Omit<GameState, "balance" | "inventory"> & {
-  balance: string;
-  inventory: Record<InventoryItemName, string>;
-};
+import { FarmSession, Account } from "./types";
+import { makeDBItem } from "./utils";
 
-export type Account = {
-  id: number;
-  owner: string;
-  sessionId?: string;
-  createdAt: string;
-  updatedAt: string;
-  gameState: FarmSession;
-  previousGameState: FarmSession;
-};
+export { FarmSession, Account };
+
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 export async function getFarmsByAccount(account: string): Promise<Account[]> {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
   const getParams = {
     TableName: process.env.tableName as string,
     KeyConditionExpression: "#owner = :owner",
@@ -37,10 +27,10 @@ export async function getFarmsByAccount(account: string): Promise<Account[]> {
 
 export async function getFarmById(
   account: string,
-  id: number,
-  db: any
+  id: number
 ): Promise<Account> {
-  console.log("Try:", process.env.tableName);
+  await new Promise((res) => setTimeout(res, 5000));
+
   const getParams = {
     TableName: process.env.tableName as string,
     Key: {
@@ -49,33 +39,9 @@ export async function getFarmById(
     },
   };
 
-  const results = await db.get(getParams).promise();
+  const results = await dynamoDb.get(getParams).promise();
 
   return results.Item as Account;
-}
-
-/**
- * Santize the farm data
- */
-function makeDBItem(farm: GameState): FarmSession {
-  const inventory = Object.keys(farm.inventory).reduce((items, itemName) => {
-    const value = farm.inventory[itemName as InventoryItemName];
-
-    if (!value || value.lessThanOrEqualTo(0)) {
-      return items;
-    }
-
-    return {
-      ...items,
-      [itemName]: value.toString(),
-    };
-  }, {} as Record<InventoryItemName, string>);
-
-  return {
-    ...farm,
-    balance: farm.balance.toString(),
-    inventory,
-  };
 }
 
 type CreateFarm = {
@@ -92,7 +58,6 @@ export async function createFarm({
   gameState,
   previousGameState,
 }: CreateFarm): Promise<Account> {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
   const Item: Account = {
     id: id,
     sessionId: sessionId,
@@ -120,7 +85,6 @@ type UpdateFarm = {
 };
 
 export async function updateFarm({ id, owner, gameState }: UpdateFarm) {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
@@ -150,7 +114,6 @@ export async function updateSession({
   owner,
   gameState,
 }: UpdateSession) {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
   const safeFarm = makeDBItem(gameState);
 
   const updateParams = {

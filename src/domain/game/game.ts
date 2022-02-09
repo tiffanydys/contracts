@@ -35,6 +35,8 @@ export async function startSession({
 
   const farm = farms.find((farm) => farm.id === farmId);
 
+  // TODO - also check session ID is 0x0000000000...
+
   // No session was ever created for this farm + account
   if (!farm) {
     // We don't really care about this - they could create a session but never be able to save it
@@ -284,9 +286,8 @@ type MintOptions = {
 /**
  * Creates the changeset
  */
-export async function mint({ farmId, account, item, db }: MintOptions) {
-  console.log("Real mint");
-  let farm = await getFarmById(account, farmId, db);
+export async function mint({ farmId, account, item }: MintOptions) {
+  let farm = await getFarmById(account, farmId);
   if (!farm) {
     throw new Error("Farm does not exist");
   }
