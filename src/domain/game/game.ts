@@ -229,10 +229,32 @@ function processEvent(state: GameState, action: GameAction): GameState {
 // An event must be saved within 5 minutes before it is considered stale
 export const MILLISECONDS_TO_SAVE = 5 * 60 * 1000;
 
+// The events cannot span wider than a 2 minute time range
+export const MAX_SECONDS_RANGE = 2 * 60;
+
+// Humanly possible time before executing 2 distinct actions
+const HUMAN_BUFFER_MILLSECONDS = 200;
+
 export function processActions(state: GameState, actions: GameAction[]) {
   // Validate actions
   if (!Array.isArray(actions)) {
     throw new Error("Expected actions to be an array");
+  }
+
+  const timeRange =
+    new Date(actions[actions.length - 1].createdAt).getTime() -
+    new Date(actions[0].createdAt).getTime();
+
+  if (timeRange >= MAX_SECONDS_RANGE * 1000) {
+    throw new Error("Event range is too large");
+  }
+
+  // If they have done multiple actions, make sure it is humanly possible
+  if (actions.length > 2) {
+    const average = timeRange / actions.length;
+    if (average < HUMAN_BUFFER_MILLSECONDS) {
+      throw new Error("Too many events in a short time");
+    }
   }
 
   return actions.reduce((farm, action, index) => {
@@ -241,6 +263,13 @@ export function processActions(state: GameState, actions: GameAction[]) {
       const previousAction = actions[index - 1];
       if (new Date(previousAction.createdAt) > createdAt) {
         throw new Error("Events must be in chronological order");
+      }
+
+      const difference =
+        createdAt.getTime() - new Date(previousAction.createdAt).getTime();
+
+      if (difference < 100) {
+        throw new Error("Event fired too quickly");
       }
     }
 

@@ -92,7 +92,8 @@ describe("game", () => {
       ).toThrow("Event is too old");
     });
 
-    it("ensures events are feasible in the time period", () => {
+    it("ensures event range is less than 2 minutes", () => {
+      // First event to last event are within 2 minutes
       expect(() =>
         processActions(
           { ...INITIAL_FARM, inventory: { "Sunflower Seed": new Decimal(1) } },
@@ -101,12 +102,75 @@ describe("game", () => {
               type: "item.planted",
               index: 4,
               item: "Sunflower Seed",
-              // 10 minutes ago
-              createdAt: new Date(Date.now() - 60 * 10 * 1000).toISOString(),
+              // 4 minutes ago
+              createdAt: new Date(Date.now() - 60 * 4 * 1000).toISOString(),
+            },
+            {
+              type: "item.harvested",
+              index: 4,
+              // 1 minute ago
+              createdAt: new Date(Date.now() - 60 * 1 * 1000).toISOString(),
             },
           ]
         )
-      ).toThrow("Event is too old");
+      ).toThrow("Event range is too large");
+    });
+
+    it("ensures events are not fired too quickly after one another", () => {
+      // First event to last event are within 2 minutes
+      expect(() =>
+        processActions(
+          {
+            ...INITIAL_FARM,
+            inventory: { Sunflower: new Decimal(1000) },
+          },
+          [
+            {
+              type: "item.sell",
+              item: "Sunflower",
+              amount: 1,
+              createdAt: new Date(Date.now() - 100).toISOString(),
+            },
+            {
+              type: "item.sell",
+              item: "Sunflower",
+              amount: 1,
+              createdAt: new Date(Date.now() - 5).toISOString(),
+            },
+          ]
+        )
+      ).toThrow("Event fired too quickly");
+    });
+
+    it.only("ensures all events are done in a time humanly possible", () => {
+      expect(() =>
+        processActions(
+          {
+            ...INITIAL_FARM,
+            inventory: { Sunflower: new Decimal(1000) },
+          },
+          [
+            {
+              type: "item.sell",
+              item: "Sunflower",
+              amount: 1,
+              createdAt: new Date(Date.now() - 400).toISOString(),
+            },
+            {
+              type: "item.sell",
+              item: "Sunflower",
+              amount: 1,
+              createdAt: new Date(Date.now() - 250).toISOString(),
+            },
+            {
+              type: "item.sell",
+              item: "Sunflower",
+              amount: 1,
+              createdAt: new Date(Date.now() - 50).toISOString(),
+            },
+          ]
+        )
+      ).toThrow("Too many events in a short time");
     });
   });
 
