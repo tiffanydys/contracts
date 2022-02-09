@@ -3,6 +3,7 @@
   "include": ["stacks", "src", "types"],
   "exclude": ["src/domain/sunflowerFarmers/balances.ts"],
   "compilerOptions": {
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noEmit": true
   }
 }

@@ -41,6 +41,7 @@ async function kmsSign(msgHash: Buffer, keyId: string) {
   return res;
 }
 
+// TODO - to save funds we could hardcode this key
 async function getPublicKey(keyPairId: string) {
   return kms
     .getPublicKey({
@@ -71,7 +72,7 @@ function getEthereumAddress(publicKey: Buffer): string {
 }
 
 export async function findEthereumSig(plaintext: Buffer) {
-  let signature = await kmsSign(plaintext, keyId);
+  let signature = await kmsSign(plaintext, keyId as string);
   if (signature.Signature == undefined) {
     throw new Error("Signature is undefined.");
   }
@@ -148,7 +149,7 @@ function findRightKey(msg: Buffer, r: BN, s: BN, expectedEthAddr: string) {
 
 export async function sign(data: string) {
   // KMS does not store Crypto keys - convert the key to a hex string
-  let pubKey = await getPublicKey(keyId);
+  let pubKey = await getPublicKey(keyId as string);
   let ethAddr = getEthereumAddress(pubKey.PublicKey as Buffer);
 
   // Hash the data the same way the web3 clients do

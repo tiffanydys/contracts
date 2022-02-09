@@ -216,12 +216,14 @@ function processEvent(state: GameState, action: GameAction): GameState {
     throw new Error(`Unknown event type: ${action}`);
   }
 
-  return handler({
+  const payload = {
     state,
     createdAt: new Date(action.createdAt).getTime(),
     // TODO - fix this type error
     action: action as never,
-  });
+  };
+
+  return handler(payload);
 }
 
 // An event must be saved within 5 minutes before it is considered stale
