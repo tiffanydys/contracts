@@ -1,3 +1,6 @@
+// HACK - prevents CI errors
+declare module "asn1.js";
+
 /**
  * Sign messages using AWS KMS generated keys
  * All encyrption happens within KMS instead of passing keys
