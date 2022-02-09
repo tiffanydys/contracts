@@ -42,7 +42,6 @@ const schema = Joi.object({
     .required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
-  sessionId: Joi.string().required(),
   signature: Joi.string().required(),
 });
 
@@ -50,7 +49,6 @@ type Body = {
   actions: GameAction[];
   farmId: number;
   sender: string;
-  sessionId: string;
   signature: string;
 };
 

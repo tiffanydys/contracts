@@ -1,34 +1,49 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import {
+  APIGatewayProxyHandlerV2,
+  APIGatewayProxyStructuredResultV2,
+} from "aws-lambda";
 import Joi from "joi";
 
-import { calculateChangeset, getChangeset, mint } from "../domain/game/game";
-import { KNOWN_IDS } from "../domain/game/types";
-import { InventoryItemName } from "../domain/game/types/game";
+import { mint } from "../domain/game/game";
+import { LimitedItem } from "../domain/game/types/craftables";
 import { syncSignature, verifyAccount } from "../web3/signatures";
+
+const VALID_ITEMS: LimitedItem[] = [
+  "Chicken Coop",
+  "Gold Egg",
+  "Golden Cauliflower",
+  "Potato Statue",
+  "Scarecrow",
+  "Sunflower Rock",
+  "Sunflower Statue",
+];
 
 const schema = Joi.object({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
   signature: Joi.string().required(),
-  item: Joi.string().required(),
+  item: Joi.string()
+    .required()
+    .valid(...VALID_ITEMS),
 });
 
-type Body = {
+export type MintBody = {
   farmId: number;
   sessionId: string;
   sender: string;
   signature: string;
-  hash: string;
-  item: InventoryItemName;
+  item: LimitedItem;
 };
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler: APIGatewayProxyHandlerV2 = async (
+  event
+): Promise<APIGatewayProxyStructuredResultV2> => {
   if (!event.body) {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
+  const body: MintBody = JSON.parse(event.body);
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);
@@ -39,11 +54,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     farmId: body.farmId,
     signature: body.signature,
   });
+  console.log({ verified: true });
+
+  const db = new AWS.DynamoDB.DocumentClient();
 
   const changeset = await mint({
     farmId: Number(body.farmId),
     account: body.sender,
     item: body.item,
+    db,
   });
 
   // TODO - check the total supply limit

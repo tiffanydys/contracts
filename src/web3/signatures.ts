@@ -124,7 +124,7 @@ export function encodeSyncFunction({
 
 const SYNC_DEADLINE_MINUTES = 5;
 
-type SyncSignature = {
+export type SyncSignature = {
   sessionId: string;
   sender: string;
   farmId: number;

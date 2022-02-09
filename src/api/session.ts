@@ -8,8 +8,6 @@ const schema = Joi.object({
   farmId: Joi.number().required(),
   sender: Joi.string().required(),
   signature: Joi.string().required(),
-  hasV1Farm: Joi.boolean().required(),
-  hasV1Tokens: Joi.boolean().required(),
 });
 
 type Body = {
@@ -17,8 +15,6 @@ type Body = {
   farmId: number;
   sender: string;
   signature: string;
-  hasV1Farm: boolean;
-  hasV1Tokens: boolean;
 };
 
 // Token.sol - 0x75e0ae699d64520136b047b4a82703aa5e8c01f00003046d64de9085c69b5ecb
@@ -43,8 +39,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     farmId: body.farmId,
     sessionId: body.sessionId,
     sender: body.sender,
-    hasV1Farm: body.hasV1Farm,
-    hasV1Tokens: body.hasV1Tokens,
   });
 
   return {

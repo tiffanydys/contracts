@@ -11,7 +11,7 @@ import {
 } from "../../repository/farms";
 import { EVENTS, GameEvent } from "./events";
 import { GameState, InventoryItemName, Inventory } from "./types/game";
-import { LimitedItems, CraftableName } from "./types/craftables";
+import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
 import { fetchOnChainData, loadNFTFarm } from "../../web3/contracts";
 import { getItemUnit } from "../../web3/utils";
@@ -24,16 +24,12 @@ type StartSessionArgs = {
   farmId: number;
   sessionId: string;
   sender: string;
-  hasV1Farm: boolean;
-  hasV1Tokens: boolean;
 };
 
 export async function startSession({
   farmId,
   sender,
   sessionId,
-  hasV1Farm,
-  hasV1Tokens,
 }: StartSessionArgs): Promise<GameState> {
   let farms = await getFarmsByAccount(sender);
 
@@ -62,8 +58,6 @@ export async function startSession({
       // Load a V1 snapshot (any resources/inventory they had from the old game)
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
-        hasFarm: hasV1Farm,
-        hasTokens: hasV1Tokens,
       });
 
       if (sunflowerFarmersSnapshot) {
@@ -284,14 +278,15 @@ export async function save({ farmId, account, actions }: SaveArgs) {
 type MintOptions = {
   farmId: number;
   account: string;
-  item: CraftableName;
+  item: LimitedItem;
 };
 
 /**
  * Creates the changeset
  */
-export async function mint({ farmId, account, item }: MintOptions) {
-  let farm = await getFarmById(account, farmId);
+export async function mint({ farmId, account, item, db }: MintOptions) {
+  console.log("Real mint");
+  let farm = await getFarmById(account, farmId, db);
   if (!farm) {
     throw new Error("Farm does not exist");
   }

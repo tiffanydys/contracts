@@ -16,7 +16,6 @@ type Body = {
   sessionId: string;
   sender: string;
   signature: string;
-  hash: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
