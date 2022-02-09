@@ -1,6 +1,3 @@
-// HACK - prevents CI errors
-declare module "asn1.js";
-
 /**
  * Sign messages using AWS KMS generated keys
  * All encyrption happens within KMS instead of passing keys
@@ -10,7 +7,8 @@ declare module "asn1.js";
 import { KMS } from "aws-sdk";
 import { keccak256 } from "js-sha3";
 import * as ethutil from "ethereumjs-util";
-import * as asn1 from "asn1.js";
+// HACK - CI build fails using import for these build types so use require
+const asn1 = require("asn1.js");
 import BN from "bn.js";
 
 const kms = new KMS();
