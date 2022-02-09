@@ -11,6 +11,7 @@ describe("api.autosave", () => {
       farmId: 1,
       sender: "",
       signature: "0x9123",
+      sessionId: "0x",
       actions: [
         {
           type: "item.harvested",
@@ -38,6 +39,7 @@ describe("api.autosave", () => {
       farmId: 1,
       sender: "0x9123",
       signature: "",
+      sessionId: "0x",
       actions: [
         {
           type: "item.harvested",
@@ -64,6 +66,7 @@ describe("api.autosave", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
+      sessionId: "0x",
       actions: [
         {
           type: "item.harvested",
@@ -90,6 +93,7 @@ describe("api.autosave", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
+      sessionId: "0x",
       actions: [],
     } as any as AutosaveBody;
 
@@ -111,6 +115,7 @@ describe("api.autosave", () => {
       sender: "0x9123",
       signature: "0x9123",
       farmId: 1,
+      sessionId: "0x",
       actions: [
         {
           type: "not.an.action",
@@ -139,6 +144,7 @@ describe("api.autosave", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
+      sessionId: "0x",
       farmId: 1,
       actions: [
         {
@@ -168,6 +174,7 @@ describe("api.autosave", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
+      sessionId: "0x",
       farmId: 1,
       actions: [
         {
@@ -194,6 +201,7 @@ describe("api.autosave", () => {
   it("requires a valid signature", async () => {
     const body: AutosaveBody = {
       sender: "0x9123",
+      sessionId: "0x",
       signature:
         "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
       farmId: 1,
@@ -252,6 +260,7 @@ describe("api.autosave", () => {
       signature:
         "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
       farmId: 1,
+      sessionId: "0x",
       actions: [
         {
           type: "item.planted",

@@ -4,11 +4,12 @@ import Joi from "joi";
 import { verifyAccount } from "../services/web3/signatures";
 import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/game";
 
-const eventTimeValidation = () =>
-  Joi.date()
+const eventTimeValidation = () => {
+  return Joi.date()
     .iso()
     .greater(Date.now() - MILLISECONDS_TO_SAVE)
     .less("now");
+};
 
 // Thunk it so we can get the current time on runtime
 const schema = () =>
@@ -46,6 +47,7 @@ const schema = () =>
     farmId: Joi.number().required(),
     sender: Joi.string().required(),
     signature: Joi.string().required(),
+    sessionId: Joi.string().required(),
   });
 
 export type AutosaveBody = {
@@ -53,6 +55,8 @@ export type AutosaveBody = {
   farmId: number;
   sender: string;
   signature: string;
+  // Not actually used, but throw people off the scent of how our sessions work
+  sessionId: string;
 };
 
 /**
