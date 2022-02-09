@@ -111,7 +111,25 @@ describe("api.sync", () => {
   });
 
   it("requires user is on the whitelist", async () => {
-    // TODO
+    const body: SyncBody = {
+      sender: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
+      signature:
+        "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+      farmId: 1,
+      sessionId: "0x123",
+    };
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("Not on whitelist");
   });
 
   it("mints an item", async () => {

@@ -4,7 +4,10 @@ import Joi from "joi";
 import { CHARITIES } from "../constants/charities";
 import { canCreateFarm } from "../constants/whitelist";
 
-import { createFarmSignature } from "../services/web3/signatures";
+import {
+  createFarmSignature,
+  verifyAccount,
+} from "../services/web3/signatures";
 
 const schema = Joi.object<CreateFarmBody>({
   charity: Joi.string()
@@ -12,12 +15,14 @@ const schema = Joi.object<CreateFarmBody>({
     .valid(...CHARITIES),
   donation: Joi.number().required().min(1),
   address: Joi.string().required(),
+  signature: Joi.string().required(),
 });
 
 export type CreateFarmBody = {
   charity: string;
   donation: number;
   address: string;
+  signature: string;
 };
 
 const network = process.env.NETWORK;
@@ -32,6 +37,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (valid.error) {
     throw new Error(valid.error.message);
   }
+
+  verifyAccount({
+    address: body.address,
+    signature: body.signature,
+  });
 
   if (network !== "mumbai") {
     if (!canCreateFarm(body.address)) {

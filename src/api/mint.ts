@@ -54,7 +54,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (
 
   verifyAccount({
     address: body.sender,
-    farmId: body.farmId,
     signature: body.signature,
   });
 

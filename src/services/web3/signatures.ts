@@ -6,17 +6,12 @@ import { Inventory, InventoryItemName } from "../../domain/game/types/game";
 import { sign } from "../kms";
 
 type VerifyAccountArgs = {
-  farmId: number;
   address: string;
   signature: string;
 };
 
-export function verifyAccount({
-  farmId,
-  address,
-  signature,
-}: VerifyAccountArgs) {
-  const message = generateMessage({ farmId, address });
+export function verifyAccount({ address, signature }: VerifyAccountArgs) {
+  const message = generateMessage({ address });
   // HACK - Web3 incorrectly types the default class export: use any
   const owner = new (Accounts as any)().recover(message, signature);
 
@@ -202,10 +197,9 @@ export async function syncSignature({
 
 type HashArgs = {
   address: string;
-  farmId: number;
 };
 
-export function generateMessage({ address, farmId }: HashArgs) {
+export function generateMessage({ address }: HashArgs) {
   const MESSAGE = [
     "Welcome to Sunflower Land!",
     "Click to sign in and accept the Sunflower Land Terms of Service: https://docs.sunflower-land.com/support/terms-of-service",
