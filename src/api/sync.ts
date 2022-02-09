@@ -11,7 +11,7 @@ const schema = Joi.object({
   signature: Joi.string().required(),
 });
 
-type Body = {
+export type SyncBody = {
   farmId: number;
   sessionId: string;
   sender: string;
@@ -23,7 +23,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const body: Body = JSON.parse(event.body);
+  const body: SyncBody = JSON.parse(event.body);
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);

@@ -3,37 +3,14 @@ import { getFarmByIdMock } from "../repository/__mocks__/farms";
 import "../services/__mocks__/kms";
 
 import { SyncSignature } from "../web3/signatures";
-import { handler, MintBody } from "./mint";
+import { handler, SyncBody } from "./sync";
 
 describe("api.mint", () => {
-  it("validates item is mintable", async () => {
-    const body: MintBody = {
-      farmId: 1,
-      sender: "0x57",
-      signature: "0x9123",
-      item: "Christmas Tree",
-      sessionId: "0x123",
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("must be one of");
-  });
-
   it("requires sender", async () => {
-    const body: MintBody = {
+    const body: SyncBody = {
       farmId: 1,
       sender: "",
       signature: "0x9123",
-      item: "Sunflower Statue",
       sessionId: "0x123",
     };
 
@@ -51,11 +28,10 @@ describe("api.mint", () => {
   });
 
   it("requires signature", async () => {
-    const body: MintBody = {
+    const body: SyncBody = {
       farmId: 1,
       sender: "0x9123",
       signature: "",
-      item: "Sunflower Statue",
       sessionId: "0x123",
     };
 
@@ -76,9 +52,8 @@ describe("api.mint", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
-      item: "Sunflower Statue",
       sessionId: "0x123",
-    } as MintBody;
+    } as SyncBody;
 
     const result = handler(
       {
@@ -97,9 +72,8 @@ describe("api.mint", () => {
     const body = {
       sender: "0x9123",
       signature: "0x9123",
-      item: "Sunflower Statue",
       sessionId: "",
-    } as MintBody;
+    } as SyncBody;
 
     const result = handler(
       {
@@ -115,11 +89,10 @@ describe("api.mint", () => {
   });
 
   it("requires a valid signature", async () => {
-    const body: MintBody = {
+    const body: SyncBody = {
       sender: "0x9123",
       signature:
         "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
-      item: "Sunflower Statue",
       farmId: 1,
       sessionId: "0x123",
     };
@@ -152,18 +125,20 @@ describe("api.mint", () => {
         inventory: {
           Sunflower: "10000",
           Stone: "1000",
+          "Carrot Seed": "100",
         },
         address: "0x291019282",
       },
       id: 2,
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       previousGameState: {
-        balance: "100000",
+        balance: "20000",
         fields: {},
         id: 2,
         inventory: {
-          Sunflower: "10000",
-          Stone: "1000",
+          Sunflower: "4000",
+          Stone: "500",
+          "Carrot Seed": "200",
         },
         address: "0x291019282",
       },
@@ -171,11 +146,10 @@ describe("api.mint", () => {
       sessionId: "0x8123",
     });
 
-    const body: MintBody = {
+    const body: SyncBody = {
       sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       signature:
         "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
-      item: "Sunflower Statue",
       farmId: 1,
       sessionId: "0x123",
     };
@@ -194,12 +168,12 @@ describe("api.mint", () => {
       sessionId: body.sessionId,
       farmId: body.farmId,
       sender: body.sender,
-      tokens: "5000000000000000000",
+      tokens: "80000000000000000000000",
       deadline: expect.any(Number),
-      mintIds: [KNOWN_IDS["Sunflower Statue"]],
-      mintAmounts: ["1"],
-      burnIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
-      burnAmounts: ["1000", "50000000000000000000"],
+      mintIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
+      mintAmounts: ["6000", "500000000000000000000"],
+      burnIds: [KNOWN_IDS["Carrot Seed"]],
+      burnAmounts: ["100"],
       signature: "0x0asd0j234nsd0",
     });
   });

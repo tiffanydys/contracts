@@ -2,7 +2,7 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
 import { CHARITIES } from "../constants/charities";
-import { isWhitelisted } from "../constants/whitelist";
+import { canCreateFarm } from "../constants/whitelist";
 
 import { createFarmSignature } from "../web3/signatures";
 
@@ -34,7 +34,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   if (network !== "mumbai") {
-    if (!isWhitelisted(body.address)) {
+    if (!canCreateFarm(body.address)) {
       throw new Error("Not on whitelist");
     }
   }

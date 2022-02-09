@@ -3,6 +3,7 @@ import {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import Joi from "joi";
+import { canSync } from "../constants/whitelist";
 
 import { mint } from "../domain/game/game";
 import { LimitedItem } from "../domain/game/types/craftables";
@@ -36,6 +37,8 @@ export type MintBody = {
   item: LimitedItem;
 };
 
+const network = process.env.NETWORK;
+
 export const handler: APIGatewayProxyHandlerV2 = async (
   event
 ): Promise<APIGatewayProxyStructuredResultV2> => {
@@ -54,6 +57,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     farmId: body.farmId,
     signature: body.signature,
   });
+
+  if (network !== "mumbai") {
+    if (!canSync(body.sender)) {
+      throw new Error("Not on whitelist");
+    }
+  }
 
   const changeset = await mint({
     farmId: Number(body.farmId),
