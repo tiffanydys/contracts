@@ -37,8 +37,6 @@ export type MintBody = {
   item: LimitedItem;
 };
 
-const network = process.env.NETWORK;
-
 export const handler: APIGatewayProxyHandlerV2 = async (
   event
 ): Promise<APIGatewayProxyStructuredResultV2> => {
@@ -57,7 +55,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     signature: body.signature,
   });
 
-  if (network !== "mumbai") {
+  if (process.env.NETWORK !== "mumbai") {
     if (!canMint(body.sender)) {
       throw new Error("Not on whitelist");
     }

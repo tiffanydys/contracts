@@ -25,8 +25,6 @@ export type CreateFarmBody = {
   signature: string;
 };
 
-const network = process.env.NETWORK;
-
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (!event.body) {
     throw new Error("No body found in event");
@@ -43,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     signature: body.signature,
   });
 
-  if (network !== "mumbai") {
+  if (process.env.NETWORK !== "mumbai") {
     if (!canCreateFarm(body.address)) {
       throw new Error("Not on whitelist");
     }

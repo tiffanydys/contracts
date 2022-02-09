@@ -111,7 +111,7 @@ describe("api.sync", () => {
   });
 
   it("requires user is on the whitelist", async () => {
-    process.env.network = "mainnet";
+    process.env.NETWORK = "mainnet";
 
     const body: SyncBody = {
       sender: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
