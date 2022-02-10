@@ -24,16 +24,25 @@ contract SunflowerLandSession is Ownable {
 
     address private signer;
     address private team;
-    // 0.1
-    uint private fee = 1 * (10 ** 17);
+    address private wishingWell;
+
+    uint private syncFee = 1 * (10 ** 17);
+    uint private withdrawFee = 1 * (10 ** 17);
+
+    // 30% of the tax goes into the wishing well
+    uint private wishingWellTax = 30;
+
+    bool private liquify = true;
+
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
     SunflowerLandFarm farm;
 
-    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm) payable {
+    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm, address _wishingWell) payable {
         inventory = _inventory;
         token = _token;
         farm = _farm;
+        wishingWell = _wishingWell;
         signer = _msgSender();
         team = _msgSender();
     }
@@ -42,14 +51,20 @@ contract SunflowerLandSession is Ownable {
         signer = _signer;
     }
 
-
-
     function transferTeam(address _team) public onlyOwner {
         team = _team;
     }
 
-    function setFee(uint _fee) public onlyOwner {
-        fee = _fee;
+    function setSyncFee(uint _fee) public onlyOwner {
+        syncFee = _fee;
+    }
+
+    function setWithdrawFee(uint _fee) public onlyOwner {
+        syncFee = _fee;
+    }
+
+    function setWishingWellTax(uint _tax) public onlyOwner {
+        wishingWellTax = _tax;
     }
 
     // A unique nonce identifer for the account
@@ -82,7 +97,7 @@ contract SunflowerLandSession is Ownable {
         uint256[] memory burnAmounts,
         int256 tokens
     ) public payable returns(bool success) {
-       require(msg.value >= fee, "SunflowerLand: Missing fee");
+       require(msg.value >= syncFee, "SunflowerLand: Missing fee");
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
@@ -146,36 +161,72 @@ contract SunflowerLandSession is Ownable {
         }
     }
 
-    // TODO!
-    // Withdraw resources from farm to another account
-    // function withdraw(
-    //     uint256 farmId,
-    //     address to,
-    //     uint256[] memory ids,
-    //     uint256[] memory amounts,
-    //     uint256 tokenAmount
-    // ) public  {
-    //     // Start a new session
-    //     sessions[farmId] = generateSessionId(farmId);
+    function withdraw(
+        // Verification
+        bytes memory signature,
+        bytes32 sessionId,
+        uint deadline,
+        // Data
+        uint farmId,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        uint256 sfl,
+        // 100 = 10%
+        uint tax
+    ) public payable returns (bool) {
+        require(msg.value >= withdrawFee, "SunflowerLand: Missing fee");
+       require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
-    //     address farmOwner = farm.ownerOf(farmId);
+        // Check the session is new or has not changed (already saved or withdrew funds)
+        bytes32 farmSessionId = sessions[farmId];
+        require(
+            farmSessionId == sessionId,
+            "SunflowerLand: Session has changed"
+        );
 
-    //     // Check they own the farm
-    //     require(
-    //         farmOwner == _msgSender(),
-    //         "SunflowerLand: You do not own this farm"
-    //     );
+        // Start a new session
+        sessions[farmId] = generateSessionId(farmId);
+
+        // Verify
+        bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, ids, amounts, sfl, tax));
+        require(!executed[txHash], "SunflowerLand: Tx Executed");
+        require(verify(txHash, signature), "SunflowerLand: Unauthorised");
+        executed[txHash] = true;
+
+        address farmOwner = farm.ownerOf(farmId);
+
+        // Check they own the farm
+        require(
+            farmOwner == _msgSender(),
+            "SunflowerLand: You do not own this farm"
+        );
+
+        // Get the holding address of the farm
+        Farm memory farmNFT = farm.getFarm(farmId);
+
+        uint teamFee = sfl * tax / 1000;
+
+        token.gameTransfer(farmNFT.account, address(this), teamFee);
+        takeFee(teamFee);
+
+        // Withdraw from farm
+        uint remaining = sfl - teamFee;
+
+        inventory.gameTransferFrom(farmNFT.account, _msgSender(), ids, amounts, "");
+        token.gameTransfer(farmNFT.account, _msgSender(), remaining);
 
 
+        (bool teamSent,) = team.call{value: msg.value}("");
+        require(teamSent, "SunflowerLand: Fee Failed");
 
-    //     // Get the holding address of the tokens
-    //     Farm memory farmNFT = farm.getFarm(farmId);
+        return true;
+    }
 
-    //     // TODO - validate the max limits on the withrdraw
-    //         // E.g. No more than 10,000 tokens at a time
+    function takeFee(uint amount) private {
+        uint wishingWellFee = amount * wishingWellTax / 100;
+        uint remaining = amount - wishingWellFee;
 
-    //     // Withdraw from farm
-    //     inventory.gameTransferFrom(farmNFT.account, to, ids, amounts, "");
-    //     token.gameTransfer(farmNFT.account, to, tokenAmount);
-    // }
+        token.transfer(wishingWell, wishingWellFee);
+        token.transfer(team, remaining);
+    }
 }

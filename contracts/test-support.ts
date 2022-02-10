@@ -27,7 +27,7 @@ export class TestAccount {
 }
 
 export async function deploySFLContracts(web3: Web3) {
-  const [inventory, token, farm] = await Promise.all([
+  const [inventory, token, farm, wishingWell] = await Promise.all([
     deployContract(
       web3,
       abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
@@ -43,13 +43,25 @@ export async function deploySFLContracts(web3: Web3) {
       abijson.contracts["contracts/Farm.sol:SunflowerLandFarm"],
       TestAccount.TEAM.address
     ),
+    deployContract(
+      web3,
+      abijson.contracts["contracts/WishingWell.sol:WishingWell"],
+      TestAccount.TEAM.address,
+      // We don't care about the token ERC20 and LP ERC20 for testing
+      [TestAccount.TEAM.address, TestAccount.TEAM.address]
+    ),
   ]);
 
   const session = await deployContract(
     web3,
     abijson.contracts["contracts/Sessions.sol:SunflowerLandSession"],
     TestAccount.TEAM.address,
-    [inventory.options.address, token.options.address, farm.options.address]
+    [
+      inventory.options.address,
+      token.options.address,
+      farm.options.address,
+      wishingWell.options.address,
+    ]
   );
 
   const beta = await deployContract(
@@ -74,7 +86,7 @@ export async function deploySFLContracts(web3: Web3) {
       .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { session, farm, token, inventory, beta };
+  return { session, farm, token, inventory, beta, wishingWell };
 }
 
 export async function deployWishingWellContracts(web3: Web3) {
