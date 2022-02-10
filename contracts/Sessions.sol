@@ -23,6 +23,9 @@ contract SunflowerLandSession is Ownable {
     function deposit() external payable {}
 
     address private signer;
+    address private team;
+    // 0.1
+    uint private fee = 1 * (10 ** 17);
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
     SunflowerLandFarm farm;
@@ -32,10 +35,21 @@ contract SunflowerLandSession is Ownable {
         token = _token;
         farm = _farm;
         signer = _msgSender();
+        team = _msgSender();
     }
 
     function transferSigner(address _signer) public onlyOwner {
         signer = _signer;
+    }
+
+
+
+    function transferTeam(address _team) public onlyOwner {
+        team = _team;
+    }
+
+    function setFee(uint _fee) public onlyOwner {
+        fee = _fee;
     }
 
     // A unique nonce identifer for the account
@@ -67,7 +81,8 @@ contract SunflowerLandSession is Ownable {
         uint256[] memory burnIds,
         uint256[] memory burnAmounts,
         int256 tokens
-    ) public {
+    ) public payable returns(bool success) {
+       require(msg.value >= fee, "SunflowerLand: Missing fee");
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
@@ -98,6 +113,11 @@ contract SunflowerLandSession is Ownable {
         Farm memory farmNFT = farm.getFarm(farmId);
 
         updateBalance(farmNFT.account, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
+
+        (bool teamSent,) = team.call{value: msg.value}("");
+        require(teamSent, "SunflowerLand: Fee Failed");
+
+        return true;
     }
 
     function updateBalance(
