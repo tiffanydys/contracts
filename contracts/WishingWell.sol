@@ -13,6 +13,7 @@ import "./Token.sol";
  * A contract which converts an ERC20 token (SFF/MATIC pair token) into Wishing Well (WW) Tokens
  * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
  * Every 3 days someone with WW tokens can claim their SFL from this contract
+ * When you want to get your LP tokens back, you exchange the WW for the SFF/MATIC pair token
  */
 contract WishingWell is ERC20Pausable, Ownable {
   using SafeMath for uint256;
