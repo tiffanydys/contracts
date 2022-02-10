@@ -40562,7 +40562,11 @@ export const balances: Record<string, Inventory> = {
   "0x380a116a6445fcde65d3d3b6ff3561198edc557d": { "Golden Cauliflower": "1" },
   "0x9037f7327f66d93170de672b50c9d2a2f98e98c3": { "Golden Cauliflower": "1" },
   "0x4c496c3f8481e73454acbbcf84300897381542f7": { "Golden Cauliflower": "1" },
-  "0x2b3f0a1810a19250b76290ed9b51cb9a518b3d95": { "Sunflower Rock": "1" },
+  "0x2b3f0a1810a19250b76290ed9b51cb9a518b3d95": {
+    "Sunflower Rock": "1",
+    "Golden Cauliflower": "1",
+    "Farm Cat": "1",
+  },
   "0xed8906723b822368db39401e4c40a3ff828c2906": { "Sunflower Rock": "1" },
   "0x8d680eb6b3ad31ab065b1632bb44fa1456a26548": { "Sunflower Rock": "1" },
   "0x05f0e2750e1ac47934d8e668926bfe7adaf18319": { "Sunflower Rock": "1" },
