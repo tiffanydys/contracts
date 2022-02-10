@@ -668,7 +668,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       await expect(
@@ -701,7 +700,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       await expect(
@@ -743,7 +741,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       await expect(
@@ -807,7 +804,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       // Farm tokens are subtracted
@@ -872,7 +868,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       await expect(
@@ -925,7 +920,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       // Try again with same session ID
@@ -935,7 +929,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       await expect(
@@ -963,7 +956,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       const tokenBalance = await token.methods
@@ -973,106 +965,7 @@ describe("Session contract", () => {
       expect(tokenBalance).toEqual("9880");
     });
 
-    it("requires a sufficient fee", async () => {
-      const web3 = new Web3(
-        new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
-      );
-      const { session, farm } = await deploySFLContracts(web3);
-
-      await farm.methods.mint(TestAccount.PLAYER.address).send({
-        from: TestAccount.TEAM.address,
-        gasPrice: await web3.eth.getGasPrice(),
-        gas: gasLimit,
-      });
-
-      const sessionId = await session.methods
-        .getSessionId(1)
-        .call({ from: TestAccount.PLAYER.address });
-
-      const signature = await sign(web3, {
-        sessionId,
-        deadline: validDeadline,
-        sender: TestAccount.PLAYER.address,
-        farmId: 1,
-        ids: [],
-        amounts: [],
-        sfl: 60,
-        tax: 50,
-      });
-
-      const result = session.methods
-        .withdraw(signature, sessionId, validDeadline, 1, [1], [500], 60, 50)
-        .send({
-          from: TestAccount.PLAYER.address,
-          gasPrice: await web3.eth.getGasPrice(),
-          gas: gasLimit,
-          value: toWei("0.09"),
-        });
-
-      await expect(
-        result.catch((e: Error) => Promise.reject(e.message))
-      ).rejects.toContain("SunflowerLand: Missing fee");
-    });
-
-    it("takes the fee", async () => {
-      const web3 = new Web3(
-        new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
-      );
-      const { session, farm, token } = await deploySFLContracts(web3);
-
-      await farm.methods.mint(TestAccount.PLAYER.address).send({
-        from: TestAccount.TEAM.address,
-        gasPrice: await web3.eth.getGasPrice(),
-        gas: gasLimit,
-      });
-
-      const farmNFT = await farm.methods
-        .getFarm(1)
-        .call({ from: TestAccount.PLAYER.address });
-
-      // Mint some items
-      await token.methods.gameMint(farmNFT.account, 200).send({
-        from: TestAccount.TEAM.address,
-        gasPrice: await web3.eth.getGasPrice(),
-        gas: gasLimit,
-      });
-
-      // Used to check the fee works
-      const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
-
-      const sessionId = await session.methods
-        .getSessionId(1)
-        .call({ from: TestAccount.PLAYER.address });
-
-      const signature = await sign(web3, {
-        sessionId,
-        deadline: validDeadline,
-        sender: TestAccount.PLAYER.address,
-        farmId: 1,
-        ids: [],
-        amounts: [],
-        sfl: 60,
-        tax: 50,
-      });
-
-      await session.methods
-        .withdraw(signature, sessionId, validDeadline, 1, [], [], 60, 50)
-        .send({
-          from: TestAccount.PLAYER.address,
-          gasPrice: await web3.eth.getGasPrice(),
-          gas: gasLimit,
-          value: fee,
-        });
-
-      // Expect the fee to be taken
-      const newTeamBalance = await web3.eth.getBalance(
-        TestAccount.TEAM.address
-      );
-
-      expect(Number(newTeamBalance)).toEqual(Number(teamBalance) + Number(fee));
-    });
-
-    it.only("takes the SFL tax", async () => {
+    it("takes the SFL tax", async () => {
       const web3 = new Web3(
         new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
       );
@@ -1121,7 +1014,6 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
-          value: fee,
         });
 
       // Expect player to only have the taxed amount

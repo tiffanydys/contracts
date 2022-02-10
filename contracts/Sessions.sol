@@ -9,8 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./Inventory.sol";
 import "./Token.sol";
 import "./Farm.sol";
-
-// Do we need Ownable - what would happen if we renounced ownership?
+// import "./Uniswap.sol";
 
 contract SunflowerLandSession is Ownable {
     using ECDSA for bytes32;
@@ -26,17 +25,21 @@ contract SunflowerLandSession is Ownable {
     address private team;
     address private wishingWell;
 
+    // 0.1
     uint private syncFee = 1 * (10 ** 17);
-    uint private withdrawFee = 1 * (10 ** 17);
 
     // 30% of the tax goes into the wishing well
     uint private wishingWellTax = 30;
 
-    bool private liquify = true;
+    // Whether to liquidate fees instead of sending SFL token
+    bool private liquify = false;
 
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
     SunflowerLandFarm farm;
+
+    // Enable for deploy - disable for testing
+    //IUniswapV2Router02 public immutable uniswapV2Router;
 
     constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm, address _wishingWell) payable {
         inventory = _inventory;
@@ -45,6 +48,9 @@ contract SunflowerLandSession is Ownable {
         wishingWell = _wishingWell;
         signer = _msgSender();
         team = _msgSender();
+
+        // Enable for deploy - disable for testing
+        //uniswapV2Router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
     }
 
     function transferSigner(address _signer) public onlyOwner {
@@ -65,6 +71,10 @@ contract SunflowerLandSession is Ownable {
 
     function setWishingWellTax(uint _tax) public onlyOwner {
         wishingWellTax = _tax;
+    }
+
+    function setLiquify(bool _liquify) public onlyOwner {
+        liquify = _liquify;
     }
 
     // A unique nonce identifer for the account
@@ -173,8 +183,7 @@ contract SunflowerLandSession is Ownable {
         uint256 sfl,
         // 100 = 10%
         uint tax
-    ) public payable returns (bool) {
-        require(msg.value >= withdrawFee, "SunflowerLand: Missing fee");
+    ) public returns (bool) {
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
@@ -204,29 +213,50 @@ contract SunflowerLandSession is Ownable {
         // Get the holding address of the farm
         Farm memory farmNFT = farm.getFarm(farmId);
 
+        // Withdrawal tax
         uint teamFee = sfl * tax / 1000;
-
-        token.gameTransfer(farmNFT.account, address(this), teamFee);
-        takeFee(teamFee);
+        takeFee(farmNFT.account, teamFee);
 
         // Withdraw from farm
         uint remaining = sfl - teamFee;
-
         inventory.gameTransferFrom(farmNFT.account, _msgSender(), ids, amounts, "");
         token.gameTransfer(farmNFT.account, _msgSender(), remaining);
-
-
-        (bool teamSent,) = team.call{value: msg.value}("");
-        require(teamSent, "SunflowerLand: Fee Failed");
 
         return true;
     }
 
-    function takeFee(uint amount) private {
+    function takeFee(address from, uint amount) private {
+        token.gameTransfer(from, address(this), amount);
+
         uint wishingWellFee = amount * wishingWellTax / 100;
         uint remaining = amount - wishingWellFee;
 
         token.transfer(wishingWell, wishingWellFee);
-        token.transfer(team, remaining);
+
+        if (liquify) {
+            // Enable for deploy - disable for testing
+            //liquidate(remaining);
+        } else {
+            token.transfer(team, remaining);
+        }
     }
+
+    // Enable for deploy - disable for testing
+
+    // function liquidate(uint amount) private {
+    //     token.approve(address(uniswapV2Router), amount);
+
+    //     address[] memory path = new address[](2);
+    //     path[0] = address(token);
+    //     path[1] = uniswapV2Router.WETH();
+
+    //     // make the swap
+    //     uniswapV2Router.swapTokensForExactETH(
+    //         amount,
+    //         0, // accept any amount of ETH
+    //         path,
+    //         team,
+    //         block.timestamp
+    //     );
+    // }
 }
