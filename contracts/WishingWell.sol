@@ -9,6 +9,11 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Token.sol";
 
+/**
+ * A contract which converts an ERC20 token (SFF/MATIC pair token) into Wishing Well (WW) Tokens
+ * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
+ * Every 3 days someone with WW tokens can claim their SFL from this contract
+ */
 contract WishingWell is ERC20Pausable, Ownable {
   using SafeMath for uint256;
 
@@ -28,6 +33,9 @@ contract WishingWell is ERC20Pausable, Ownable {
         lockedPeriod = period;
     }
 
+    /**
+     * Throw in Liquidity token and get minted Wishing Well tokens
+     */
     function throwTokens(uint amount) public {
         updatedAt[msg.sender] = block.timestamp;
 
@@ -36,6 +44,10 @@ contract WishingWell is ERC20Pausable, Ownable {
         _mint(msg.sender, amount);
     }
 
+    /**
+     * Every 3 days after depositing, collecting or withdrawing a user must wait
+     * This acts as a 'locked' period
+     */
     function canCollect(address account) public view returns (bool) {
         uint lastOpenDate = updatedAt[account];
 
@@ -43,6 +55,10 @@ contract WishingWell is ERC20Pausable, Ownable {
         return lastOpenDate < threeDaysAgo;
     }
 
+    /**
+     * How 'lucky' a user is
+     * Depending on your WW balance, depends how much SFL you can claim
+     */
     function searchWell(address account) private view returns (uint amount) {        
         // Total of 200 LP tokens
         uint tokensInWell = token.balanceOf(address(this));
@@ -51,6 +67,9 @@ contract WishingWell is ERC20Pausable, Ownable {
         return tokensInWell.mul(balanceOf(account)).div(totalSupply());
     }
 
+    /**
+     * Grabs any SFL lying in the well
+     */
     function collectFromWell() public {
         require (canCollect(msg.sender), "WishingWell: Good things come for those who wait");
         updatedAt[msg.sender] = block.timestamp;
@@ -61,6 +80,10 @@ contract WishingWell is ERC20Pausable, Ownable {
         token.transfer(msg.sender, amount);
     }
 
+    /**
+     * Take out your LP tokens
+     * Once you extract, you must wait 3 days again
+     */
     function takeOut(uint amount) public {
         require (canCollect(msg.sender), "WishingWell: Wait 3 days after throwing in or collecting");
 
