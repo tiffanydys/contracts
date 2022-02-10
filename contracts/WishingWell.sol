@@ -10,10 +10,10 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Token.sol";
 
 /**
- * A contract which converts an ERC20 token (SFF/MATIC pair token) into Wishing Well (WW) Tokens
+ * A contract which converts an ERC20 token (SFL/MATIC pair token) into Wishing Well (WW) Tokens
  * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
  * Every 3 days someone with WW tokens can claim their SFL from this contract
- * When you want to get your LP tokens back, you exchange the WW for the SFF/MATIC pair token
+ * When you want to get your LP tokens back, you exchange the WW for the SFL/MATIC pair token
  */
 contract WishingWell is ERC20Pausable, Ownable {
   using SafeMath for uint256;
@@ -36,6 +36,7 @@ contract WishingWell is ERC20Pausable, Ownable {
 
     /**
      * Throw in Liquidity token and get minted Wishing Well tokens
+     * Requires the user 'approves' SFL before sending
      */
     function throwTokens(uint amount) public {
         updatedAt[msg.sender] = block.timestamp;
@@ -61,7 +62,6 @@ contract WishingWell is ERC20Pausable, Ownable {
      * Depending on your WW balance, depends how much SFL you can claim
      */
     function searchWell(address account) private view returns (uint amount) {        
-        // Total of 200 LP tokens
         uint tokensInWell = token.balanceOf(address(this));
 
         // Give them their portion
