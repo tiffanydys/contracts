@@ -1,11 +1,11 @@
 import Web3 from "web3";
-import { soliditySha3 } from "web3-utils";
+import { soliditySha3, toWei } from "web3-utils";
 import { deploySFLContracts, gasLimit, TestAccount } from "./test-support";
 
 describe("Session contract", () => {
   // 10 seconds in the future
   const validDeadline = Math.floor(Date.now() / 1000 + 100);
-
+  const fee = toWei("0.1");
   describe("sync", () => {
     it("requires the transaction is submitted before the deadline", async () => {
       const web3 = new Web3(
@@ -36,6 +36,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -69,6 +70,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -111,6 +113,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -170,6 +173,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       tokenBalance = await token.methods
@@ -232,6 +236,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -294,6 +299,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       const tokenBalance = await token.methods
@@ -355,6 +361,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -402,6 +409,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       // Try again with same session ID
@@ -411,6 +419,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       await expect(
@@ -449,6 +458,7 @@ describe("Session contract", () => {
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
           gas: gasLimit,
+          value: fee,
         });
 
       const tokenBalance = await token.methods
@@ -456,6 +466,99 @@ describe("Session contract", () => {
         .call({ from: TestAccount.PLAYER.address });
 
       expect(tokenBalance).toEqual("120");
+    });
+
+    it("requires a sufficient fee", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      // Used to check the fee works
+      const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [1],
+        mintAmounts: [500],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: 60,
+      });
+
+      const result = session.methods
+        .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: toWei("0.09"),
+        });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("SunflowerLand: Missing fee");
+    });
+
+    it("takes the fee", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      // Used to check the fee works
+      const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [1],
+        mintAmounts: [500],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: 60,
+      });
+
+      await session.methods
+        .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      // Expect the fee to be taken
+      const newTeamBalance = await web3.eth.getBalance(
+        TestAccount.TEAM.address
+      );
+
+      expect(Number(newTeamBalance)).toEqual(Number(teamBalance) + Number(fee));
     });
   });
 

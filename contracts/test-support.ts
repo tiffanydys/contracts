@@ -59,14 +59,6 @@ export async function deploySFLContracts(web3: Web3) {
     [farm.options.address]
   );
 
-  const wishingWell = await deployContract(
-    web3,
-    abijson.contracts["contracts/WishingWell.sol:WishingWell"],
-    TestAccount.TEAM.address,
-    // In production this will be the SFL/MATIC pair, but for testing we'll use SFL as it is an ERC20 as well
-    [token.options.address]
-  );
-
   await Promise.all([
     farm.methods
       .addGameRole(beta.options.address)
@@ -82,7 +74,7 @@ export async function deploySFLContracts(web3: Web3) {
       .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { session, farm, token, inventory, beta, wishingWell };
+  return { session, farm, token, inventory, beta };
 }
 
 export async function deployWishingWellContracts(web3: Web3) {
