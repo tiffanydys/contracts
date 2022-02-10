@@ -4,7 +4,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Token.sol";
@@ -17,7 +17,7 @@ import "./Token.sol";
  * Every 3 days someone with WW tokens can claim their SFL from this contract
  * When you want to get your LP tokens back, you exchange the WW for the SFL/MATIC pair token
  */
-contract WishingWell is ERC20Pausable, Ownable {
+contract WishingWell is ERC20, Ownable {
   using SafeMath for uint256;
 
     SunflowerLandToken token;

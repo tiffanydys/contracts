@@ -53,6 +53,105 @@ export async function createFarmSignature({
   return { signature, donation: wei, charity };
 }
 
+export type WithdrawArgs = {
+  sessionId: string;
+  deadline: number;
+  sender: string;
+  farmId: number;
+  ids: number[];
+  amounts: string[];
+  sfl: number;
+  tax: number;
+};
+
+export function encodeWithdrawFunction({
+  sessionId,
+  deadline,
+  sender,
+  farmId,
+  ids,
+  amounts,
+  sfl,
+  tax,
+}: WithdrawArgs) {
+  return soliditySha3(
+    {
+      type: "bytes32",
+      value: sessionId,
+    },
+    {
+      type: "uint256",
+      value: deadline.toString(),
+    },
+    {
+      type: "address",
+      value: sender,
+    },
+    {
+      type: "uint256",
+      value: farmId.toString(),
+    },
+    {
+      type: "uint256[]",
+      value: ids as any,
+    },
+    {
+      type: "uint256[]",
+      value: amounts as any,
+    },
+    {
+      type: "uint256",
+      value: sfl.toString(),
+    },
+    {
+      type: "uint256",
+      value: tax.toString(),
+    }
+  );
+}
+
+export type WithdrawSignatureArgs = {
+  sessionId: string;
+  sender: string;
+  farmId: number;
+  sfl: number;
+  ids: number[];
+  amounts: string[];
+  tax: number;
+};
+
+export async function withdrawSignature({
+  farmId,
+  sender,
+  sessionId,
+  sfl,
+  ids,
+  amounts,
+  tax,
+}: WithdrawSignatureArgs) {
+  const deadline = Math.floor(Date.now() / 1000 + SYNC_DEADLINE_MINUTES * 60);
+
+  const args = {
+    sessionId: sessionId,
+    farmId: farmId,
+    sender: sender,
+    sfl,
+    deadline,
+    tax,
+    ids,
+    amounts,
+  };
+
+  const shad = encodeWithdrawFunction(args);
+
+  const { signature } = await sign(shad as string);
+
+  return {
+    ...args,
+    signature,
+  };
+}
+
 export type SyncArgs = {
   sessionId: string;
   deadline: number;

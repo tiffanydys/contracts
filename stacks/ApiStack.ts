@@ -79,6 +79,16 @@ export default class ApiStack extends sst.Stack {
             ...web3EnvironmentVariables,
           },
         },
+        "POST    /withdraw": {
+          handler: "src/api/withdraw.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+          environment: {
+            tableName: sessionTable.dynamodbTable.tableName,
+            ...web3EnvironmentVariables,
+          },
+        },
       },
     });
 

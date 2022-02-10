@@ -62,4 +62,5 @@ export const KNOWN_ITEMS: Record<string, InventoryItemName> = Object.assign(
   ...Object.entries(KNOWN_IDS).map(([a, b]) => ({ [b]: a }))
 );
 
+export const ITEM_NAMES = Object.keys(KNOWN_IDS);
 export const IDS = Object.values(KNOWN_IDS);
