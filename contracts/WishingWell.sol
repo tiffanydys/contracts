@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Token.sol";
 
+// TODO - do not make it pausable, that is a bit dodgy and could 'accidentally' lock the tokens
+
 /**
  * A contract which converts an ERC20 token (SFL/MATIC pair token) into Wishing Well (WW) Tokens
  * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
@@ -51,6 +53,11 @@ contract WishingWell is ERC20Pausable, Ownable {
      * This acts as a 'locked' period
      */
     function canCollect(address account) public view returns (bool) {
+        // Just an extra safeguard
+        if (balanceOf(account) == 0) {
+            return false;
+        }
+
         uint lastOpenDate = updatedAt[account];
 
         uint threeDaysAgo = block.timestamp.sub(lockedPeriod); 
@@ -62,10 +69,16 @@ contract WishingWell is ERC20Pausable, Ownable {
      * Depending on your WW balance, depends how much SFL you can claim
      */
     function searchWell(address account) private view returns (uint amount) {        
+        uint balance = balanceOf(account);
+
+        if (balance == 0) {
+            return 0;
+        }
+
         uint tokensInWell = token.balanceOf(address(this));
 
         // Give them their portion
-        return tokensInWell.mul(balanceOf(account)).div(totalSupply());
+        return tokensInWell.mul(balance).div(totalSupply());
     }
 
     /**
