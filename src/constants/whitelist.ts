@@ -3,7 +3,11 @@ const SYNC_WHITELIST = [
   "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
 ];
 
-const CREATE_FARM_WHITELIST = [...SYNC_WHITELIST];
+const CREATE_FARM_WHITELIST = [
+  ...SYNC_WHITELIST,
+  // DON
+  "0x307CED27048cCe9928C69eB7296F5BeD270b1954",
+];
 
 export function canCreateFarm(address: string) {
   return CREATE_FARM_WHITELIST.includes(address);
