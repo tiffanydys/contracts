@@ -296,6 +296,7 @@ describe("api.autosave", () => {
           "Sunflower Seed": "4",
           Sunflower: "1",
         },
+        stock: {},
         address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       },
     });

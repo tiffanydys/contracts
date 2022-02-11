@@ -123,6 +123,7 @@ describe("api.session", () => {
             Sunflower: "10000",
             Stone: "1000",
           },
+          stock: {},
           address: "0x291019282",
         },
         id: 2,
@@ -135,6 +136,7 @@ describe("api.session", () => {
             Sunflower: "10000",
             Stone: "1000",
           },
+          stock: {},
           address: "0x291019282",
         },
         sessionId: "0x123",
@@ -167,6 +169,7 @@ describe("api.session", () => {
           Sunflower: "10000",
           Stone: "1000",
         },
+        stock: {},
         address: "0x291019282",
       },
     });
