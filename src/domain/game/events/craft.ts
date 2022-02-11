@@ -46,7 +46,6 @@ export function craft({ state, action, available }: Options) {
     throw new Error("Invalid amount");
   }
 
-  console.log({ stock: state.stock });
   if (state.stock[action.item]?.lt(action.amount)) {
     throw new Error("Not enough stock");
   }

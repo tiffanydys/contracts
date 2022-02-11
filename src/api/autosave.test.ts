@@ -234,6 +234,7 @@ describe("api.autosave", () => {
       gameState: {
         balance: "100000",
         fields: {},
+        stock: {},
         id: 2,
         inventory: {
           "Sunflower Seed": "5",
@@ -244,6 +245,7 @@ describe("api.autosave", () => {
       owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       previousGameState: {
         balance: "20000",
+        stock: {},
         fields: {},
         id: 2,
         inventory: {},
