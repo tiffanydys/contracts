@@ -42,15 +42,6 @@ export async function startSession({
 
   // No session was ever created for this farm + account
   if (!farm) {
-    // If a user session does not exist in Sessions.sol, it is represented as 0, which is the following:
-    const isInitialSession =
-      sessionId ===
-      "0x0000000000000000000000000000000000000000000000000000000000000000";
-
-    if (!isInitialSession) {
-      throw new Error("User has already created a session");
-    }
-
     // We don't really care about this - they could create a session but never be able to save it
     const nftFarm = await loadNFTFarm(farmId);
     if (nftFarm.owner !== sender) {
@@ -64,11 +55,18 @@ export async function startSession({
       balance: new Decimal(0),
     };
 
+    //If a user session does not exist in Sessions.sol, it is represented as 0, which is the following:
+    const isInitialSession =
+      // We nuke testnet a lot so ignore
+      process.env.NETWORK !== "mainnet" ||
+      sessionId ===
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
+
     /**
      * Double check they do not already have a farm migrated.
      * Beta.sol allows only one farm per account but still check!
      */
-    if (farms.length === 0) {
+    if (farms.length === 0 && isInitialSession) {
       // Load a V1 snapshot (any resources/inventory they had from the old game)
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
