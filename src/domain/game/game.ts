@@ -20,7 +20,7 @@ import {
 } from "../../services/web3/polygon";
 
 import { getItemUnit } from "../../services/web3/utils";
-import { INITIAL_FARM } from "../game/lib/constants";
+import { INITIAL_FARM, INITIAL_STOCK } from "../game/lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 import { IDS, KNOWN_IDS } from "./types";
 import { craft } from "./events/craft";
@@ -40,10 +40,17 @@ export async function startSession({
 
   const farm = farms.find((farm) => farm.id === farmId);
 
-  // TODO - also check session ID is 0x0000000000...
-
   // No session was ever created for this farm + account
   if (!farm) {
+    // If a user session does not exist in Sessions.sol, it is represented as 0, which is the following:
+    const isInitialSession =
+      sessionId ===
+      "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+    if (!isInitialSession) {
+      throw new Error("User has already created a session");
+    }
+
     // We don't really care about this - they could create a session but never be able to save it
     const nftFarm = await loadNFTFarm(farmId);
     if (nftFarm.owner !== sender) {
@@ -91,7 +98,6 @@ export async function startSession({
     return initialFarm;
   }
 
-  console.log("loaded");
   let farmState = makeGame(farm.gameState);
 
   // Does the session ID match?
@@ -111,6 +117,8 @@ export async function startSession({
     ...farm.gameState,
     balance: onChainData.balance,
     inventory: onChainData.inventory,
+    // Reset the stock
+    stock: INITIAL_STOCK,
   };
 
   await updateSession({
@@ -137,10 +145,22 @@ function makeGame(gameState: Account["gameState"]): GameState {
     {} as Record<InventoryItemName, Decimal>
   );
 
+  // Convert the string values into decimals
+  const stock = Object.keys(gameState.stock).reduce(
+    (items, itemName) => ({
+      ...items,
+      [itemName]: new Decimal(
+        gameState.stock[itemName as InventoryItemName] || 0
+      ),
+    }),
+    {} as Record<InventoryItemName, Decimal>
+  );
+
   return {
     ...gameState,
     balance: new Decimal(gameState.balance),
     inventory,
+    stock,
   };
 }
 

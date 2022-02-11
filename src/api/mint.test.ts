@@ -170,6 +170,7 @@ describe("api.mint", () => {
         balance: "100000",
         fields: {},
         id: 2,
+        stock: {},
         inventory: {
           Sunflower: "10000",
           Stone: "1000",
@@ -182,6 +183,7 @@ describe("api.mint", () => {
         balance: "100000",
         fields: {},
         id: 2,
+        stock: {},
         inventory: {
           Sunflower: "10000",
           Stone: "1000",

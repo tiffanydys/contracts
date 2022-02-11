@@ -19,9 +19,23 @@ export function makeDBItem(farm: GameState): FarmSession {
     };
   }, {} as Record<InventoryItemName, string>);
 
+  const stock = Object.keys(farm.stock).reduce((items, itemName) => {
+    const value = farm.stock[itemName as InventoryItemName];
+
+    if (!value || value.lessThanOrEqualTo(0)) {
+      return items;
+    }
+
+    return {
+      ...items,
+      [itemName]: value.toString(),
+    };
+  }, {} as Record<InventoryItemName, string>);
+
   return {
     ...farm,
     balance: farm.balance.toString(),
     inventory,
+    stock,
   };
 }

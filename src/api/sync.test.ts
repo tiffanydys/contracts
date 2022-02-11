@@ -148,6 +148,7 @@ describe("api.sync", () => {
           "Carrot Seed": "100",
         },
         address: "0x291019282",
+        stock: {},
       },
       id: 2,
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
@@ -161,6 +162,7 @@ describe("api.sync", () => {
           "Carrot Seed": "200",
         },
         address: "0x291019282",
+        stock: {},
       },
       // TODO real ID
       sessionId: "0x8123",
