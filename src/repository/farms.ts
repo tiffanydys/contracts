@@ -29,6 +29,7 @@ export async function getFarmById(
   account: string,
   id: number
 ): Promise<Account> {
+  // Testing purposes
   await new Promise((res) => setTimeout(res, 5000));
 
   const getParams = {
