@@ -60,7 +60,7 @@ export type WithdrawArgs = {
   farmId: number;
   ids: number[];
   amounts: string[];
-  sfl: number;
+  sfl: string;
   tax: number;
 };
 
@@ -101,7 +101,7 @@ export function encodeWithdrawFunction({
     },
     {
       type: "uint256",
-      value: sfl.toString(),
+      value: sfl,
     },
     {
       type: "uint256",
@@ -114,7 +114,7 @@ export type WithdrawSignatureArgs = {
   sessionId: string;
   sender: string;
   farmId: number;
-  sfl: number;
+  sfl: string;
   ids: number[];
   amounts: string[];
   tax: number;

@@ -8,6 +8,18 @@ import {
 } from "../services/web3/signatures";
 import { canSync } from "../constants/whitelist";
 import { IDS, ITEM_NAMES, KNOWN_IDS } from "../domain/game/types";
+import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
+import { InventoryItemName } from "../domain/game/types/game";
+
+/**
+ * Items like pumpkin soup are non-transferrable
+ */
+const VALID_ITEMS = Object.keys({
+  ...TOOLS,
+  ...LimitedItems,
+}) as InventoryItemName[];
+
+const VALID_IDS = VALID_ITEMS.map((id) => KNOWN_IDS[id]);
 
 const schema = Joi.object<WithdrawBody>({
   sessionId: Joi.string().required(),
@@ -15,8 +27,11 @@ const schema = Joi.object<WithdrawBody>({
   sender: Joi.string().required(),
   signature: Joi.string().required(),
   sfl: Joi.string().required(),
-  ids: Joi.array().items().min(0),
-  amounts: Joi.array().items(Joi.string()),
+  ids: Joi.array()
+    .items(Joi.number().valid(...VALID_IDS))
+    .required()
+    .min(0),
+  amounts: Joi.array().items(Joi.string()).required(),
 });
 
 export type WithdrawBody = {
@@ -24,7 +39,7 @@ export type WithdrawBody = {
   sessionId: string;
   sender: string;
   signature: string;
-  sfl: number;
+  sfl: string;
   ids: number[];
   amounts: string[];
 };
