@@ -56,12 +56,7 @@ export async function deploySFLContracts(web3: Web3) {
     web3,
     abijson.contracts["contracts/Sessions.sol:SunflowerLandSession"],
     TestAccount.TEAM.address,
-    [
-      inventory.options.address,
-      token.options.address,
-      farm.options.address,
-      wishingWell.options.address,
-    ]
+    [inventory.options.address, token.options.address, farm.options.address]
   );
 
   const beta = await deployContract(
@@ -72,6 +67,9 @@ export async function deploySFLContracts(web3: Web3) {
   );
 
   await Promise.all([
+    session.methods.setWishingWell(wishingWell.options.address).send({
+      from: TestAccount.TEAM.address,
+    }),
     farm.methods
       .addGameRole(beta.options.address)
       .send({ from: TestAccount.TEAM.address }),

@@ -41,11 +41,10 @@ contract SunflowerLandSession is Ownable {
     // Enable for deploy - disable for testing
     //IUniswapV2Router02 public immutable uniswapV2Router;
 
-    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm, address _wishingWell) payable {
+    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm) payable {
         inventory = _inventory;
         token = _token;
         farm = _farm;
-        wishingWell = _wishingWell;
         signer = _msgSender();
         team = _msgSender();
 
@@ -75,6 +74,10 @@ contract SunflowerLandSession is Ownable {
 
     function setLiquify(bool _liquify) public onlyOwner {
         liquify = _liquify;
+    }
+
+    function setWishingWell(address _wishingWell) public onlyOwner {
+        wishingWell = _wishingWell;
     }
 
     // A unique nonce identifer for the account
@@ -251,7 +254,7 @@ contract SunflowerLandSession is Ownable {
     //     path[1] = uniswapV2Router.WETH();
 
     //     // make the swap
-    //     uniswapV2Router.swapTokensForExactETH(
+    //     uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
     //         amount,
     //         0, // accept any amount of ETH
     //         path,

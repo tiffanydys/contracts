@@ -5,7 +5,7 @@ import { deploySFLContracts, gasLimit, TestAccount } from "./test-support";
 describe("Session contract", () => {
   describe("sync", () => {
     // 10 seconds in the future
-    const validDeadline = Math.floor(Date.now() / 1000 + 100);
+    const validDeadline = Math.floor(Date.now() / 1000) + 1000;
     const fee = toWei("0.1");
     it("requires the transaction is submitted before the deadline", async () => {
       const web3 = new Web3(
@@ -637,7 +637,7 @@ describe("Session contract", () => {
 
   describe("withdraw", () => {
     // 100 seconds in the future
-    const validDeadline = Math.floor(Date.now() / 1000 + 100);
+    const validDeadline = Math.floor(Date.now() / 1000) + 100;
     const fee = toWei("0.1");
 
     it("requires the transaction is submitted before the deadline", async () => {
