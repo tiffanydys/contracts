@@ -1,6 +1,6 @@
 import "../services/web3/__mocks__/polygon";
 import "../services/__mocks__/kms";
-import { getFarmByIdMock } from "../repository/__mocks__/farms";
+import { getFarmsMock } from "../repository/__mocks__/db";
 
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, AutosaveBody } from "./autosave";
@@ -228,7 +228,7 @@ describe("api.autosave", () => {
   });
 
   it("autosaves", async () => {
-    getFarmByIdMock.mockReturnValue({
+    getFarmsMock.mockReturnValue({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       gameState: {

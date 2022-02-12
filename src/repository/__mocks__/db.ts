@@ -1,7 +1,10 @@
 import { Account } from "../types";
 
-export const getFarmsByAccountMock = jest.fn();
-export const getFarmByIdMock = jest.fn(
+export const createMock = jest.fn();
+export const updateGameStateMock = jest.fn();
+export const createSessionMock = jest.fn();
+export const getFarmMock = jest.fn();
+export const getFarmsMock = jest.fn(
   (): Account => ({
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -28,8 +31,10 @@ export const getFarmByIdMock = jest.fn(
   })
 );
 
-jest.doMock("../farms", () => ({
-  getFarmById: getFarmByIdMock,
-  getFarmsByAccount: getFarmsByAccountMock,
-  updateFarm: jest.fn(),
+jest.doMock("../db", () => ({
+  getFarm: getFarmMock,
+  getFarms: getFarmsMock,
+  create: createMock,
+  updateGameState: updateGameStateMock,
+  createSession: createSessionMock,
 }));
