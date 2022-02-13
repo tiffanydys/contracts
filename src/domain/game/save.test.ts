@@ -274,5 +274,46 @@ describe("game", () => {
         },
       });
     });
+
+    /**
+     * Ensure no one goes through the autosave process to craft a limited item
+     */
+    it("does not craft a limited edition item", async () => {
+      process.env.NETWORK = "mainnet";
+
+      getFarmMock.mockReturnValueOnce({
+        id: 13,
+        session:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        gameState: {
+          fields: {},
+          inventory: {},
+          stock: {
+            "Potato Seed": "7",
+          },
+          balance: "20",
+        },
+      });
+
+      loadBalanceMock.mockReturnValue("120000000000000000000");
+      loadInventoryMock.mockReturnValue(["1", "2"]);
+
+      const result = save({
+        farmId: 13,
+        account: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        actions: [
+          {
+            type: "item.crafted",
+            item: "Chicken Coop",
+            amount: 1,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("This item is not craftable: Chicken Coop");
+    });
   });
 });

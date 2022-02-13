@@ -86,6 +86,9 @@ export async function mint({ farmId, account, item }: MintOptions) {
     throw new Error("Farm does not exist");
   }
 
+  // TODO - call to the Blockchain and see if some are still available
+  // Currently only the UI will be protecting this limit
+
   // Pass numbers into a safe format before processing.
   const gameState = makeGame(farm.gameState);
 
