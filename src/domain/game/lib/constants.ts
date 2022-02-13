@@ -1,5 +1,6 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
+import { FOODS, LimitedItems } from "../types/craftables";
 import { GameState, Inventory } from "../types/game";
 
 export const GRID_WIDTH_PX = 42;

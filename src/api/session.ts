@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { startSession } from "../domain/game/game";
+import { startSession } from "../domain/game/session";
 import { verifyAccount } from "../services/web3/signatures";
 
 const schema = Joi.object<SessionBody>({

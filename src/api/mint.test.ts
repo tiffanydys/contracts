@@ -217,7 +217,7 @@ describe("api.mint", () => {
       sessionId: body.sessionId,
       farmId: body.farmId,
       sender: body.sender,
-      tokens: "5000000000000000000",
+      tokens: "-5000000000000000000",
       deadline: expect.any(Number),
       mintIds: [KNOWN_IDS["Sunflower Statue"]],
       mintAmounts: ["1"],
