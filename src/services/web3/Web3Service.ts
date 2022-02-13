@@ -44,10 +44,6 @@ export class Web3Service {
         blockNumber
       );
 
-      if (this.service === "alchemy") {
-        throw new Error("Not implemented");
-      }
-
       return result;
     } catch (e) {
       console.error(e);
