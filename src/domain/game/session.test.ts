@@ -131,7 +131,7 @@ describe("game", () => {
         id: 13,
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
-          balance: "2.99999999999999999",
+          balance: "0",
           fields: {
             "0": {
               name: "Sunflower",
@@ -171,9 +171,7 @@ describe("game", () => {
             },
           },
           id: 1,
-          inventory: {
-            "Sunflower Seed": "3",
-          },
+          inventory: {},
           stock: {
             Axe: "50",
             "Beetroot Seed": "80",
@@ -347,7 +345,7 @@ describe("game", () => {
         id: 13,
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
-          balance: "2.99999999999999999",
+          balance: "0",
           fields: {
             "0": {
               name: "Sunflower",
@@ -387,9 +385,7 @@ describe("game", () => {
             },
           },
           id: 1,
-          inventory: {
-            "Sunflower Seed": "3",
-          },
+          inventory: {},
           stock: {
             Axe: "50",
             "Beetroot Seed": "80",
