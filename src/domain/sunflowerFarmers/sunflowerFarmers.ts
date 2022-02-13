@@ -41,10 +41,8 @@ export async function getV1GameState({
     inventory: {},
   };
 
-  console.log({ address });
   const inventorySnapshot = balances[address.toLowerCase()];
   if (inventorySnapshot) {
-    console.log({ inventorySnapshot });
     gameState.inventory = Object.keys(inventorySnapshot).reduce(
       (items, itemName) => ({
         ...items,
