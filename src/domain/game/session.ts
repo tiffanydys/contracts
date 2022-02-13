@@ -88,7 +88,11 @@ export async function startSession({
       gameState: initialFarm,
 
       // We want to be able to calculate the changeset for the farm
-      previousGameState: INITIAL_FARM,
+      previousGameState: {
+        ...INITIAL_FARM,
+        // Remove the seeds as we want these minted as well
+        inventory: {},
+      },
 
       // Will be 0 but still let UI pass it in
       sessionId: sessionId,
