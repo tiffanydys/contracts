@@ -30,15 +30,15 @@ export async function getChangeset({
   return calculateChangeset({ current, previous });
 }
 
-export async function calculateChangeset({
+export function calculateChangeset({
   current,
   previous,
 }: {
   current: GameState;
   previous: GameState;
-}): Promise<GameState> {
+}): GameState {
   const balance = current.balance.minus(previous.balance);
-  const wei = new Decimal(toWei(balance.abs().toString()));
+  const wei = new Decimal(toWei(balance.toString()));
 
   const items = [
     ...new Set([

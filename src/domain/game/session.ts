@@ -1,5 +1,5 @@
 import Decimal from "decimal.js-light";
-import { fromWei, toWei } from "web3-utils";
+import { fromWei } from "web3-utils";
 
 import {
   getFarmsByAccount,
