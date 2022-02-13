@@ -2,7 +2,7 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
 import { verifyAccount } from "../services/web3/signatures";
-import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/game";
+import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/save";
 
 const eventTimeValidation = () => {
   return Joi.date()

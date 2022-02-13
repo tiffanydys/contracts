@@ -5,7 +5,7 @@ import {
 import Joi from "joi";
 import { canMint } from "../constants/whitelist";
 
-import { mint } from "../domain/game/game";
+import { mint } from "../domain/game/sync";
 import { LimitedItem } from "../domain/game/types/craftables";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 

@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { getChangeset } from "../domain/game/game";
+import { getChangeset } from "../domain/game/sync";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 import { canSync } from "../constants/whitelist";
 
