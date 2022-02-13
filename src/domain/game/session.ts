@@ -12,6 +12,7 @@ import {
   loadNFTFarm,
   loadInventory,
   loadBalance,
+  FarmNFT,
 } from "../../services/web3/polygon";
 
 import { INITIAL_FARM, INITIAL_STOCK } from "./lib/constants";
@@ -109,6 +110,7 @@ export async function startSession({
   const onChainData = await fetchOnChainData({
     sender: sender,
     farmId: farmId,
+    farm: nftFarm,
   });
 
   const gameState: GameState = {
@@ -134,27 +136,23 @@ export async function startSession({
 export async function fetchOnChainData({
   sender,
   farmId,
+  farm,
 }: {
   sender: string;
   farmId: number;
+  farm: FarmNFT;
 }) {
-  const farmNFT = await loadNFTFarm(farmId);
-
-  if (farmNFT.owner !== sender) {
-    throw new Error("Farm is not owned by you");
-  }
-
-  const balanceString = await loadBalance(farmNFT.account);
+  const balanceString = await loadBalance(farm.account);
   const balance = new Decimal(fromWei(balanceString, "ether"));
 
-  const inventory = await loadInventory(IDS, farmNFT.account);
+  const inventory = await loadInventory(IDS, farm.account);
   const friendlyInventory = makeInventory(inventory);
 
   return {
     balance,
     inventory: friendlyInventory,
     id: farmId,
-    address: farmNFT.account,
+    address: farm.account,
     fields: {},
   } as GameState;
 }

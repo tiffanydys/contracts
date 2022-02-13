@@ -1,4 +1,5 @@
 import Decimal from "decimal.js-light";
+import { toWei } from "web3-utils";
 import {
   createMock,
   createSessionMock,
@@ -11,7 +12,7 @@ import {
   loadBalanceMock,
   loadInventoryMock,
 } from "../../services/web3/__mocks__/polygon";
-import { startSession } from "./session";
+import { fetchOnChainData, startSession } from "./session";
 
 describe("game", () => {
   beforeEach(() => {
@@ -500,6 +501,227 @@ describe("game", () => {
           "Sunflower Seed": new Decimal("1000"),
           "Wheat Seed": new Decimal("0"),
         },
+      });
+    });
+  });
+
+  describe("fetchOnChainData", () => {
+    it("loads balance from on chain", async () => {
+      loadBalanceMock.mockReturnValue(toWei("35"));
+      loadInventoryMock.mockReturnValue([]);
+
+      const result = await fetchOnChainData({
+        farmId: 13,
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        farm: {
+          account: "0xD7123601239123",
+          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+          tokenId: 2,
+        },
+      });
+
+      expect(result.balance).toEqual(new Decimal("35"));
+      expect(result.inventory).toEqual({});
+    });
+
+    /**
+     * Hardcoded data but we should test every item here
+     */
+    it("loads inventory from on chain", async () => {
+      loadBalanceMock.mockReturnValue(toWei("0"));
+      loadInventoryMock.mockReturnValue([
+        // Seeds
+        "10",
+        "20",
+        "60",
+        "4",
+        "5",
+        "6",
+        "20",
+        "23",
+        "10",
+        "10023",
+        // Crops
+        "20",
+        "1",
+        "1",
+        "22",
+        "45",
+        "99",
+        "30",
+        "80",
+        "33",
+        "2022",
+        // Tools
+        toWei("2"),
+        toWei("30"),
+        toWei("45"),
+        toWei("1"),
+        toWei("340"),
+        toWei("20"),
+        // Limited items
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        // Resources
+        toWei("20"),
+        toWei("125"),
+        toWei("34"),
+        toWei("30"),
+        toWei("80"),
+        toWei("2000"),
+      ]);
+
+      const result = await fetchOnChainData({
+        farmId: 13,
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        farm: {
+          account: "0xD7123601239123",
+          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+          tokenId: 2,
+        },
+      });
+
+      expect(result.balance).toEqual(new Decimal(0));
+      expect(result.inventory).toEqual({
+        Axe: new Decimal("2"),
+        Beetroot: new Decimal("99"),
+        "Beetroot Seed": new Decimal("6"),
+        Cabbage: new Decimal("45"),
+        "Cabbage Seed": new Decimal("5"),
+        Carrot: new Decimal("22"),
+        "Carrot Seed": new Decimal("4"),
+        Cauliflower: new Decimal("30"),
+        "Cauliflower Seed": new Decimal("20"),
+        Chicken: new Decimal("2000"),
+        "Chicken Coop": new Decimal("1"),
+        "Christmas Tree": new Decimal("1"),
+        Egg: new Decimal("80"),
+        "Farm Cat": new Decimal("1"),
+        "Farm Dog": new Decimal("1"),
+        Flour: new Decimal("1"),
+        Gnome: new Decimal("1"),
+        Gold: new Decimal("30"),
+        "Gold Egg": new Decimal("1"),
+        "Golden Cauliflower": new Decimal("1"),
+        Hammer: new Decimal("340"),
+        Iron: new Decimal("34"),
+        "Iron Pickaxe": new Decimal("1"),
+        Parsnip: new Decimal("80"),
+        "Parsnip Seed": new Decimal("23"),
+        Pickaxe: new Decimal("30"),
+        Potato: new Decimal("1"),
+        "Potato Seed": new Decimal("20"),
+        "Potato Statue": new Decimal("1"),
+        Pumpkin: new Decimal("1"),
+        "Pumpkin Seed": new Decimal("60"),
+        "Pumpkin Soup": new Decimal("1"),
+        Radish: new Decimal("33"),
+        "Radish Seed": new Decimal("10"),
+        "Roasted Cauliflower": new Decimal("1"),
+        Rod: new Decimal("20"),
+        Sauerkraut: new Decimal("1"),
+        Scarecrow: new Decimal("1"),
+        Stone: new Decimal("125"),
+        "Stone Pickaxe": new Decimal("45"),
+        Sunflower: new Decimal("20"),
+        "Sunflower Rock": new Decimal("1"),
+        "Sunflower Seed": new Decimal("10"),
+        "Sunflower Statue": new Decimal("1"),
+        "Sunflower Tombstone": new Decimal("1"),
+        Wheat: new Decimal("2022"),
+        "Wheat Seed": new Decimal("10023"),
+        Wood: new Decimal("20"),
+      });
+    });
+
+    /**
+     * Hardcoded data but we should test every item here
+     */
+    it("loads basic inventory from chain", async () => {
+      loadBalanceMock.mockReturnValue(toWei("0"));
+      loadInventoryMock.mockReturnValue([
+        // Seeds
+        "3",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        // Crops
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        // Tools
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        // Limited items
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        // Resources
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+        toWei("0"),
+      ]);
+
+      const result = await fetchOnChainData({
+        farmId: 13,
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        farm: {
+          account: "0xD7123601239123",
+          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+          tokenId: 2,
+        },
+      });
+
+      expect(result.balance).toEqual(new Decimal(0));
+      expect(result.inventory).toEqual({
+        "Sunflower Seed": new Decimal(3),
       });
     });
   });

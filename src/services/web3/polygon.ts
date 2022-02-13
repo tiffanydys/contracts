@@ -16,15 +16,14 @@ const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
 const FARM_ADDRESS = process.env.FARM_ADDRESS;
 const INVENTORY_ADDRESS = process.env.INVENTORY_ADDRESS;
 
+export type FarmNFT = { owner: string; account: string; tokenId: number };
 export async function loadNFTFarm(id: number) {
   const farmContract = new sunflowerLandWeb3.eth.Contract(
     FarmABI as any,
     FARM_ADDRESS
   );
 
-  const farmNFT: { owner: string; account: string } = await farmContract.methods
-    .getFarm(id)
-    .call();
+  const farmNFT: FarmNFT = await farmContract.methods.getFarm(id).call();
 
   return farmNFT;
 }
