@@ -1,7 +1,7 @@
 import "../services/web3/__mocks__/polygon";
 import "../services/__mocks__/kms";
-import { getFarmMock } from "../repository/__mocks__/db";
-
+import { getFarmsMock } from "../repository/__mocks__/db";
+import { loadNFTFarmMock } from "../services/web3/__mocks__/polygon";
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, SessionBody } from "./session";
 
@@ -111,7 +111,13 @@ describe("api.session", () => {
   });
 
   it("loads a session", async () => {
-    getFarmMock.mockReturnValue([
+    loadNFTFarmMock.mockReturnValue({
+      owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      account: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+      id: 2,
+    });
+
+    getFarmsMock.mockReturnValue([
       {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -127,7 +133,7 @@ describe("api.session", () => {
           address: "0x291019282",
         },
         id: 2,
-        owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
         previousGameState: {
           balance: "100000",
           fields: {},

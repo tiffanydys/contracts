@@ -1,5 +1,5 @@
 import { KNOWN_IDS } from "../domain/game/types";
-import { getFarmsMock } from "../repository/__mocks__/db";
+import { getFarmMock } from "../repository/__mocks__/db";
 import "../services/__mocks__/kms";
 
 import { SyncSignature } from "../services/web3/signatures";
@@ -163,7 +163,7 @@ describe("api.mint", () => {
   });
 
   it("mints an item", async () => {
-    getFarmsMock.mockReturnValue({
+    getFarmMock.mockReturnValue({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       gameState: {

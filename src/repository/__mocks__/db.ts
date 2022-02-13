@@ -1,5 +1,3 @@
-import { Account } from "../types";
-
 export const createMock = jest.fn();
 export const updateGameStateMock = jest.fn();
 export const createSessionMock = jest.fn();

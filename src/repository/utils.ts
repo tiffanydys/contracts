@@ -32,6 +32,8 @@ export function makeDBItem(farm: GameState): FarmSession {
     };
   }, {} as Record<InventoryItemName, string>);
 
+  console.log({ stock });
+
   return {
     ...farm,
     balance: farm.balance.toString(),
