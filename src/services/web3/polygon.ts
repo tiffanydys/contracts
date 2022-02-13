@@ -4,13 +4,12 @@ import FarmABI from "../../../contracts/abis/Farm.json";
 import TokenABI from "../../../contracts/abis/Token.json";
 import InventoryABI from "../../../contracts/abis/Inventory.json";
 import SunflowerFarmersABI from "../../../contracts/abis/SunflowerFarmers.json";
+import { Web3Service, Network } from "./Web3Service";
 
 const alchemyKey = process.env.ALCHEMY_KEY;
 const network = process.env.NETWORK;
 
-const sunflowerLandWeb3 = createAlchemyWeb3(
-  `https://polygon-${network}.g.alchemy.com/v2/${alchemyKey}`
-);
+const sunflowerLandWeb3 = new Web3Service(network as Network);
 
 const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
 const FARM_ADDRESS = process.env.FARM_ADDRESS;
@@ -18,23 +17,23 @@ const INVENTORY_ADDRESS = process.env.INVENTORY_ADDRESS;
 
 export type FarmNFT = { owner: string; account: string; tokenId: number };
 export async function loadNFTFarm(id: number) {
-  const farmContract = new sunflowerLandWeb3.eth.Contract(
-    FarmABI as any,
-    FARM_ADDRESS
-  );
-
-  const farmNFT: FarmNFT = await farmContract.methods.getFarm(id).call();
+  const farmNFT: FarmNFT = await sunflowerLandWeb3.call({
+    abi: FarmABI as any,
+    address: FARM_ADDRESS as string,
+    method: "getFarm",
+    args: [id],
+  });
 
   return farmNFT;
 }
 
 export async function loadBalance(address: string): Promise<string> {
-  const tokenContract = new sunflowerLandWeb3.eth.Contract(
-    TokenABI as any,
-    TOKEN_ADDRESS
-  );
-
-  const balance: string = await tokenContract.methods.balanceOf(address).call();
+  const balance: string = await sunflowerLandWeb3.call({
+    abi: TokenABI as any,
+    address: TOKEN_ADDRESS as string,
+    method: "balanceOf",
+    args: [address],
+  });
 
   return balance;
 }
@@ -43,24 +42,20 @@ export async function loadInventory(
   ids: number[],
   address: string
 ): Promise<string[]> {
-  const inventoryContract = new sunflowerLandWeb3.eth.Contract(
-    InventoryABI as any,
-    INVENTORY_ADDRESS
-  );
-
   const addresses = ids.map(() => address);
 
-  const inventory: string[] = await inventoryContract.methods
-    .balanceOfBatch(addresses, ids)
-    .call();
+  const inventory: string[] = await sunflowerLandWeb3.call({
+    abi: InventoryABI as any,
+    address: INVENTORY_ADDRESS as string,
+    method: "balanceOfBatch",
+    args: [addresses, ids],
+  });
 
   return inventory;
 }
 
-// Always from mainnet
-const sunflowerFarmersWeb3 = createAlchemyWeb3(
-  `https://polygon-mainnet.g.alchemy.com/v2/${alchemyKey}`
-);
+// Always from mainnet to read snapshot
+const sunflowerFarmersWeb3 = new Web3Service("mainnet");
 
 const SFF_TOKEN_ADDRESS = "0xdf9B4b57865B403e08c85568442f95c26b7896b0";
 const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
@@ -74,15 +69,14 @@ const SFF_FARM_ADDRESS = "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0";
 const RECOVERY_BLOCK_NUMBER = 24247919;
 
 export async function loadV1Balance(address: string): Promise<string> {
-  const tokenContract = new sunflowerFarmersWeb3.eth.Contract(
+  const balance: string = await sunflowerFarmersWeb3.call({
     // Use other ABI as it is also a ERC20 token
-    TokenABI as any,
-    SFF_TOKEN_ADDRESS
-  );
-
-  const balance = await tokenContract.methods
-    .balanceOf(address)
-    .call({ blockNumber: RECOVERY_BLOCK_NUMBER }, RECOVERY_BLOCK_NUMBER);
+    abi: TokenABI as any,
+    address: SFF_TOKEN_ADDRESS as string,
+    method: "balanceOf",
+    args: [address],
+    blockNumber: RECOVERY_BLOCK_NUMBER,
+  });
 
   return balance;
 }
@@ -104,14 +98,14 @@ export interface Square {
 }
 
 export async function loadV1Farm(address: string): Promise<Square[]> {
-  const farmContract = new sunflowerFarmersWeb3.eth.Contract(
-    SunflowerFarmersABI as any,
-    SFF_FARM_ADDRESS
-  );
-
-  const fields = await farmContract.methods
-    .getLand(address)
-    .call({ blockNumber: RECOVERY_BLOCK_NUMBER }, RECOVERY_BLOCK_NUMBER);
+  const fields: Square[] = await sunflowerFarmersWeb3.call({
+    // Use other ABI as it is also a ERC20 token
+    abi: SunflowerFarmersABI as any,
+    address: SFF_FARM_ADDRESS as string,
+    method: "getLand",
+    args: [address],
+    blockNumber: RECOVERY_BLOCK_NUMBER,
+  });
 
   return fields;
 }

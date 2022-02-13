@@ -52,7 +52,6 @@ export async function getV1GameState({
       }),
       {} as Inventory
     ) as Inventory;
-    console.log({ converted: gameState.inventory });
   }
 
   const liquidityPool = POOL_BALANCE[address];
