@@ -20,16 +20,19 @@ contract SunflowerLandToken is ERC20Pausable, GameOwner {
     return true;
   }
   
-  function gameMint(address account, uint256 amount) public onlyGame {
+  function gameMint(address account, uint256 amount) public onlyGame returns (bool){
 	_mint(account, amount);
+    return true;
  }
 
-  function gameBurn(address account, uint256 amount) public onlyGame {
+  function gameBurn(address account, uint256 amount) public onlyGame returns (bool){
 	_burn(account, amount);
+    return true;
   }
 
-  function gameTransfer(address from, address to, uint256 amount) public onlyGame {
+  function gameTransfer(address from, address to, uint256 amount) public onlyGame returns (bool){
 	_transfer(from, to, amount);
+    return true;
   }
 
   function gameApprove(address spender, uint256 amount) public onlyGame returns (bool) {

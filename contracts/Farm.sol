@@ -44,25 +44,32 @@ contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
     }
 
 
-    function mint(address account) public onlyGame {
+    function mint(address account) public onlyGame returns (bool){
         uint256 tokenId = totalSupply() + 1;
         _mint(account, tokenId);
 
         // Create identifiable farm contract
         FarmHolder farm = new FarmHolder(this, tokenId);
         farms[tokenId] = address(farm);
+
+        return true;
 	}
 
-    function gameTransfer(address from, address to, uint256 tokenId) public onlyGame {
+    function gameTransfer(address from, address to, uint256 tokenId) public onlyGame returns (bool){
         _transfer(from, to, tokenId);
+        return true;
+
     }
 
-    function gameApprove(address to, uint256 tokenId) public onlyGame {
+    function gameApprove(address to, uint256 tokenId) public onlyGame returns (bool) {
         _approve(to, tokenId);
+        return true;
+
     }
 
-    function gameBurn(uint256 tokenId) public onlyGame {
+    function gameBurn(uint256 tokenId) public onlyGame returns (bool){
         _burn(tokenId);
+        return true;
     }
     
     /**

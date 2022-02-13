@@ -65,7 +65,8 @@ contract SunflowerLandBeta is Ownable {
             require(charitySent, "Beta: Charity Donation Failed");
         }
 
-        farm.mint(_msgSender());
+        bool minted = farm.mint(_msgSender());
+        require(minted, "Beta: Unable to mint farm");
     }
 
     function farmCreatedAt(address account) public view returns (uint) {
