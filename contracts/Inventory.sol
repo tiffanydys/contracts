@@ -12,8 +12,9 @@ contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
         gameRoles[msg.sender] = true;
     }
 
-    function setURI(string memory newuri) public onlyOwner {
+    function setURI(string memory newuri) public onlyOwner returns (bool) {
         _setURI(newuri);
+        return true;
     }
 
     function gameMint(
@@ -21,16 +22,18 @@ contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) public onlyGame {
+    ) public onlyGame returns (bool) {
         _mintBatch(to, ids, amounts, data);
+        return true;
     }
 
     function gameBurn(
         address to,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) public onlyGame {
+    ) public onlyGame returns (bool) {
         _burnBatch(to, ids, amounts);
+        return true;
     }
 
     function gameTransferFrom(
@@ -39,16 +42,18 @@ contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) public onlyGame {
+    ) public onlyGame returns (bool) {
         _safeBatchTransferFrom(from, to, ids, amounts, data);
+        return true;
     }
 
     function gameSetApproval(
         address owner,
         address operator,
         bool approved
-    ) internal virtual onlyGame {
+    ) internal virtual onlyGame returns (bool) {
         _setApprovalForAll(owner, operator, approved);
+        return true;
     }
 
     /**

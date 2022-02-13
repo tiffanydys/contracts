@@ -36,10 +36,17 @@ export async function startSession({
   sender,
   sessionId,
 }: StartSessionArgs): Promise<GameState> {
+  // We don't really care about this - they could create a session but never be able to save it
+  const nftFarm = await loadNFTFarm(farmId);
+  if (nftFarm.owner !== sender) {
+    throw new Error("You do not own this farm");
+  }
+
   let farms = await getFarmsByAccount(sender);
 
   const farm = farms.find((farm) => farm.id === farmId);
 
+  console.log({ farm, farms });
   // No session was ever created for this farm + account
   if (!farm) {
     // We don't really care about this - they could create a session but never be able to save it

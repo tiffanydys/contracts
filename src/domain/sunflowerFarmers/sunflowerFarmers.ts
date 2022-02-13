@@ -28,7 +28,10 @@ type Options = {
   address: string;
 };
 
-type PartialGame = Pick<GameState, "balance" | "inventory">;
+type PartialGame = {
+  balance: Decimal;
+  inventory: Inventory;
+};
 
 export async function getV1GameState({
   address,
@@ -38,6 +41,7 @@ export async function getV1GameState({
     inventory: {},
   };
 
+  console.log({ address });
   const inventorySnapshot = balances[address.toLowerCase()];
   if (inventorySnapshot) {
     console.log({ inventorySnapshot });

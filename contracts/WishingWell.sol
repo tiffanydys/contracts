@@ -43,7 +43,8 @@ contract WishingWell is ERC20, Ownable {
     function throwTokens(uint amount) public {
         updatedAt[msg.sender] = block.timestamp;
 
-        liquidityToken.transferFrom(msg.sender, address(this), amount);
+        bool transferred = liquidityToken.transferFrom(msg.sender, address(this), amount);
+        require(transferred == true, "WishingWell: Transfer failed");
 
         _mint(msg.sender, amount);
     }
@@ -105,7 +106,8 @@ contract WishingWell is ERC20, Ownable {
 
         _burn(msg.sender, amount);
 
-        liquidityToken.transfer(msg.sender, amount);
+        bool transferred = liquidityToken.transfer(msg.sender, amount);
+        require(transferred == true, "WishingWell: Transfer failed");
     }
 
     function lastUpdatedAt(address account) public view returns (uint) {
