@@ -8,6 +8,8 @@ import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 import { getItemUnit } from "../../services/web3/utils";
 import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
+import { loadItemSupply } from "../../services/web3/polygon";
+import { KNOWN_IDS } from "./types";
 
 type CalculateChangesetArgs = {
   id: number;
@@ -85,9 +87,6 @@ export async function mint({ farmId, account, item }: MintOptions) {
     throw new Error("Farm does not exist");
   }
 
-  // TODO - call to the Blockchain and see if some are still available
-  // Currently only the UI will be protecting this limit
-
   // Pass numbers into a safe format before processing.
   const gameState = makeGame(farm.gameState);
 
@@ -100,6 +99,12 @@ export async function mint({ farmId, account, item }: MintOptions) {
     },
     available: Object.keys(LimitedItems) as CraftableName[],
   });
+
+  const supply = await loadItemSupply(KNOWN_IDS[item]);
+  const craftable = LimitedItems[item];
+  if (!craftable.supply || new Decimal(supply).gte(craftable.supply)) {
+    throw new Error("Total supply reached for item");
+  }
 
   const changeset = calculateChangeset({
     current: newGameState,

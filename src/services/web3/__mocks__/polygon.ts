@@ -5,11 +5,13 @@ export const loadV1BalanceMock = jest.fn();
 export const loadV1FarmMock = jest.fn((): Square[] => []);
 export const loadBalanceMock = jest.fn();
 export const loadInventoryMock = jest.fn();
+export const loadItemSupplyMock = jest.fn();
 
 jest.doMock("../polygon", () => ({
   loadNFTFarm: loadNFTFarmMock,
   loadInventory: loadInventoryMock,
   loadBalance: loadBalanceMock,
+  loadItemSupply: loadItemSupplyMock,
   loadV1Balance: loadV1BalanceMock,
   loadV1Farm: loadV1FarmMock,
 }));

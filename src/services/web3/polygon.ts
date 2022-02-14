@@ -1,5 +1,3 @@
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
-
 import FarmABI from "../../../contracts/abis/Farm.json";
 import TokenABI from "../../../contracts/abis/Token.json";
 import InventoryABI from "../../../contracts/abis/Inventory.json";
@@ -7,7 +5,6 @@ import SunflowerFarmersABI from "../../../contracts/abis/SunflowerFarmers.json";
 import { Web3Service, Network } from "./Web3Service";
 import { Square } from "./types";
 
-const alchemyKey = process.env.ALCHEMY_KEY;
 const network = process.env.NETWORK;
 
 const sunflowerLandWeb3 = new Web3Service(network as Network);
@@ -53,6 +50,17 @@ export async function loadInventory(
   });
 
   return inventory;
+}
+
+export async function loadItemSupply(id: number): Promise<string> {
+  const supply: string = await sunflowerLandWeb3.call({
+    abi: InventoryABI as any,
+    address: INVENTORY_ADDRESS as string,
+    method: "totalSupply",
+    args: [id],
+  });
+
+  return supply;
 }
 
 // Always from mainnet to read snapshot
