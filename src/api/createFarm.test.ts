@@ -113,7 +113,7 @@ describe("api.createFarm", () => {
     ).rejects.toContain("Unable to verify account");
   });
 
-  it("requires user is on the whitelist", async () => {
+  it.only("requires user is on the whitelist", async () => {
     process.env.NETWORK = "mainnet";
 
     const body: CreateFarmBody = {

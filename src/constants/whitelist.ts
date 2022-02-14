@@ -5,13 +5,14 @@ const SYNC_WHITELIST = [
   "0x43B1633AE106Ab279db9CE79bc2b051F85Ab0738",
   "0xD755984F4A5D885919451eD25e1a854daa5086C9",
   "0xcC9bb698585E78355211710cc1c48fa15868a5d4",
+  "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
 ];
 
 // Lots of duplicates but does not really matter
 const CREATE_FARM_WHITELIST = [
   ...SYNC_WHITELIST,
 
-  // // Artists
+  // Artists
   // "0x002287ec2A4232467A06a92457306157a94ad9DC",
   // "0x2b3F0A1810A19250B76290Ed9b51cb9A518B3D95",
   // "0xb8Bf9f119a18513b0ABBe302986789bC385574C3",
@@ -21,7 +22,7 @@ const CREATE_FARM_WHITELIST = [
   // "0xD6678938ecBB4d0AEFa61E625Ef84620ECbeE1EB",
   // "0x0E893541f9CFdf8Db2326720F0EbCAac411Ffd1E",
 
-  // // Developers
+  //Developers
   // "0xeD8906723B822368DB39401e4c40a3ff828c2906",
   // "0x60826e7d0ECA970845391F1e8db8B16B46C6CfdC",
   // "0x8d680eB6b3aD31ab065B1632bB44fa1456A26548",
@@ -31,7 +32,7 @@ const CREATE_FARM_WHITELIST = [
   // "0xbacae1ba4b2e591e98b158aa1bef27d16099ae0f",
   // "0x068BAb172FA62635DFB3cAbCF330EdbF63522cE4",
 
-  // // Beta test
+  //Beta test
   // "0x9528CE2C1F0e4E8Eeb3CBc31fb67601C3a87c2db",
   // "0x307CED27048cCe9928C69eB7296F5BeD270b1954",
   // "0x7E8931003Be6F9BE079070A2e8738D678710F238",
@@ -123,13 +124,25 @@ const CREATE_FARM_WHITELIST = [
 ];
 
 export function canCreateFarm(address: string) {
+  const network = process.env.NETWORK as "mumbai" | "mainnet";
+  if (network !== "mainnet") {
+    return true;
+  }
   return CREATE_FARM_WHITELIST.includes(address);
 }
 
 export function canSync(address: string) {
+  const network = process.env.NETWORK as "mumbai" | "mainnet";
+  if (network !== "mainnet") {
+    return true;
+  }
   return SYNC_WHITELIST.includes(address);
 }
 
 export function canMint(address: string) {
+  const network = process.env.NETWORK as "mumbai" | "mainnet";
+  if (network !== "mainnet") {
+    return true;
+  }
   return SYNC_WHITELIST.includes(address);
 }
