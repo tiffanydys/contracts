@@ -89,6 +89,11 @@ export default class ApiStack extends sst.Stack {
             ...web3EnvironmentVariables,
           },
         },
+        "GET    /nfts/farm/{id}": {
+          handler: "src/api/metadata.handler",
+          bundle: {},
+          environment: {},
+        },
       },
     });
 

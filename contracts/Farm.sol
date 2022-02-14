@@ -23,7 +23,7 @@ contract SunflowerLand is ERC721Enumerable, Pausable, GameOwner {
 
     string private baseURI = "https://sunflower-land.com/play/nfts/farm/";
 
-    constructor() ERC721("Sunflower Land Farm", "SLF") {
+    constructor() ERC721("Sunflower Land", "SL") {
         gameRoles[msg.sender] = true;
     }
 
