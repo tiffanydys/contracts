@@ -1,6 +1,7 @@
 import Decimal from "decimal.js-light";
 import { toWei } from "web3-utils";
 import { getFarmMock } from "../../repository/__mocks__/db";
+import { loadItemSupplyMock } from "../../services/web3/__mocks__/polygon";
 import { calculateChangeset, getChangeset, mint } from "./sync";
 import { FOODS, LimitedItems, TOOLS } from "./types/craftables";
 import { CROPS, SEEDS } from "./types/crops";
@@ -263,7 +264,12 @@ describe("game.sync", () => {
     });
   });
 
-  describe.only("mint", () => {
+  describe("mint", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      loadItemSupplyMock.mockReturnValue("75");
+    });
+
     it("throws an error if the farm does not exist", async () => {
       getFarmMock.mockReturnValueOnce(null);
 
@@ -369,6 +375,49 @@ describe("game.sync", () => {
       await expect(
         result.catch((e: Error) => Promise.reject(e.message))
       ).rejects.toContain("Insufficient tokens");
+    });
+
+    it("does not craft an item once supply is reached", async () => {
+      loadItemSupplyMock.mockReturnValue(LimitedItems["Sunflower Rock"].supply);
+
+      getFarmMock.mockReturnValueOnce({
+        id: 13,
+        session:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        gameState: {
+          balance: "2000",
+          fields: {},
+          inventory: {
+            Sunflower: "50000",
+            Iron: "200",
+            Gold: "3",
+            Gnome: "1",
+          },
+          stock: {
+            "Potato Seed": "7",
+          },
+        },
+        previousGameState: {
+          balance: "400",
+          fields: {},
+          stock: {},
+          inventory: {
+            Sunflower: "2000",
+            "Potato Seed": "7",
+            Gnome: "1",
+          },
+        },
+      });
+
+      const result = mint({
+        farmId: 13,
+        item: "Sunflower Rock",
+        account: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("Total supply reached for item");
     });
   });
 });

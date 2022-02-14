@@ -2,9 +2,11 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { verifyAccount, withdrawSignature } from "../services/web3/signatures";
 import { canSync } from "../constants/whitelist";
-import { IDS, ITEM_NAMES, KNOWN_IDS } from "../domain/game/types";
+import { KNOWN_IDS } from "../domain/game/types";
 import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
 import { InventoryItemName } from "../domain/game/types/game";
+import { getTax } from "../domain/game/withdraw";
+import { RESOURCES } from "../domain/game/types/resources";
 
 /**
  * Items like pumpkin soup are non-transferrable
@@ -12,6 +14,7 @@ import { InventoryItemName } from "../domain/game/types/game";
 const VALID_ITEMS = Object.keys({
   ...TOOLS,
   ...LimitedItems,
+  ...RESOURCES,
 }) as InventoryItemName[];
 
 const VALID_IDS = VALID_ITEMS.map((id) => KNOWN_IDS[id]);
@@ -26,7 +29,7 @@ const schema = Joi.object<WithdrawBody>({
     .items(Joi.number().valid(...VALID_IDS))
     .required()
     .min(0),
-  amounts: Joi.array().items(Joi.string()).required(),
+  amounts: Joi.array().items(Joi.string()).required().min(0),
 });
 
 export type WithdrawBody = {
@@ -70,8 +73,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     sfl: body.sfl,
     ids: body.ids,
     amounts: body.amounts,
-    // TODO
-    tax: 50,
+    tax: getTax(body.sfl),
   });
 
   return {

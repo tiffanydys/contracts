@@ -12,7 +12,27 @@ import {
   loadBalanceMock,
   loadInventoryMock,
 } from "../../services/web3/__mocks__/polygon";
+import { INITIAL_FIELDS, INITIAL_STOCK } from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
+
+const initialStockJSON = {
+  Axe: "50",
+  "Beetroot Seed": "80",
+  "Cabbage Seed": "90",
+  "Carrot Seed": "100",
+  "Cauliflower Seed": "70",
+  "Iron Pickaxe": "50",
+  "Parsnip Seed": "50",
+  Pickaxe: "50",
+  "Potato Seed": "300",
+  "Pumpkin Seed": "200",
+  "Pumpkin Soup": "1",
+  "Radish Seed": "40",
+  "Roasted Cauliflower": "1",
+  Sauerkraut: "1",
+  "Stone Pickaxe": "50",
+  "Sunflower Seed": "1000",
+};
 
 describe("game", () => {
   beforeEach(() => {
@@ -64,64 +84,10 @@ describe("game", () => {
 
       const gameState = {
         balance: "60",
-        fields: {
-          "0": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "1": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "10": {
-            name: "Cauliflower",
-            plantedAt: 0,
-          },
-          "11": {
-            name: "Beetroot",
-            plantedAt: 0,
-          },
-          "16": {
-            name: "Parsnip",
-            plantedAt: 0,
-          },
-          "17": {
-            name: "Radish",
-            plantedAt: 0,
-          },
-          "2": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "5": {
-            name: "Carrot",
-            plantedAt: 0,
-          },
-          "6": {
-            name: "Cabbage",
-            plantedAt: 0,
-          },
-        },
+        fields: INITIAL_FIELDS,
         id: 1,
         inventory: {},
-        stock: {
-          Axe: "50",
-          "Beetroot Seed": "80",
-          "Cabbage Seed": "90",
-          "Carrot Seed": "100",
-          "Cauliflower Seed": "70",
-          "Iron Pickaxe": "50",
-          "Parsnip Seed": "50",
-          Pickaxe: "50",
-          "Potato Seed": "300",
-          "Pumpkin Seed": "200",
-          "Pumpkin Soup": "1",
-          "Radish Seed": "40",
-          "Roasted Cauliflower": "1",
-          Sauerkraut: "1",
-          "Stone Pickaxe": "50",
-          "Sunflower Seed": "1000",
-        },
+        stock: initialStockJSON,
       };
 
       // Initial farm values
@@ -132,64 +98,10 @@ describe("game", () => {
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
           balance: "0",
-          fields: {
-            "0": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "1": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "10": {
-              name: "Cauliflower",
-              plantedAt: 0,
-            },
-            "11": {
-              name: "Beetroot",
-              plantedAt: 0,
-            },
-            "16": {
-              name: "Parsnip",
-              plantedAt: 0,
-            },
-            "17": {
-              name: "Radish",
-              plantedAt: 0,
-            },
-            "2": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "5": {
-              name: "Carrot",
-              plantedAt: 0,
-            },
-            "6": {
-              name: "Cabbage",
-              plantedAt: 0,
-            },
-          },
+          fields: INITIAL_FIELDS,
           id: 1,
           inventory: {},
-          stock: {
-            Axe: "50",
-            "Beetroot Seed": "80",
-            "Cabbage Seed": "90",
-            "Carrot Seed": "100",
-            "Cauliflower Seed": "70",
-            "Iron Pickaxe": "50",
-            "Parsnip Seed": "50",
-            Pickaxe: "50",
-            "Potato Seed": "300",
-            "Pumpkin Seed": "200",
-            "Pumpkin Soup": "1",
-            "Radish Seed": "40",
-            "Roasted Cauliflower": "1",
-            Sauerkraut: "1",
-            "Stone Pickaxe": "50",
-            "Sunflower Seed": "1000",
-          },
+          stock: initialStockJSON,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -198,65 +110,10 @@ describe("game", () => {
 
       expect(session).toEqual({
         balance: new Decimal(60),
-        fields: {
-          "0": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "1": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "10": {
-            name: "Cauliflower",
-            plantedAt: 0,
-          },
-          "11": {
-            name: "Beetroot",
-            plantedAt: 0,
-          },
-          "16": {
-            name: "Parsnip",
-            plantedAt: 0,
-          },
-          "17": {
-            name: "Radish",
-            plantedAt: 0,
-          },
-          "2": {
-            name: "Sunflower",
-            plantedAt: 0,
-          },
-          "5": {
-            name: "Carrot",
-            plantedAt: 0,
-          },
-          "6": {
-            name: "Cabbage",
-            plantedAt: 0,
-          },
-        },
+        fields: INITIAL_FIELDS,
         id: 1,
         inventory: {},
-        stock: {
-          Axe: new Decimal("50"),
-          "Beetroot Seed": new Decimal("80"),
-          "Cabbage Seed": new Decimal("90"),
-          "Carrot Seed": new Decimal("100"),
-          "Cauliflower Seed": new Decimal("70"),
-          "Iron Pickaxe": new Decimal("50"),
-          "Parsnip Seed": new Decimal("50"),
-          Pickaxe: new Decimal("50"),
-          "Potato Seed": new Decimal("300"),
-          "Pumpkin Seed": new Decimal("200"),
-          "Pumpkin Soup": new Decimal("1"),
-          "Radish Seed": new Decimal("40"),
-          "Roasted Cauliflower": new Decimal("1"),
-          Sauerkraut: new Decimal("1"),
-          "Stone Pickaxe": new Decimal("50"),
-          "Sunflower Seed": new Decimal("1000"),
-          "Wheat Seed": new Decimal("0"),
-        },
+        stock: INITIAL_STOCK,
       });
     });
 
@@ -281,129 +138,19 @@ describe("game", () => {
         createdAt: expect.any(String),
         gameState: {
           balance: "0",
-          fields: {
-            "0": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "1": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "10": {
-              name: "Cauliflower",
-              plantedAt: 0,
-            },
-            "11": {
-              name: "Beetroot",
-              plantedAt: 0,
-            },
-            "16": {
-              name: "Parsnip",
-              plantedAt: 0,
-            },
-            "17": {
-              name: "Radish",
-              plantedAt: 0,
-            },
-            "2": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "5": {
-              name: "Carrot",
-              plantedAt: 0,
-            },
-            "6": {
-              name: "Cabbage",
-              plantedAt: 0,
-            },
-          },
+          fields: INITIAL_FIELDS,
           id: 1,
-          inventory: {
-            "Sunflower Seed": "3",
-          },
-          stock: {
-            Axe: "50",
-            "Beetroot Seed": "80",
-            "Cabbage Seed": "90",
-            "Carrot Seed": "100",
-            "Cauliflower Seed": "70",
-            "Iron Pickaxe": "50",
-            "Parsnip Seed": "50",
-            Pickaxe: "50",
-            "Potato Seed": "300",
-            "Pumpkin Seed": "200",
-            "Pumpkin Soup": "1",
-            "Radish Seed": "40",
-            "Roasted Cauliflower": "1",
-            Sauerkraut: "1",
-            "Stone Pickaxe": "50",
-            "Sunflower Seed": "1000",
-          },
+          inventory: {},
+          stock: initialStockJSON,
         },
         id: 13,
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
           balance: "0",
-          fields: {
-            "0": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "1": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "10": {
-              name: "Cauliflower",
-              plantedAt: 0,
-            },
-            "11": {
-              name: "Beetroot",
-              plantedAt: 0,
-            },
-            "16": {
-              name: "Parsnip",
-              plantedAt: 0,
-            },
-            "17": {
-              name: "Radish",
-              plantedAt: 0,
-            },
-            "2": {
-              name: "Sunflower",
-              plantedAt: 0,
-            },
-            "5": {
-              name: "Carrot",
-              plantedAt: 0,
-            },
-            "6": {
-              name: "Cabbage",
-              plantedAt: 0,
-            },
-          },
+          fields: INITIAL_FIELDS,
           id: 1,
           inventory: {},
-          stock: {
-            Axe: "50",
-            "Beetroot Seed": "80",
-            "Cabbage Seed": "90",
-            "Carrot Seed": "100",
-            "Cauliflower Seed": "70",
-            "Iron Pickaxe": "50",
-            "Parsnip Seed": "50",
-            Pickaxe: "50",
-            "Potato Seed": "300",
-            "Pumpkin Seed": "200",
-            "Pumpkin Soup": "1",
-            "Radish Seed": "40",
-            "Roasted Cauliflower": "1",
-            Sauerkraut: "1",
-            "Stone Pickaxe": "50",
-            "Sunflower Seed": "1000",
-          },
+          stock: initialStockJSON,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -449,24 +196,7 @@ describe("game", () => {
             "Potato Seed": "2",
             "Sunflower Seed": "1",
           },
-          stock: {
-            Axe: "50",
-            "Beetroot Seed": "80",
-            "Cabbage Seed": "90",
-            "Carrot Seed": "100",
-            "Cauliflower Seed": "70",
-            "Iron Pickaxe": "50",
-            "Parsnip Seed": "50",
-            Pickaxe: "50",
-            "Potato Seed": "300",
-            "Pumpkin Seed": "200",
-            "Pumpkin Soup": "1",
-            "Radish Seed": "40",
-            "Roasted Cauliflower": "1",
-            Sauerkraut: "1",
-            "Stone Pickaxe": "50",
-            "Sunflower Seed": "1000",
-          },
+          stock: initialStockJSON,
         },
         sessionId: "0x123",
       });
@@ -478,25 +208,7 @@ describe("game", () => {
           "Potato Seed": new Decimal(2),
           "Sunflower Seed": new Decimal(1),
         },
-        stock: {
-          Axe: new Decimal("50"),
-          "Beetroot Seed": new Decimal("80"),
-          "Cabbage Seed": new Decimal("90"),
-          "Carrot Seed": new Decimal("100"),
-          "Cauliflower Seed": new Decimal("70"),
-          "Iron Pickaxe": new Decimal("50"),
-          "Parsnip Seed": new Decimal("50"),
-          Pickaxe: new Decimal("50"),
-          "Potato Seed": new Decimal("300"),
-          "Pumpkin Seed": new Decimal("200"),
-          "Pumpkin Soup": new Decimal("1"),
-          "Radish Seed": new Decimal("40"),
-          "Roasted Cauliflower": new Decimal("1"),
-          Sauerkraut: new Decimal("1"),
-          "Stone Pickaxe": new Decimal("50"),
-          "Sunflower Seed": new Decimal("1000"),
-          "Wheat Seed": new Decimal("0"),
-        },
+        stock: INITIAL_STOCK,
       });
     });
   });

@@ -2,11 +2,14 @@ import {
   APIGatewayProxyHandlerV2,
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
+import Decimal from "decimal.js-light";
 import Joi from "joi";
 import { canMint } from "../constants/whitelist";
 
 import { mint } from "../domain/game/sync";
+import { KNOWN_IDS } from "../domain/game/types";
 import { LimitedItem } from "../domain/game/types/craftables";
+import { loadItemSupply } from "../services/web3/polygon";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
 const VALID_ITEMS: LimitedItem[] = [
@@ -66,8 +69,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     account: body.sender,
     item: body.item,
   });
-
-  // TODO - check the total supply limit
 
   // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({

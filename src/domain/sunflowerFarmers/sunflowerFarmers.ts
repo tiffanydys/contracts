@@ -1,27 +1,22 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
-import {
-  loadV1Balance,
-  loadV1Farm,
-  Square,
-  V1Fruit,
-} from "../../services/web3/polygon";
-import { CropName, SeedName } from "../game/types/crops";
-import { GameState, Inventory, InventoryItemName } from "../game/types/game";
+import { loadV1Balance, loadV1Farm } from "../../services/web3/polygon";
+import { Square, V1Fruit } from "../../services/web3/types";
+import { CropName } from "../game/types/crops";
+import { Inventory, InventoryItemName } from "../game/types/game";
 
 import { balances } from "./constants/balances";
 import { POOL_BALANCE } from "./constants/liquidityPools";
 
 const CROP_CONVERSION: Record<V1Fruit, CropName> = {
-  // Even give them some sunflower seeds for their empty fields <3
   "0": "Sunflower",
   "1": "Sunflower",
   "2": "Potato",
   "3": "Pumpkin",
   "4": "Carrot",
-  "5": "Cabbage",
-  "6": "Beetroot",
-  "7": "Cauliflower",
+  "5": "Cauliflower",
+  "6": "Parsnip",
+  "7": "Radish",
 };
 
 type Options = {
@@ -41,7 +36,9 @@ export async function getV1GameState({
     inventory: {},
   };
 
+  console.log({ address });
   const inventorySnapshot = balances[address.toLowerCase()];
+  console.log({ inventorySnapshot });
   if (inventorySnapshot) {
     gameState.inventory = Object.keys(inventorySnapshot).reduce(
       (items, itemName) => ({
