@@ -1,12 +1,11 @@
 import Decimal from "decimal.js-light";
-import { fromWei, toWei } from "web3-utils";
+import { toWei } from "web3-utils";
 
 import { getFarmById } from "../../repository/farms";
 import { GameState, InventoryItemName, Inventory } from "./types/game";
 import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
 import { getItemUnit } from "../../services/web3/utils";
-import { KNOWN_IDS } from "./types";
 import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
 
