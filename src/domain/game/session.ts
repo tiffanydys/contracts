@@ -112,7 +112,6 @@ export async function startSession({
 
   // We are out of sync with the Blockchain
   const onChainData = await fetchOnChainData({
-    sender: sender,
     farmId: farmId,
     farm: nftFarm,
   });
@@ -138,11 +137,9 @@ export async function startSession({
 }
 
 export async function fetchOnChainData({
-  sender,
   farmId,
   farm,
 }: {
-  sender: string;
   farmId: number;
   farm: FarmNFT;
 }) {

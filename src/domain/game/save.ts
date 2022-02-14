@@ -3,6 +3,7 @@ import { EVENTS, GameEvent } from "./events";
 import { GameState } from "./types/game";
 
 import { makeGame } from "./lib/transforms";
+import { storeEvents } from "../../repository/eventStore";
 
 export type GameAction = GameEvent & {
   createdAt: string;
@@ -106,6 +107,13 @@ export async function save({ farmId, account, actions }: SaveArgs) {
     id: farmId,
     gameState: newGameState,
     owner: account,
+  });
+
+  await storeEvents({
+    account,
+    farmId,
+    events: actions,
+    state: newGameState,
   });
 
   return newGameState;

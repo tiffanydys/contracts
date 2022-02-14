@@ -1,4 +1,5 @@
 import { getFarmMock } from "../repository/__mocks__/db";
+import "../repository/__mocks__/eventStore";
 import "../services/web3/__mocks__/polygon";
 import "../services/__mocks__/kms";
 

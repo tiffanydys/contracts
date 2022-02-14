@@ -17,6 +17,12 @@ export default class ApiStack extends sst.Stack {
       primaryIndex: { partitionKey: "owner", sortKey: "id" },
     });
 
+    const bucket = new sst.Bucket(this, "PlayerEvents", {
+      s3Bucket: {
+        bucketName: `${scope.stage}-player-events`,
+      },
+    });
+
     const web3EnvironmentVariables = {
       NETWORK: process.env.NETWORK as string,
       ALCHEMY_KEY: process.env.ALCHEMY_KEY as string,
@@ -47,6 +53,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            bucketName: bucket.bucketName,
           },
         },
         "POST    /session": {
@@ -97,7 +104,7 @@ export default class ApiStack extends sst.Stack {
       },
     });
 
-    api.attachPermissions([sessionTable]);
+    api.attachPermissions([sessionTable, bucket]);
 
     this.addOutputs({
       ApiEndpoint: api.url,

@@ -4,6 +4,7 @@ import {
   getFarmsMock,
   updateGameStateMock,
 } from "../../repository/__mocks__/db";
+import "../../repository/__mocks__/eventStore";
 import {
   loadBalanceMock,
   loadInventoryMock,
