@@ -36,12 +36,12 @@ contract SunflowerLandSession is Ownable {
 
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
-    SunflowerLandFarm farm;
+    SunflowerLand farm;
 
     // Enable for deploy - disable for testing
     //IUniswapV2Router02 public immutable uniswapV2Router;
 
-    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLandFarm _farm) payable {
+    constructor(SunflowerLandInventory _inventory, SunflowerLandToken _token, SunflowerLand _farm) payable {
         inventory = _inventory;
         token = _token;
         farm = _farm;

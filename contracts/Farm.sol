@@ -14,14 +14,14 @@ struct Farm {
     uint256 tokenId;
 }
 
-contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
+contract SunflowerLand is ERC721Enumerable, Pausable, GameOwner {
     /*
      * Each farm has its own contract address deployed
      * This enables the NFT to actually own the resources and tokens
     */
     mapping (uint => address) farms;
 
-    string private baseURI = "https://sunflower-land.com/api/nfts/farm/";
+    string private baseURI = "https://sunflower-land.com/play/nfts/farm/";
 
     constructor() ERC721("Sunflower Land Farm", "SLF") {
         gameRoles[msg.sender] = true;
@@ -117,10 +117,10 @@ contract SunflowerLandFarm is ERC721Enumerable, Pausable, GameOwner {
 }
 
 contract FarmHolder is ERC165, IERC1155Receiver {
-    SunflowerLandFarm private farm;
+    SunflowerLand private farm;
     uint private id;
 
-    constructor(SunflowerLandFarm _farm, uint _id) {
+    constructor(SunflowerLand _farm, uint _id) {
         farm = _farm;
         id = _id;
     }

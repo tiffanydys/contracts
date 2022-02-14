@@ -12,7 +12,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract SunflowerLandFarm",
+        "internalType": "contract SunflowerLand",
         "name": "_farm",
         "type": "address"
       }

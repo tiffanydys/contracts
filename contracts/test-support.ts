@@ -40,7 +40,7 @@ export async function deploySFLContracts(web3: Web3) {
     ),
     deployContract(
       web3,
-      abijson.contracts["contracts/Farm.sol:SunflowerLandFarm"],
+      abijson.contracts["contracts/Farm.sol:SunflowerLand"],
       TestAccount.TEAM.address
     ),
     deployContract(

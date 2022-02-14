@@ -51,7 +51,7 @@ contract SunflowerLandInventory is ERC1155Supply, GameOwner, Pausable {
         address owner,
         address operator,
         bool approved
-    ) internal virtual onlyGame returns (bool) {
+    ) public onlyGame returns (bool) {
         _setApprovalForAll(owner, operator, approved);
         return true;
     }

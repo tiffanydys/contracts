@@ -16,9 +16,9 @@ contract SunflowerLandBeta is Ownable {
 
     address private signer;
     address private team;
-    SunflowerLandFarm farm;
+    SunflowerLand farm;
 
-    constructor(SunflowerLandFarm _farm) payable {
+    constructor(SunflowerLand _farm) payable {
         farm = _farm;
         signer = _msgSender();
         team = _msgSender();
