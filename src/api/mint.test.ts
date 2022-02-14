@@ -1,3 +1,4 @@
+import { loadItemSupplyMock } from "../services/web3/__mocks__/polygon";
 import { KNOWN_IDS } from "../domain/game/types";
 import { getFarmMock } from "../repository/__mocks__/db";
 import "../services/__mocks__/kms";
@@ -163,6 +164,9 @@ describe("api.mint", () => {
   });
 
   it("mints an item", async () => {
+    // Still some left!
+    loadItemSupplyMock.mockReturnValue("50");
+
     getFarmMock.mockReturnValue({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
