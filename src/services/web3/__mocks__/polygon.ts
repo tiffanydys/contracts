@@ -1,6 +1,8 @@
+import { Square } from "../types";
+
 export const loadNFTFarmMock = jest.fn();
 export const loadV1BalanceMock = jest.fn();
-export const loadV1FarmMock = jest.fn(() => []);
+export const loadV1FarmMock = jest.fn((): Square[] => []);
 export const loadBalanceMock = jest.fn();
 export const loadInventoryMock = jest.fn();
 

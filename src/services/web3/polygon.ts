@@ -5,6 +5,7 @@ import TokenABI from "../../../contracts/abis/Token.json";
 import InventoryABI from "../../../contracts/abis/Inventory.json";
 import SunflowerFarmersABI from "../../../contracts/abis/SunflowerFarmers.json";
 import { Web3Service, Network } from "./Web3Service";
+import { Square } from "./types";
 
 const alchemyKey = process.env.ALCHEMY_KEY;
 const network = process.env.NETWORK;
@@ -79,22 +80,6 @@ export async function loadV1Balance(address: string): Promise<string> {
   });
 
   return balance;
-}
-
-export enum V1Fruit {
-  None = "0",
-  Sunflower = "1",
-  Potato = "2",
-  Pumpkin = "3",
-  Beetroot = "4",
-  Cauliflower = "5",
-  Parsnip = "6",
-  Radish = "7",
-}
-
-export interface Square {
-  fruit: V1Fruit;
-  createdAt: number;
 }
 
 export async function loadV1Farm(address: string): Promise<Square[]> {

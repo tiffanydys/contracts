@@ -263,7 +263,7 @@ describe("game.sync", () => {
     });
   });
 
-  describe.only("mint", () => {
+  describe("mint", () => {
     it("throws an error if the farm does not exist", async () => {
       getFarmMock.mockReturnValueOnce(null);
 
