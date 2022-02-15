@@ -2162,6 +2162,8 @@ export const balances: Record<string, Inventory> = {
     "Sunflower Statue": "1",
     Scarecrow: "1",
     "Sunflower Tombstone": "1",
+    "Sunflower Rock": "1",
+    "Gold Egg": "1",
   },
   "0x46fdc7bcddc10248a94132718a429efcd7d3ca65": { Axe: "2", Wood: "13" },
   "0x470faf7c48203276ecd3ff1f3c43894f66288574": {

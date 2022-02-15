@@ -14,10 +14,14 @@ import "./Farm.sol";
 contract SunflowerLandSession is Ownable {
     using ECDSA for bytes32;
 
+    event SessionChanged(address owner, bytes32 sessionId, uint farmId);
+
+
     mapping(bytes32 => bool) public executed;
 
     // Farm ID to saved timestamp
     mapping(uint => bytes32) public sessions;
+    mapping(uint => uint) public withdrawnAt;
 
     function deposit() external payable {}
 
@@ -80,6 +84,10 @@ contract SunflowerLandSession is Ownable {
         wishingWell = _wishingWell;
     }
 
+    function getWithdrawnAt(uint tokenId) public view returns(uint) {
+        return withdrawnAt[tokenId];
+    }
+
     // A unique nonce identifer for the account
     function generateSessionId(uint tokenId) public view returns(bytes32) {
         return keccak256(abi.encodePacked(_msgSender(), sessions[tokenId], block.timestamp)).toEthSignedMessageHash();
@@ -121,7 +129,8 @@ contract SunflowerLandSession is Ownable {
         );
 
         // Start a new session
-        sessions[farmId] = generateSessionId(farmId);
+        bytes32 newSessionId = generateSessionId(farmId);
+        sessions[farmId] = newSessionId;
 
         // Verify
         bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, mintIds, mintAmounts, burnIds, burnAmounts, tokens));
@@ -144,6 +153,8 @@ contract SunflowerLandSession is Ownable {
 
         (bool teamSent,) = team.call{value: msg.value}("");
         require(teamSent, "SunflowerLand: Fee Failed");
+
+        emit SessionChanged(farmOwner, newSessionId, farmId);
 
         return true;
     }
@@ -197,7 +208,9 @@ contract SunflowerLandSession is Ownable {
         );
 
         // Start a new session
-        sessions[farmId] = generateSessionId(farmId);
+        bytes32 newSessionId = generateSessionId(farmId);
+        sessions[farmId] = newSessionId;
+        withdrawnAt[farmId] = block.timestamp;
 
         // Verify
         bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, ids, amounts, sfl, tax));
@@ -224,6 +237,8 @@ contract SunflowerLandSession is Ownable {
         uint remaining = sfl - teamFee;
         inventory.gameTransferFrom(farmNFT.account, _msgSender(), ids, amounts, "");
         token.gameTransfer(farmNFT.account, _msgSender(), remaining);
+
+        emit SessionChanged(farmOwner, newSessionId, farmId);
 
         return true;
     }
