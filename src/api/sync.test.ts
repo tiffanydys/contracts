@@ -193,7 +193,7 @@ describe("api.sync", () => {
       tokens: "80000000000000000000000",
       deadline: expect.any(Number),
       mintIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
-      mintAmounts: ["6000", "500000000000000000000"],
+      mintAmounts: ["6000000000000000000000", "500000000000000000000"],
       burnIds: [KNOWN_IDS["Carrot Seed"]],
       burnAmounts: ["100"],
       signature: "0x0asd0j234nsd0",

@@ -64,7 +64,7 @@ describe("game.sync", () => {
           "Farm Cat": new Decimal(1),
           Gold: new Decimal(toWei("3")),
           "Potato Seed": new Decimal("-4"),
-          Sunflower: new Decimal("4"),
+          Sunflower: new Decimal(toWei("4")),
         },
         stock: {
           "Potato Seed": new Decimal("7"),
@@ -155,8 +155,8 @@ describe("game.sync", () => {
         "Farm Cat": new Decimal("-1"),
         Gold: new Decimal("-10000000000000000000"),
         Iron: new Decimal("37000000000000000000"),
-        Pickaxe: new Decimal("-5000000000000000000"),
-        Sunflower: new Decimal("70"),
+        Pickaxe: new Decimal("-5"),
+        Sunflower: new Decimal(toWei("70")),
         "Sunflower Rock": new Decimal("1"),
         Wood: new Decimal("5000000000000000000"),
       });
@@ -185,7 +185,7 @@ describe("game.sync", () => {
       });
 
       expect(changeset.inventory).toEqual({
-        Cabbage: new Decimal("100"),
+        Cabbage: new Decimal(toWei("100")),
         "Cauliflower Seed": new Decimal("5"),
         "Golden Cauliflower": new Decimal("1"),
       });
@@ -214,8 +214,8 @@ describe("game.sync", () => {
       expect(changeset.inventory).toEqual({});
     });
 
-    it("uses wei conversion for all tools and resources", async () => {
-      const weiBased = { ...TOOLS, ...RESOURCES };
+    it("uses wei conversion for all crops and resources", async () => {
+      const weiBased = { ...CROPS(), ...RESOURCES };
 
       const increase = Object.keys(weiBased).reduce((acc, key) => {
         acc[key as InventoryItemName] = new Decimal(1);
@@ -241,8 +241,8 @@ describe("game.sync", () => {
       expect(changeset.inventory).toEqual(expected);
     });
 
-    it("uses eth conversion for all seeds, crops and NFTs", async () => {
-      const ethBased = { ...LimitedItems, ...SEEDS, ...CROPS, ...FOODS };
+    it("uses eth conversion for all seeds, tools and NFTs", async () => {
+      const ethBased = { ...LimitedItems, ...SEEDS(), ...TOOLS, ...FOODS };
 
       const increase = Object.keys(ethBased).reduce((acc, key) => {
         acc[key as InventoryItemName] = new Decimal(1);
@@ -339,7 +339,7 @@ describe("game.sync", () => {
         Gold: new Decimal("3000000000000000000"),
         Iron: new Decimal("100000000000000000000"),
         "Potato Seed": new Decimal("-7"),
-        Sunflower: new Decimal("38000"),
+        Sunflower: new Decimal(toWei("38000")),
         "Sunflower Rock": new Decimal("1"),
       });
     });

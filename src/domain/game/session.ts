@@ -148,8 +148,6 @@ export async function fetchOnChainData({
   sessionId: string;
 }) {
   const currentSessionId = await loadSession(farmId);
-  console.log({ currentSessionId });
-  console.log({ sessionId });
   if (sessionId !== currentSessionId) {
     throw new Error("Session ID does not match");
   }
