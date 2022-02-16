@@ -37,7 +37,7 @@ export async function startSession({
     throw new Error("You do not own this farm");
   }
 
-  let farms = await getFarmsByAccount(sender);
+  const farms = await getFarmsByAccount(sender);
 
   const farm = farms.find((farm) => farm.id === farmId);
 
@@ -101,7 +101,7 @@ export async function startSession({
     return initialFarm;
   }
 
-  let farmState = makeGame(farm.gameState);
+  const farmState = makeGame(farm.gameState);
 
   // Does the session ID match?
   const sessionMatches = farm.sessionId === sessionId;
