@@ -14,7 +14,7 @@ import "./Farm.sol";
 contract SunflowerLandSession is Ownable {
     using ECDSA for bytes32;
 
-    event SessionChanged(address owner, bytes32 sessionId, uint farmId);
+    event SessionChanged(address indexed owner, bytes32 indexed sessionId, uint indexed farmId);
 
 
     mapping(bytes32 => bool) public executed;
