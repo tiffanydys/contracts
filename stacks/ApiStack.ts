@@ -28,6 +28,7 @@ export default class ApiStack extends sst.Stack {
       ALCHEMY_KEY: process.env.ALCHEMY_KEY as string,
       TOKEN_ADDRESS: process.env.TOKEN_ADDRESS as string,
       FARM_ADDRESS: process.env.FARM_ADDRESS as string,
+      SESSION_ADDRESS: process.env.SESSION_ADDRESS as string,
       INVENTORY_ADDRESS: process.env.INVENTORY_ADDRESS as string,
       SFF_TOKEN_ADDRESS: process.env.SFF_TOKEN_ADDRESS as string,
       SFF_FARM_ADDRESS: process.env.SFF_FARM_ADDRESS as string,

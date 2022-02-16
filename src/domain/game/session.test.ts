@@ -11,6 +11,7 @@ import {
   loadV1BalanceMock,
   loadBalanceMock,
   loadInventoryMock,
+  loadSessionMock,
 } from "../../services/web3/__mocks__/polygon";
 import { INITIAL_FIELDS, INITIAL_STOCK } from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
@@ -178,6 +179,7 @@ describe("game", () => {
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
       loadInventoryMock.mockReturnValue(["1", "2"]);
+      loadSessionMock.mockReturnValue("0x123");
 
       const session = await startSession({
         farmId: 13,
@@ -214,13 +216,34 @@ describe("game", () => {
   });
 
   describe("fetchOnChainData", () => {
+    it("throws an error if the session does not match", async () => {
+      loadBalanceMock.mockReturnValue(toWei("35"));
+      loadInventoryMock.mockReturnValue([]);
+      loadSessionMock.mockReturnValue("0xabc");
+
+      const result = fetchOnChainData({
+        farmId: 13,
+        sessionId: "0x123",
+        farm: {
+          account: "0xD7123601239123",
+          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+          tokenId: 2,
+        },
+      });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("Session ID does not match");
+    });
+
     it("loads balance from on chain", async () => {
       loadBalanceMock.mockReturnValue(toWei("35"));
       loadInventoryMock.mockReturnValue([]);
+      loadSessionMock.mockReturnValue("0x123");
 
       const result = await fetchOnChainData({
         farmId: 13,
-        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        sessionId: "0x123",
         farm: {
           account: "0xD7123601239123",
           owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
@@ -292,10 +315,11 @@ describe("game", () => {
         toWei("80"),
         toWei("2000"),
       ]);
+      loadSessionMock.mockReturnValue("0x123");
 
       const result = await fetchOnChainData({
         farmId: 13,
-        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        sessionId: "0x123",
         farm: {
           account: "0xD7123601239123",
           owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
@@ -416,10 +440,11 @@ describe("game", () => {
         toWei("0"),
         toWei("0"),
       ]);
+      loadSessionMock.mockReturnValue("0x123");
 
       const result = await fetchOnChainData({
         farmId: 13,
-        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        sessionId: "0x123",
         farm: {
           account: "0xD7123601239123",
           owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",

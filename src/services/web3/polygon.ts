@@ -1,6 +1,7 @@
 import FarmABI from "../../../contracts/abis/Farm.json";
 import TokenABI from "../../../contracts/abis/Token.json";
 import InventoryABI from "../../../contracts/abis/Inventory.json";
+import SessionABI from "../../../contracts/abis/Sessions.json";
 import SunflowerFarmersABI from "../../../contracts/abis/SunflowerFarmers.json";
 import { Web3Service, Network } from "./Web3Service";
 import { Square } from "./types";
@@ -12,6 +13,7 @@ const sunflowerLandWeb3 = new Web3Service(network as Network);
 const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS;
 const FARM_ADDRESS = process.env.FARM_ADDRESS;
 const INVENTORY_ADDRESS = process.env.INVENTORY_ADDRESS;
+const SESSION_ADDRESS = process.env.SESSION_ADDRESS;
 
 export type FarmNFT = { owner: string; account: string; tokenId: number };
 export async function loadNFTFarm(id: number) {
@@ -34,6 +36,17 @@ export async function loadBalance(address: string): Promise<string> {
   });
 
   return balance;
+}
+
+export async function loadSession(farmId: number): Promise<string> {
+  const sessionId: string = await sunflowerLandWeb3.call({
+    abi: SessionABI as any,
+    address: SESSION_ADDRESS as string,
+    method: "getSessionId",
+    args: [farmId],
+  });
+
+  return sessionId;
 }
 
 export async function loadInventory(

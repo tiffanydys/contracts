@@ -13,6 +13,7 @@ import {
   loadInventory,
   loadBalance,
   FarmNFT,
+  loadSession,
 } from "../../services/web3/polygon";
 
 import { INITIAL_FARM, INITIAL_STOCK } from "./lib/constants";
@@ -114,6 +115,7 @@ export async function startSession({
   const onChainData = await fetchOnChainData({
     farmId: farmId,
     farm: nftFarm,
+    sessionId,
   });
 
   const gameState: GameState = {
@@ -139,10 +141,19 @@ export async function startSession({
 export async function fetchOnChainData({
   farmId,
   farm,
+  sessionId,
 }: {
   farmId: number;
   farm: FarmNFT;
+  sessionId: string;
 }) {
+  const currentSessionId = await loadSession(farmId);
+  console.log({ currentSessionId });
+  console.log({ sessionId });
+  if (sessionId !== currentSessionId) {
+    throw new Error("Session ID does not match");
+  }
+
   const balanceString = await loadBalance(farm.account);
   const balance = new Decimal(fromWei(balanceString, "ether"));
 
