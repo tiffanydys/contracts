@@ -307,6 +307,8 @@ describe("game", () => {
         "1",
         "1",
         "1",
+        "1",
+        "1",
         // Resources
         toWei("20"),
         toWei("125"),
@@ -377,6 +379,8 @@ describe("game", () => {
         Wheat: new Decimal("2022"),
         "Wheat Seed": new Decimal("10023"),
         Wood: new Decimal("20"),
+        "Goblin Crown": new Decimal("1"),
+        Fountain: new Decimal("1"),
       });
     });
 
