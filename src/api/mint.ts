@@ -2,14 +2,11 @@ import {
   APIGatewayProxyHandlerV2,
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
-import Decimal from "decimal.js-light";
 import Joi from "joi";
 import { canMint } from "../constants/whitelist";
 
 import { mint } from "../domain/game/sync";
-import { KNOWN_IDS } from "../domain/game/types";
 import { LimitedItem } from "../domain/game/types/craftables";
-import { loadItemSupply } from "../services/web3/polygon";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
 const VALID_ITEMS: LimitedItem[] = [
@@ -20,6 +17,8 @@ const VALID_ITEMS: LimitedItem[] = [
   "Scarecrow",
   "Sunflower Rock",
   "Sunflower Statue",
+  "Fountain",
+  "Goblin Crown",
 ];
 
 const schema = Joi.object<MintBody>({
