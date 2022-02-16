@@ -40594,4 +40594,5 @@ export const balances: Record<string, Inventory> = {
   "0x068BAb172FA62635DFB3cAbCF330EdbF63522cE4": { "Sunflower Rock": "1" },
   "0xD637918139D44a2DeC4Bbd24F77D8Fca355Cf53E": { "Sunflower Rock": "1" },
   "0x8Bcc3389261679718DB663B94e255485F81d2Ab4": { "Sunflower Rock": "1" },
+  "0x358A9bb416fe97231bAD833eb18215766F5788c2": { "Sunflower Rock": "1" },
 };
