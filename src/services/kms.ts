@@ -15,6 +15,7 @@ const kms = new KMS();
 const keyId = process.env.KMS_KEY_ID;
 
 // Generated public key is - 0x76b88de108e64b835b415353a03406164b912794
+// Production key is - 0xa74423f91780969e53e43a7b0852db007129edd8
 
 const EcdsaSigAsnParse = asn1.define("EcdsaSig", function (this: any) {
   // parsing this according to https://tools.ietf.org/html/rfc3279#section-2.2.3
