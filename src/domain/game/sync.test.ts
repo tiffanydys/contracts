@@ -267,7 +267,7 @@ describe("game.sync", () => {
   describe("mint", () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      loadItemSupplyMock.mockReturnValue("75");
+      loadItemSupplyMock.mockReturnValue("22");
     });
 
     it("throws an error if the farm does not exist", async () => {
