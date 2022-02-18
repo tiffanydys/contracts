@@ -41,10 +41,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     signature: body.signature,
   });
 
-  if (process.env.NETWORK !== "mumbai") {
-    if (!canCreateFarm(body.address)) {
-      throw new Error("Not on whitelist");
-    }
+  if (!canCreateFarm(body.address)) {
+    throw new Error("Not on whitelist");
   }
 
   // No signature validation as not needed
