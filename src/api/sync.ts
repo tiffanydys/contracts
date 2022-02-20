@@ -55,6 +55,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     inventory: changeset.inventory,
   });
 
+  console.info(
+    `Synced ${body.sender} for ${body.farmId}`,
+    JSON.stringify(changeset, null, 2)
+  );
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },

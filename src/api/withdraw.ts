@@ -48,7 +48,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: WithdrawBody = JSON.parse(event.body);
-  console.log({ body });
+  console.info("Withdraw", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {

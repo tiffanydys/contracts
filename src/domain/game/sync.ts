@@ -82,7 +82,7 @@ type MintOptions = {
  * Creates the changeset
  */
 export async function mint({ farmId, account, item }: MintOptions) {
-  let farm = await getFarmById(account, farmId);
+  const farm = await getFarmById(account, farmId);
   if (!farm) {
     throw new Error("Farm does not exist");
   }

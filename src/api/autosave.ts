@@ -68,7 +68,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: AutosaveBody = JSON.parse(event.body);
-  console.log({ body });
+  console.info("Autosave", JSON.stringify(body, null, 2));
 
   const valid = schema().validate(body);
   if (valid.error) {
@@ -85,6 +85,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     account: body.sender,
     actions: body.actions,
   });
+
+  console.info(
+    `Saved ${body.sender} for ${body.farmId}`,
+    JSON.stringify(game, null, 2)
+  );
 
   return {
     statusCode: 200,

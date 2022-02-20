@@ -80,6 +80,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     inventory: changeset.inventory,
   });
 
+  console.info(
+    `Minted ${body.item} for ${body.sender} at ${body.farmId}`,
+    JSON.stringify(changeset, null, 2)
+  );
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },

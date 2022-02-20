@@ -62,6 +62,11 @@ export async function getV1GameState({
   const fields = await loadV1Farm(address);
   gameState.inventory = makeInventory(fields, gameState.inventory);
 
+  console.info(
+    `Sunflower Farmers Migration ${address}`,
+    JSON.stringify(gameState, null, 2)
+  );
+
   return gameState;
 }
 

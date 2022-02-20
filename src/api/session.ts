@@ -24,7 +24,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: SessionBody = JSON.parse(event.body);
-  console.log({ body });
+  console.info("Session Start", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {

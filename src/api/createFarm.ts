@@ -31,7 +31,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: CreateFarmBody = JSON.parse(event.body);
-  console.log({ body });
+  console.info("Create Farm", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {
