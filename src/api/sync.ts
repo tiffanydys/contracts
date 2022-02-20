@@ -24,6 +24,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: SyncBody = JSON.parse(event.body);
+  console.log({ body });
+
   const valid = schema.validate(body);
   if (valid.error) {
     throw new Error(valid.error.message);
