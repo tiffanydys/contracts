@@ -167,6 +167,7 @@ describe("api.session", () => {
 
     expect(result.statusCode).toEqual(200);
     expect(JSON.parse(result.body)).toEqual({
+      startedAt: expect.any(String),
       farm: {
         balance: "100000",
         fields: {},
