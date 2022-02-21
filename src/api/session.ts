@@ -47,6 +47,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       farm,
+      startedAt: new Date().toISOString(),
     }),
   };
 };
