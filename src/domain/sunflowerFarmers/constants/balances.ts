@@ -19328,7 +19328,7 @@ export const balances: Record<string, Inventory> = {
   "0xd9ec3fe2cb543825dac5fa4c0a81aece414e44f2": { Gold: "1" },
   "0xda0fbdceccacd757ae63c344e4ac068d043408d5": { Gold: "1", Wood: "4" },
   "0xdb96c32b1503524543691d2f53e671019a26a4be": {
-    Gold: "50",
+    Gold: "55",
     Wood: "50",
     Stone: "50",
     Iron: "50",
