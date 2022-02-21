@@ -2,13 +2,18 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
 import { verifyAccount } from "../services/web3/signatures";
-import { GameAction, MILLISECONDS_TO_SAVE, save } from "../domain/game/save";
+import {
+  FUTURE_SAVE_BUFFER_MS,
+  GameAction,
+  MILLISECONDS_TO_SAVE,
+  save,
+} from "../domain/game/save";
 
 const eventTimeValidation = () => {
   return Joi.date()
     .iso()
     .greater(Date.now() - MILLISECONDS_TO_SAVE)
-    .less("now");
+    .less(Date.now() + FUTURE_SAVE_BUFFER_MS);
 };
 
 // Thunk it so we can get the current time on runtime

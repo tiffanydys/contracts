@@ -35,6 +35,9 @@ export const MAX_SECONDS_RANGE = 2 * 60;
 // Humanly possible time before executing 2 distinct actions
 const HUMAN_BUFFER_MILLSECONDS = 200;
 
+// Let them save one minute in the future as well to prevent people with clock issues
+export const FUTURE_SAVE_BUFFER_MS = 60 * 1000;
+
 export function processActions(state: GameState, actions: GameAction[]) {
   // Validate actions
   if (!Array.isArray(actions)) {
@@ -74,7 +77,7 @@ export function processActions(state: GameState, actions: GameAction[]) {
     }
 
     const now = new Date();
-    if (createdAt > now) {
+    if (createdAt.getTime() > now.getTime() + FUTURE_SAVE_BUFFER_MS) {
       throw new Error("Event cannot be in the future");
     }
 

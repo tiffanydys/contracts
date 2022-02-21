@@ -73,7 +73,7 @@ describe("game", () => {
       ).toThrow("Events must be in chronological order");
     });
 
-    it("ensures events are not in the future", () => {
+    it("ensures events are not too far in the future", () => {
       expect(() =>
         processActions(
           { ...INITIAL_FARM, inventory: { "Sunflower Seed": new Decimal(1) } },
@@ -82,7 +82,7 @@ describe("game", () => {
               type: "item.planted",
               index: 4,
               item: "Sunflower Seed",
-              createdAt: new Date(Date.now() + 5).toISOString(),
+              createdAt: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
             },
           ]
         )

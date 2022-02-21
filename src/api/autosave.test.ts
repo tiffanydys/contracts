@@ -169,8 +169,8 @@ describe("api.autosave", () => {
     ).rejects.toContain('"actions[0]" does not match any of the allowed types');
   });
 
-  it("requires actions are before current time", async () => {
-    const oneSecondInFuture = new Date(new Date().getTime() + 1000);
+  it("requires actions are not too far in the future", async () => {
+    const twoMinutesInFuture = new Date(new Date().getTime() + 1000 * 60 * 2);
 
     const body = {
       sender: "0x9123",
@@ -181,7 +181,7 @@ describe("api.autosave", () => {
         {
           type: "item.harvested",
           index: 1,
-          createdAt: oneSecondInFuture.toISOString(),
+          createdAt: twoMinutesInFuture.toISOString(),
         },
       ],
     } as AutosaveBody;
