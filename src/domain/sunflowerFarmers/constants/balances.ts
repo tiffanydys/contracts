@@ -2151,7 +2151,7 @@ export const balances: Record<string, Inventory> = {
     Axe: "10",
     Chicken: "10",
     Egg: "120",
-    Gold: "2",
+    Gold: "52",
     Iron: "39",
     "Stone Pickaxe": "4",
     Stone: "7",
