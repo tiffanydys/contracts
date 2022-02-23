@@ -4,7 +4,7 @@ import { fromWei } from "web3-utils";
 import { Account } from "../../../repository/farms";
 import { getItemUnit } from "../../../services/web3/utils";
 import { KNOWN_IDS } from "../types";
-import { GameState, Inventory, InventoryItemName } from "../types/game";
+import { GameState, Inventory, InventoryItemName, Tree } from "../types/game";
 import { INITIAL_TREES } from "./constants";
 
 export function makeGame(gameState: Account["gameState"]): GameState {
@@ -30,13 +30,27 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     {} as Record<InventoryItemName, Decimal>
   );
 
+  // Convert the string values into decimals
+  const trees = Object.keys(gameState.trees).reduce((items, index) => {
+    const dbTree = gameState.trees[Number(index)];
+    const tree: Tree = {
+      choppedAt: dbTree.choppedAt,
+      wood: new Decimal(dbTree.wood),
+    };
+
+    return {
+      ...items,
+      [Number(index)]: tree,
+    };
+  }, {} as Record<InventoryItemName, Decimal>);
+
   return {
     ...gameState,
     balance: new Decimal(gameState.balance),
     inventory,
     stock,
     // In case they were running a version without the trees
-    trees: gameState.trees || INITIAL_TREES,
+    trees: trees || INITIAL_TREES,
   };
 }
 

@@ -12,7 +12,7 @@ export type FarmSession = Omit<
   balance: string;
   inventory: Partial<Record<InventoryItemName, string>>;
   stock: Partial<Record<InventoryItemName, string>>;
-  tree: Record<number, SanitizedTree>;
+  trees: Record<number, SanitizedTree>;
 };
 
 export type Account = {

@@ -52,3 +52,5 @@ export function makeDBItem(farm: GameState): FarmSession {
     trees,
   };
 }
+
+// TODO - validate data going into the DB as well. If this gets corrupted a migration would be extremely

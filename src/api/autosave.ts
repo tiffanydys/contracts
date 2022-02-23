@@ -44,6 +44,12 @@ const schema = () =>
             type: Joi.string().equal("item.harvested"),
             index: Joi.number().min(0).max(21).integer(),
             createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("tree.chopped"),
+            item: Joi.string(),
+            index: Joi.number().min(0).max(5).integer(),
+            createdAt: eventTimeValidation(),
           })
         )
       )

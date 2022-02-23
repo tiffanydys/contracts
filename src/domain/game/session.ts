@@ -73,6 +73,7 @@ export async function startSession({
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
       });
+      console.log({ sunflowerFarmersSnapshot });
 
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
@@ -119,7 +120,7 @@ export async function startSession({
   });
 
   const gameState: GameState = {
-    ...farm.gameState,
+    ...farmState,
     balance: onChainData.balance,
     inventory: onChainData.inventory,
     // Reset the stock

@@ -79,6 +79,14 @@ export const INITIAL_TREES: GameState["trees"] = {
     wood: new Decimal(5),
     choppedAt: 0,
   },
+  3: {
+    wood: new Decimal(5),
+    choppedAt: 0,
+  },
+  4: {
+    wood: new Decimal(3),
+    choppedAt: 0,
+  },
 };
 
 export const INITIAL_FARM: GameState = {
@@ -87,5 +95,14 @@ export const INITIAL_FARM: GameState = {
   fields: INITIAL_FIELDS,
   inventory: {},
   stock: INITIAL_STOCK,
+  trees: INITIAL_TREES,
+};
+
+export const EMPTY: GameState = {
+  id: 1,
+  balance: new Decimal(fromWei("0")),
+  fields: {},
+  inventory: {},
+  stock: {},
   trees: INITIAL_TREES,
 };
