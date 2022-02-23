@@ -5,6 +5,7 @@ import {
 } from "./__mocks__/db";
 import { createFarm, updateFarm, updateSession } from "./farms";
 import Decimal from "decimal.js-light";
+import { INITIAL_TREES } from "../domain/game/lib/constants";
 
 describe("repository.farms", () => {
   beforeEach(() => {
@@ -28,6 +29,16 @@ describe("repository.farms", () => {
         stock: {
           "Sunflower Seed": new Decimal(50),
         },
+        trees: {
+          0: {
+            wood: new Decimal(3),
+            choppedAt: 0,
+          },
+          1: {
+            wood: new Decimal(2),
+            choppedAt: 169282029028,
+          },
+        },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       previousGameState: {
@@ -36,6 +47,7 @@ describe("repository.farms", () => {
         fields: {},
         inventory: {},
         stock: {},
+        trees: {},
       },
       sessionId: "0x8123",
     });
@@ -59,6 +71,16 @@ describe("repository.farms", () => {
         stock: {
           "Sunflower Seed": "50",
         },
+        trees: {
+          0: {
+            wood: "3",
+            choppedAt: 0,
+          },
+          1: {
+            wood: "2",
+            choppedAt: 169282029028,
+          },
+        },
       },
       previousGameState: {
         id: 2,
@@ -66,6 +88,7 @@ describe("repository.farms", () => {
         fields: {},
         inventory: {},
         stock: {},
+        trees: {},
       },
       updatedAt: expect.any(String),
       createdAt: expect.any(String),
@@ -90,6 +113,16 @@ describe("repository.farms", () => {
         stock: {
           "Sunflower Seed": new Decimal(50),
         },
+        trees: {
+          0: {
+            wood: new Decimal(5),
+            choppedAt: 0,
+          },
+          1: {
+            wood: new Decimal(2),
+            choppedAt: 169282029028,
+          },
+        },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
     });
@@ -111,6 +144,16 @@ describe("repository.farms", () => {
         },
         stock: {
           "Sunflower Seed": "50",
+        },
+        trees: {
+          0: {
+            wood: "5",
+            choppedAt: 0,
+          },
+          1: {
+            wood: "2",
+            choppedAt: 169282029028,
+          },
         },
       },
     });
@@ -135,6 +178,16 @@ describe("repository.farms", () => {
         stock: {
           "Sunflower Seed": new Decimal(50),
         },
+        trees: {
+          0: {
+            wood: new Decimal(3),
+            choppedAt: 0,
+          },
+          1: {
+            wood: new Decimal(2),
+            choppedAt: 169282029028,
+          },
+        },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
     });
@@ -157,6 +210,16 @@ describe("repository.farms", () => {
         },
         stock: {
           "Sunflower Seed": "50",
+        },
+        trees: {
+          0: {
+            wood: "3",
+            choppedAt: 0,
+          },
+          1: {
+            wood: "2",
+            choppedAt: 169282029028,
+          },
         },
       },
     });

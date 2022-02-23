@@ -86,7 +86,7 @@ describe("chop", () => {
   });
 
   it("chops multiple tree", () => {
-    const game = chop({
+    let game = chop({
       state: {
         ...GAME_STATE,
         inventory: {
@@ -100,7 +100,7 @@ describe("chop", () => {
       } as ChopAction,
     });
 
-    chop({
+    game = chop({
       state: game,
       action: {
         type: "tree.chopped",

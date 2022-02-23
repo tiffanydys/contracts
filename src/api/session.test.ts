@@ -131,6 +131,7 @@ describe("api.session", () => {
           },
           stock: {},
           address: "0x291019282",
+          trees: {},
         },
         id: 2,
         owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
@@ -144,6 +145,7 @@ describe("api.session", () => {
           },
           stock: {},
           address: "0x291019282",
+          trees: {},
         },
         sessionId: "0x123",
       },
@@ -178,6 +180,7 @@ describe("api.session", () => {
         },
         stock: {},
         address: "0x291019282",
+        trees: {},
       },
     });
   });

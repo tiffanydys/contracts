@@ -1,5 +1,6 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
+import { logInfo } from "../../services/logger";
 import { loadV1Balance, loadV1Farm } from "../../services/web3/polygon";
 import { Square, V1Fruit } from "../../services/web3/types";
 import { CropName } from "../game/types/crops";
@@ -62,7 +63,7 @@ export async function getV1GameState({
   const fields = await loadV1Farm(address);
   gameState.inventory = makeInventory(fields, gameState.inventory);
 
-  console.info(
+  logInfo(
     `Sunflower Farmers Migration ${address}`,
     JSON.stringify(gameState, null, 2)
   );

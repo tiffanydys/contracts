@@ -20,6 +20,7 @@ import { INITIAL_FARM, INITIAL_STOCK } from "./lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 import { IDS } from "./types";
 import { makeGame, makeInventory } from "./lib/transforms";
+import { logInfo } from "../../services/logger";
 
 type StartSessionArgs = {
   farmId: number;
@@ -73,7 +74,7 @@ export async function startSession({
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
       });
-      console.log({ sunflowerFarmersSnapshot });
+      logInfo("Session.snapshot: ", { sunflowerFarmersSnapshot });
 
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
@@ -104,7 +105,7 @@ export async function startSession({
   }
 
   const farmState = makeGame(farm.gameState);
-  console.log({ farmState });
+
   // Does the session ID match?
   const sessionMatches = farm.sessionId === sessionId;
 

@@ -180,6 +180,7 @@ describe("api.mint", () => {
           Stone: "1000",
         },
         address: "0x291019282",
+        trees: {},
       },
       id: 2,
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
@@ -193,6 +194,7 @@ describe("api.mint", () => {
           Stone: "1000",
         },
         address: "0x291019282",
+        trees: {},
       },
       // TODO real ID
       sessionId: "0x8123",

@@ -13,7 +13,7 @@ import {
   loadInventoryMock,
   loadSessionMock,
 } from "../../services/web3/__mocks__/polygon";
-import { INITIAL_FIELDS, INITIAL_STOCK } from "./lib/constants";
+import { INITIAL_FIELDS, INITIAL_STOCK, INITIAL_TREES } from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
 
 const initialStockJSON = {
@@ -33,6 +33,29 @@ const initialStockJSON = {
   Sauerkraut: "1",
   "Stone Pickaxe": "50",
   "Sunflower Seed": "1000",
+};
+
+const initialTreeJSON = {
+  0: {
+    wood: "3",
+    choppedAt: 0,
+  },
+  1: {
+    wood: "4",
+    choppedAt: 0,
+  },
+  2: {
+    wood: "5",
+    choppedAt: 0,
+  },
+  3: {
+    wood: "5",
+    choppedAt: 0,
+  },
+  4: {
+    wood: "3",
+    choppedAt: 0,
+  },
 };
 
 describe("game", () => {
@@ -89,6 +112,7 @@ describe("game", () => {
         id: 1,
         inventory: {},
         stock: initialStockJSON,
+        trees: initialTreeJSON,
       };
 
       // Initial farm values
@@ -103,6 +127,7 @@ describe("game", () => {
           id: 1,
           inventory: {},
           stock: initialStockJSON,
+          trees: initialTreeJSON,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -115,6 +140,7 @@ describe("game", () => {
         id: 1,
         inventory: {},
         stock: INITIAL_STOCK,
+        trees: INITIAL_TREES,
       });
     });
 
@@ -143,6 +169,7 @@ describe("game", () => {
           id: 1,
           inventory: {},
           stock: initialStockJSON,
+          trees: initialTreeJSON,
         },
         id: 13,
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
@@ -152,6 +179,7 @@ describe("game", () => {
           id: 1,
           inventory: {},
           stock: initialStockJSON,
+          trees: initialTreeJSON,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -173,12 +201,13 @@ describe("game", () => {
             inventory: {},
             stock: {},
             balance: "20",
+            trees: initialTreeJSON,
           },
         },
       ]);
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
-      loadInventoryMock.mockReturnValue(["1", "2"]);
+      loadInventoryMock.mockReturnValue([toWei("1"), toWei("2")]);
       loadSessionMock.mockReturnValue("0x123");
 
       const session = await startSession({
@@ -199,6 +228,7 @@ describe("game", () => {
             "Sunflower Seed": "1",
           },
           stock: initialStockJSON,
+          trees: initialTreeJSON,
         },
         sessionId: "0x123",
       });
@@ -211,6 +241,7 @@ describe("game", () => {
           "Sunflower Seed": new Decimal(1),
         },
         stock: INITIAL_STOCK,
+        trees: INITIAL_TREES,
       });
     });
   });
@@ -262,16 +293,16 @@ describe("game", () => {
       loadBalanceMock.mockReturnValue(toWei("0"));
       loadInventoryMock.mockReturnValue([
         // Seeds
-        "10",
-        "20",
-        "60",
-        "4",
-        "5",
-        "6",
-        "20",
-        "23",
-        "10",
-        "10023",
+        toWei("10"),
+        toWei("20"),
+        toWei("60"),
+        toWei("4"),
+        toWei("5"),
+        toWei("6"),
+        toWei("20"),
+        toWei("23"),
+        toWei("10"),
+        toWei("10023"),
         // Crops
         toWei("20"),
         toWei("1"),
@@ -284,12 +315,12 @@ describe("game", () => {
         toWei("33"),
         toWei("2022"),
         // Tools
-        "2",
-        "30",
-        "45",
-        "1",
-        "340",
-        "20",
+        toWei("2"),
+        toWei("30"),
+        toWei("45"),
+        toWei("1"),
+        toWei("340"),
+        toWei("20"),
         // Limited items
         "1",
         "1",
@@ -391,7 +422,7 @@ describe("game", () => {
       loadBalanceMock.mockReturnValue(toWei("0"));
       loadInventoryMock.mockReturnValue([
         // Seeds
-        "3",
+        toWei("3"),
         "0",
         "0",
         "0",
@@ -458,7 +489,7 @@ describe("game", () => {
 
       expect(result.balance).toEqual(new Decimal(0));
       expect(result.inventory).toEqual({
-        "Sunflower Seed": new Decimal(3),
+        "Sunflower Seed": new Decimal("3"),
       });
     });
   });

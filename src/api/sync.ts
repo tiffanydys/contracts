@@ -3,6 +3,7 @@ import Joi from "joi";
 import { getChangeset } from "../domain/game/sync";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 import { canSync } from "../constants/whitelist";
+import { logInfo } from "../services/logger";
 
 const schema = Joi.object<SyncBody>({
   sessionId: Joi.string().required(),
@@ -24,7 +25,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: SyncBody = JSON.parse(event.body);
-  console.log({ body });
+  logInfo("Sync API: ", { body });
 
   const valid = schema.validate(body);
   if (valid.error) {
@@ -55,7 +56,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     inventory: changeset.inventory,
   });
 
-  console.info(
+  logInfo(
     `Synced ${body.sender} for ${body.farmId}`,
     JSON.stringify(changeset, null, 2)
   );

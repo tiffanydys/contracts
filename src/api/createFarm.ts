@@ -3,6 +3,7 @@ import Joi from "joi";
 
 import { CHARITIES } from "../constants/charities";
 import { canCreateFarm } from "../constants/whitelist";
+import { logInfo } from "../services/logger";
 
 import {
   createFarmSignature,
@@ -31,7 +32,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: CreateFarmBody = JSON.parse(event.body);
-  console.info("Create Farm", JSON.stringify(body, null, 2));
+  logInfo("Create Farm", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {

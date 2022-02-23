@@ -200,6 +200,7 @@ describe("game", () => {
             inventory: {},
             stock: {},
             balance: "20",
+            trees: {},
           },
         },
       ]);
@@ -230,6 +231,7 @@ describe("game", () => {
             "Potato Seed": "7",
           },
           balance: "20",
+          trees: {},
         },
       });
 
@@ -261,6 +263,7 @@ describe("game", () => {
           stock: {
             "Potato Seed": "2",
           },
+          trees: {},
         },
       });
 
@@ -273,6 +276,7 @@ describe("game", () => {
         stock: {
           "Potato Seed": new Decimal(2),
         },
+        trees: {},
       });
     });
 
@@ -293,6 +297,7 @@ describe("game", () => {
             "Potato Seed": "7",
           },
           balance: "20",
+          trees: {},
         },
       });
 
