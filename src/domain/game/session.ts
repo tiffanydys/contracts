@@ -103,7 +103,7 @@ export async function startSession({
   }
 
   const farmState = makeGame(farm.gameState);
-
+  console.log({ farmState });
   // Does the session ID match?
   const sessionMatches = farm.sessionId === sessionId;
 

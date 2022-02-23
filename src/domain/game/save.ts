@@ -96,7 +96,7 @@ type SaveArgs = {
 };
 
 export async function save({ farmId, account, actions }: SaveArgs) {
-  let farm = await getFarmById(account, farmId);
+  const farm = await getFarmById(account, farmId);
   if (!farm) {
     throw new Error("Farm does not exist");
   }
