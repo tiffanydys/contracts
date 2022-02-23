@@ -186,6 +186,56 @@ describe("game", () => {
         )
       ).toThrow("Too many events in a short time");
     });
+
+    it("ensures wood is not chopped too quickly", () => {
+      expect(() =>
+        processActions(
+          {
+            ...INITIAL_FARM,
+            inventory: { Axe: new Decimal(5) },
+          },
+          [
+            {
+              type: "tree.chopped",
+              index: 1,
+              item: "Axe",
+              createdAt: new Date(Date.now() - 1000).toISOString(),
+            },
+            {
+              type: "tree.chopped",
+              index: 2,
+              item: "Axe",
+              createdAt: new Date().toISOString(),
+            },
+          ]
+        )
+      ).toThrow("Tree was chopped too quickly");
+    });
+
+    it("allows wood to be chopped after time", () => {
+      const state = processActions(
+        {
+          ...INITIAL_FARM,
+          inventory: { Axe: new Decimal(5) },
+        },
+        [
+          {
+            type: "tree.chopped",
+            index: 1,
+            item: "Axe",
+            createdAt: new Date(Date.now() - 3000).toISOString(),
+          },
+          {
+            type: "tree.chopped",
+            index: 2,
+            item: "Axe",
+            createdAt: new Date().toISOString(),
+          },
+        ]
+      );
+
+      expect(state.inventory.Axe).toEqual(new Decimal(3));
+    });
   });
 
   describe("save", () => {
