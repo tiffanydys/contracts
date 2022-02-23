@@ -164,5 +164,7 @@ export async function fetchOnChainData({
     id: farmId,
     address: farm.account,
     fields: {},
+    stock: {},
+    trees: {},
   } as GameState;
 }

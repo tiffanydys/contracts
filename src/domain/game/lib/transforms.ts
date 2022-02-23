@@ -5,6 +5,7 @@ import { Account } from "../../../repository/farms";
 import { getItemUnit } from "../../../services/web3/utils";
 import { KNOWN_IDS } from "../types";
 import { GameState, Inventory, InventoryItemName } from "../types/game";
+import { INITIAL_TREES } from "./constants";
 
 export function makeGame(gameState: Account["gameState"]): GameState {
   // Convert the string values into decimals
@@ -34,6 +35,8 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     balance: new Decimal(gameState.balance),
     inventory,
     stock,
+    // In case they were running a version without the trees
+    trees: gameState.trees || INITIAL_TREES,
   };
 }
 
