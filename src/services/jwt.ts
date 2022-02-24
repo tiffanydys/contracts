@@ -75,14 +75,12 @@ type Token = {
 };
 
 export function generateJwt(payload: Token) {
-  console.log({ payload });
   const token = jwt.sign(
     payload,
     privateKey,
     // Seconds - 1 day
     { expiresIn: 60 * 60 * 24 }
   );
-  console.log({ token });
 
   return { token };
 }
