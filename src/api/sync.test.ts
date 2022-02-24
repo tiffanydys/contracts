@@ -149,6 +149,7 @@ describe("api.sync", () => {
         },
         address: "0x291019282",
         stock: {},
+        trees: {},
       },
       id: 2,
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
@@ -163,6 +164,7 @@ describe("api.sync", () => {
         },
         address: "0x291019282",
         stock: {},
+        trees: {},
       },
       // TODO real ID
       sessionId: "0x8123",
@@ -195,7 +197,7 @@ describe("api.sync", () => {
       mintIds: [KNOWN_IDS.Sunflower, KNOWN_IDS.Stone],
       mintAmounts: ["6000000000000000000000", "500000000000000000000"],
       burnIds: [KNOWN_IDS["Carrot Seed"]],
-      burnAmounts: ["100"],
+      burnAmounts: ["100000000000000000000"],
       signature: "0x0asd0j234nsd0",
     });
   });

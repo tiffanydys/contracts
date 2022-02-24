@@ -10,6 +10,11 @@
     "removeIt": "sst remove",
     "preinstall": "make .githooks.log"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "./src/test/setup.ts"
+    ]
+  },
   "eslintConfig": {
     "extends": [
       "serverless-stack"
