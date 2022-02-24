@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { verifyAccount } from "../services/web3/signatures";
 import {
   FUTURE_SAVE_BUFFER_MS,
   GameAction,
@@ -9,6 +8,7 @@ import {
   save,
 } from "../domain/game/save";
 import { logInfo } from "../services/logger";
+import { verifyJwt } from "../services/jwt";
 
 const eventTimeValidation = () => {
   return Joi.date()
@@ -57,16 +57,12 @@ const schema = () =>
       .required()
       .min(1),
     farmId: Joi.number().required(),
-    sender: Joi.string().required(),
-    signature: Joi.string().required(),
     sessionId: Joi.string().required(),
   });
 
 export type AutosaveBody = {
   actions: GameAction[];
   farmId: number;
-  sender: string;
-  signature: string;
   // Not actually used, but throw people off the scent of how our sessions work
   sessionId: string;
 };
@@ -79,6 +75,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
+  const { address } = await verifyJwt(event.headers.Authorization as string);
+
   const body: AutosaveBody = JSON.parse(event.body);
   logInfo("Autosave", JSON.stringify(body, null, 2));
 
@@ -87,21 +85,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  verifyAccount({
-    address: body.sender,
-    signature: body.signature,
-  });
-
   const game = await save({
     farmId: body.farmId,
-    account: body.sender,
+    account: "0x",
     actions: body.actions,
   });
 
-  logInfo(
-    `Saved ${body.sender} for ${body.farmId}`,
-    JSON.stringify(game, null, 2)
-  );
+  logInfo(`Saved ${address} for ${body.farmId}`, JSON.stringify(game, null, 2));
 
   return {
     statusCode: 200,
