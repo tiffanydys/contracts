@@ -7,6 +7,30 @@ import { toWei } from "web3-utils";
 import { generateJwt } from "../services/jwt";
 
 describe("api.withdraw", () => {
+  it("requires a valid jwt", async () => {
+    const body = {
+      amounts: [],
+      ids: [],
+      sfl: "100",
+      sessionId: "0x123",
+    } as any as WithdrawBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<WithdrawArgs>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
+
   it("validates farmId is provided", async () => {
     const body = {
       amounts: [],

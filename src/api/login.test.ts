@@ -89,7 +89,6 @@ describe("api.login", () => {
       () => {}
     )) as any;
 
-    console.log({ result });
     expect(result.statusCode).toEqual(200);
     expect(JSON.parse(result.body)).toEqual({
       token: expect.any(String),

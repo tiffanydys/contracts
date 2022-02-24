@@ -5,6 +5,26 @@ import { handler, CreateFarmBody } from "./createFarm";
 import { generateJwt } from "../services/jwt";
 
 describe("api.createFarm", () => {
+  it("requires a valid jwt", async () => {
+    const body = {
+      donation: 1,
+    } as CreateFarmBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
   it("validates charity is provided", async () => {
     const body = {
       donation: 1,

@@ -8,6 +8,34 @@ import { handler, AutosaveBody } from "./autosave";
 import { generateJwt } from "../services/jwt";
 
 describe("api.autosave", () => {
+  it("requires a valid JWT", async () => {
+    const body = {
+      sessionId: "0x",
+      actions: [
+        {
+          type: "item.harvested",
+          index: 1,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    } as AutosaveBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
+
   it("requires farm ID", async () => {
     const body = {
       sessionId: "0x",

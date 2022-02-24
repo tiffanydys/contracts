@@ -7,6 +7,27 @@ import { handler, SyncBody } from "./sync";
 import { generateJwt } from "../services/jwt";
 
 describe("api.sync", () => {
+  it("requires a valid JWT", async () => {
+    const body = {
+      sessionId: "0x123",
+    } as SyncBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
+
   it("requires farm ID", async () => {
     const body = {
       sessionId: "0x123",
