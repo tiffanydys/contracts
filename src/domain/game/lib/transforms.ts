@@ -30,9 +30,10 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     {} as Record<InventoryItemName, Decimal>
   );
 
+  const dbTrees = gameState.trees || INITIAL_TREES;
   // Convert the string values into decimals
-  const trees = Object.keys(gameState.trees).reduce((items, index) => {
-    const dbTree = gameState.trees[Number(index)];
+  const trees = Object.keys(dbTrees).reduce((items, index) => {
+    const dbTree = dbTrees[Number(index)];
     const tree: Tree = {
       choppedAt: dbTree.choppedAt,
       wood: new Decimal(dbTree.wood),
@@ -43,6 +44,7 @@ export function makeGame(gameState: Account["gameState"]): GameState {
       [Number(index)]: tree,
     };
   }, {} as Record<InventoryItemName, Decimal>);
+  console.log({ gameState });
 
   return {
     ...gameState,
@@ -50,7 +52,7 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     inventory,
     stock,
     // In case they were running a version without the trees
-    trees: trees || INITIAL_TREES,
+    trees: trees,
   };
 }
 
