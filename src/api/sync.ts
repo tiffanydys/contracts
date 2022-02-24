@@ -21,7 +21,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  console.log({ event });
   const { address } = await verifyJwt(event.headers.authorization as string);
 
   const body: SyncBody = JSON.parse(event.body);
@@ -51,13 +50,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     inventory: changeset.inventory,
   });
 
-<<<<<<< HEAD
   logInfo(
-    `Synced ${body.sender} for ${body.farmId}`,
-=======
-  console.info(
     `Synced ${address} for ${body.farmId}`,
->>>>>>> 743663b (Add JWT support)
     JSON.stringify(changeset, null, 2)
   );
 

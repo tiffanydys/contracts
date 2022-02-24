@@ -49,7 +49,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const { address } = await verifyJwt(event.headers.authorization as string);
-
   const body: WithdrawBody = JSON.parse(event.body);
   logInfo("Withdraw", JSON.stringify(body, null, 2));
 

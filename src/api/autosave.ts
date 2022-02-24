@@ -87,7 +87,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   const game = await save({
     farmId: body.farmId,
-    account: "0x",
+    account: address,
     actions: body.actions,
   });
 
