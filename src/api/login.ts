@@ -8,12 +8,12 @@ import { generateJwt } from "../services/jwt";
 import { verifyAccount } from "../services/web3/signatures";
 
 const schema = Joi.object<LoginBody>({
-  sender: Joi.string().required(),
+  address: Joi.string().required(),
   signature: Joi.string().required(),
 });
 
 export type LoginBody = {
-  sender: string;
+  address: string;
   signature: string;
 };
 
@@ -33,12 +33,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   }
 
   verifyAccount({
-    address: body.sender,
+    address: body.address,
     signature: body.signature,
   });
 
-  const token = generateJwt({
-    address: body.sender,
+  const { token } = await generateJwt({
+    address: body.address,
   });
 
   return {

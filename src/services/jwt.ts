@@ -74,13 +74,15 @@ type Token = {
   address: string;
 };
 
-export async function generateJwt(payload: Token) {
-  const token = await jwt.sign(
+export function generateJwt(payload: Token) {
+  console.log({ payload });
+  const token = jwt.sign(
     payload,
     privateKey,
     // Seconds - 1 day
-    { expiresIn: 3 }
+    { expiresIn: 60 * 60 * 24 }
   );
+  console.log({ token });
 
   return { token };
 }
@@ -90,7 +92,10 @@ export async function generateJwt(payload: Token) {
  * Ensures it is not expired or malformed
  * Matches private key used to sign the token
  */
-export async function verifyJwt(token: string) {
+export async function verifyJwt(rawToken: string) {
+  // Remove the 'Bearer '
+  const token = rawToken.slice(7);
+
   const decoded = await jwt.verify(token, privateKey);
 
   return decoded as Token;

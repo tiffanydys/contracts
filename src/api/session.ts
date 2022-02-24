@@ -20,7 +20,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.Authorization as string);
+  console.log({ event });
+  const { address } = await verifyJwt(event.headers.authorization as string);
 
   const body: SessionBody = JSON.parse(event.body);
   logInfo("Session Start", JSON.stringify(body, null, 2));
