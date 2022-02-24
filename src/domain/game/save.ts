@@ -38,6 +38,9 @@ const HUMAN_BUFFER_MILLSECONDS = 200;
 // Let them save one minute in the future as well to prevent people with clock issues
 export const FUTURE_SAVE_BUFFER_MS = 60 * 1000;
 
+// If they chop faster than 2 seconds something is up
+export const TREE_CHOP_TIME = 2 * 1000;
+
 export function processActions(state: GameState, actions: GameAction[]) {
   // Validate actions
   if (!Array.isArray(actions)) {
@@ -74,6 +77,10 @@ export function processActions(state: GameState, actions: GameAction[]) {
       if (difference < 100) {
         throw new Error("Event fired too quickly");
       }
+
+      if (action.type === "tree.chopped" && difference < TREE_CHOP_TIME) {
+        throw new Error("Tree was chopped too quickly");
+      }
     }
 
     const now = new Date();
@@ -96,7 +103,7 @@ type SaveArgs = {
 };
 
 export async function save({ farmId, account, actions }: SaveArgs) {
-  let farm = await getFarmById(account, farmId);
+  const farm = await getFarmById(account, farmId);
   if (!farm) {
     throw new Error("Farm does not exist");
   }

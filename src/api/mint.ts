@@ -7,6 +7,7 @@ import { canMint } from "../constants/whitelist";
 
 import { mint } from "../domain/game/sync";
 import { LimitedItem } from "../domain/game/types/craftables";
+import { logInfo } from "../services/logger";
 import { syncSignature, verifyAccount } from "../services/web3/signatures";
 
 const VALID_ITEMS: LimitedItem[] = [
@@ -47,7 +48,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   }
 
   const body: MintBody = JSON.parse(event.body);
-  console.log({ body });
+  logInfo("Mint API: ", { body });
 
   const valid = schema.validate(body);
   if (valid.error) {
@@ -80,7 +81,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     inventory: changeset.inventory,
   });
 
-  console.info(
+  logInfo(
     `Minted ${body.item} for ${body.sender} at ${body.farmId}`,
     JSON.stringify(changeset, null, 2)
   );

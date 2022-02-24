@@ -8,6 +8,7 @@ import {
   MILLISECONDS_TO_SAVE,
   save,
 } from "../domain/game/save";
+import { logInfo } from "../services/logger";
 
 const eventTimeValidation = () => {
   return Joi.date()
@@ -44,6 +45,12 @@ const schema = () =>
             type: Joi.string().equal("item.harvested"),
             index: Joi.number().min(0).max(21).integer(),
             createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("tree.chopped"),
+            item: Joi.string(),
+            index: Joi.number().min(0).max(5).integer(),
+            createdAt: eventTimeValidation(),
           })
         )
       )
@@ -73,7 +80,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: AutosaveBody = JSON.parse(event.body);
-  console.info("Autosave", JSON.stringify(body, null, 2));
+  logInfo("Autosave", JSON.stringify(body, null, 2));
 
   const valid = schema().validate(body);
   if (valid.error) {
@@ -91,7 +98,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     actions: body.actions,
   });
 
-  console.info(
+  logInfo(
     `Saved ${body.sender} for ${body.farmId}`,
     JSON.stringify(game, null, 2)
   );

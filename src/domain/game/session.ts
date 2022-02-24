@@ -20,6 +20,7 @@ import { INITIAL_FARM, INITIAL_STOCK } from "./lib/constants";
 import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 import { IDS } from "./types";
 import { makeGame, makeInventory } from "./lib/transforms";
+import { logInfo } from "../../services/logger";
 
 type StartSessionArgs = {
   farmId: number;
@@ -79,6 +80,7 @@ export async function startSession({
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
       });
+      logInfo("Session.snapshot: ", { sunflowerFarmersSnapshot });
 
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
@@ -125,7 +127,7 @@ export async function startSession({
   });
 
   const gameState: GameState = {
-    ...farm.gameState,
+    ...farmState,
     balance: onChainData.balance,
     inventory: onChainData.inventory,
     // Reset the stock
@@ -170,5 +172,7 @@ export async function fetchOnChainData({
     id: farmId,
     address: farm.account,
     fields: {},
+    stock: {},
+    trees: {},
   } as GameState;
 }

@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { startSession } from "../domain/game/session";
+import { logInfo } from "../services/logger";
 import { verifyAccount } from "../services/web3/signatures";
 
 const schema = Joi.object<SessionBody>({
@@ -24,7 +25,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: SessionBody = JSON.parse(event.body);
-  console.info("Session Start", JSON.stringify(body, null, 2));
+  logInfo("Session Start", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {

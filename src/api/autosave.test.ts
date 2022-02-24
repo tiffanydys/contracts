@@ -241,6 +241,7 @@ describe("api.autosave", () => {
           "Sunflower Seed": "5",
         },
         address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        trees: {},
       },
       id: 2,
       owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
@@ -251,6 +252,7 @@ describe("api.autosave", () => {
         id: 2,
         inventory: {},
         address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        trees: {},
       },
       sessionId: "0x8123",
     });
@@ -298,6 +300,7 @@ describe("api.autosave", () => {
           Sunflower: "1",
         },
         stock: {},
+        trees: {},
         address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       },
     });

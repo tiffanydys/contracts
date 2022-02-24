@@ -4,13 +4,14 @@ import { CROPS } from "../types/crops";
 import { sell } from "./sell";
 import { INITIAL_FARM } from "../lib/constants";
 
-let GAME_STATE: GameState = {
+const GAME_STATE: GameState = {
   ...INITIAL_FARM,
   id: 1,
   fields: {},
   balance: new Decimal(0),
 
   inventory: {},
+  trees: {},
 };
 
 describe("sell", () => {

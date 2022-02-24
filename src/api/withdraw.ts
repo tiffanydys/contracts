@@ -7,6 +7,7 @@ import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
 import { InventoryItemName } from "../domain/game/types/game";
 import { getTax } from "../domain/game/withdraw";
 import { RESOURCES } from "../domain/game/types/resources";
+import { logInfo } from "../services/logger";
 
 /**
  * Items like pumpkin soup are non-transferrable
@@ -48,7 +49,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   const body: WithdrawBody = JSON.parse(event.body);
-  console.info("Withdraw", JSON.stringify(body, null, 2));
+  logInfo("Withdraw", JSON.stringify(body, null, 2));
 
   const valid = schema.validate(body);
   if (valid.error) {

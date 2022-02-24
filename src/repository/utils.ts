@@ -1,6 +1,6 @@
-import { GameState, InventoryItemName } from "../domain/game/types/game";
+import { GameState, InventoryItemName, Tree } from "../domain/game/types/game";
 
-import { FarmSession } from "./types";
+import { FarmSession, SanitizedTree } from "./types";
 
 /**
  * Santize the farm data
@@ -32,10 +32,25 @@ export function makeDBItem(farm: GameState): FarmSession {
     };
   }, {} as Record<InventoryItemName, string>);
 
+  const trees = Object.keys(farm.trees).reduce((items, index) => {
+    const tree = farm.trees[Number(index)];
+
+    return {
+      ...items,
+      [index]: {
+        ...tree,
+        wood: tree.wood.toString(),
+      } as SanitizedTree,
+    };
+  }, {} as Record<number, SanitizedTree>);
+
   return {
     ...farm,
     balance: farm.balance.toString(),
     inventory,
     stock,
+    trees,
   };
 }
+
+// TODO - validate data going into the DB as well. If this gets corrupted a migration would be extremely

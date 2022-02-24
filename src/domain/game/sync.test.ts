@@ -40,6 +40,7 @@ describe("game.sync", () => {
           stock: {
             "Potato Seed": "7",
           },
+          trees: {},
         },
         previousGameState: {
           balance: "10",
@@ -49,6 +50,7 @@ describe("game.sync", () => {
             "Potato Seed": "7",
             Sunflower: "1",
           },
+          trees: {},
         },
       });
 
@@ -63,12 +65,13 @@ describe("game.sync", () => {
         inventory: {
           "Farm Cat": new Decimal(1),
           Gold: new Decimal(toWei("3")),
-          "Potato Seed": new Decimal("-4"),
+          "Potato Seed": new Decimal(toWei("-4")),
           Sunflower: new Decimal(toWei("4")),
         },
         stock: {
           "Potato Seed": new Decimal("7"),
         },
+        trees: {},
       });
     });
   });
@@ -150,12 +153,12 @@ describe("game.sync", () => {
       });
 
       expect(changeset.inventory).toEqual({
-        "Beetroot Seed": new Decimal("20"),
+        "Beetroot Seed": new Decimal("20000000000000000000"),
         "Christmas Tree": new Decimal("-1"),
         "Farm Cat": new Decimal("-1"),
         Gold: new Decimal("-10000000000000000000"),
         Iron: new Decimal("37000000000000000000"),
-        Pickaxe: new Decimal("-5"),
+        Pickaxe: new Decimal("-5000000000000000000"),
         Sunflower: new Decimal(toWei("70")),
         "Sunflower Rock": new Decimal("1"),
         Wood: new Decimal("5000000000000000000"),
@@ -186,7 +189,7 @@ describe("game.sync", () => {
 
       expect(changeset.inventory).toEqual({
         Cabbage: new Decimal(toWei("100")),
-        "Cauliflower Seed": new Decimal("5"),
+        "Cauliflower Seed": new Decimal("5000000000000000000"),
         "Golden Cauliflower": new Decimal("1"),
       });
     });
@@ -214,8 +217,8 @@ describe("game.sync", () => {
       expect(changeset.inventory).toEqual({});
     });
 
-    it("uses wei conversion for all crops and resources", async () => {
-      const weiBased = { ...CROPS(), ...RESOURCES };
+    it("uses wei conversion for all crops, seeds, tools and resources", async () => {
+      const weiBased = { ...CROPS(), ...RESOURCES, ...SEEDS(), ...TOOLS };
 
       const increase = Object.keys(weiBased).reduce((acc, key) => {
         acc[key as InventoryItemName] = new Decimal(1);
@@ -241,8 +244,8 @@ describe("game.sync", () => {
       expect(changeset.inventory).toEqual(expected);
     });
 
-    it("uses eth conversion for all seeds, tools and NFTs", async () => {
-      const ethBased = { ...LimitedItems, ...SEEDS(), ...TOOLS, ...FOODS };
+    it("uses eth conversion for all food & NFTs", async () => {
+      const ethBased = { ...LimitedItems, ...FOODS };
 
       const increase = Object.keys(ethBased).reduce((acc, key) => {
         acc[key as InventoryItemName] = new Decimal(1);
@@ -315,6 +318,7 @@ describe("game.sync", () => {
           stock: {
             "Potato Seed": "7",
           },
+          trees: {},
         },
         previousGameState: {
           balance: "400",
@@ -325,6 +329,7 @@ describe("game.sync", () => {
             "Potato Seed": "7",
             Gnome: "1",
           },
+          trees: {},
         },
       });
 
@@ -338,7 +343,7 @@ describe("game.sync", () => {
       expect(changeset.inventory).toEqual({
         Gold: new Decimal("3000000000000000000"),
         Iron: new Decimal("100000000000000000000"),
-        "Potato Seed": new Decimal("-7"),
+        "Potato Seed": new Decimal("-7000000000000000000"),
         Sunflower: new Decimal(toWei("38000")),
         "Sunflower Rock": new Decimal("1"),
       });
@@ -354,6 +359,7 @@ describe("game.sync", () => {
           fields: {},
           inventory: {},
           stock: {},
+          trees: {},
         },
         previousGameState: {
           balance: "400",
@@ -363,6 +369,7 @@ describe("game.sync", () => {
             Sunflower: "2000",
             Iron: "700",
           },
+          trees: {},
         },
       });
 
@@ -396,6 +403,7 @@ describe("game.sync", () => {
           stock: {
             "Potato Seed": "7",
           },
+          trees: {},
         },
         previousGameState: {
           balance: "400",
@@ -406,6 +414,7 @@ describe("game.sync", () => {
             "Potato Seed": "7",
             Gnome: "1",
           },
+          trees: {},
         },
       });
 
