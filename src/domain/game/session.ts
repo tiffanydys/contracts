@@ -49,6 +49,8 @@ export async function startSession({
   // Support case where DB goes down?
   // Fetch on chain data
 
+  // We always want to be fetching on chain first just in case to set the previousGameState
+
   // No session was ever created for this farm + account
   if (!farm) {
     // We don't really care about this - they could create a session but never be able to save it
