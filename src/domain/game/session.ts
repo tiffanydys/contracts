@@ -42,6 +42,12 @@ export async function startSession({
 
   const farm = farms.find((farm) => farm.id === farmId);
 
+  // TODO: Support cases where someone just transferred a farm from someone else ;)
+  // Fetch on chain data
+
+  // Support case where DB goes down?
+  // Fetch on chain data
+
   // No session was ever created for this farm + account
   if (!farm) {
     // We don't really care about this - they could create a session but never be able to save it
