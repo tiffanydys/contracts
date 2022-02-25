@@ -39377,7 +39377,7 @@ export const balances: Record<string, Inventory> = {
   },
   "0xc2756446dfe264418e2d8b4b4dbcf3bee12fe760": { "Christmas Tree": "1" },
   "0x7e919704c83ffe7f19f88e72321783b06c800904": {
-    "Farm Dog": "1",
+    "Farm Cat": "1",
     "Sunflower Rock": "1",
   },
   "0x457ea0b03dd671bac515fa5bf324918db4b12669": { "Farm Dog": "1" },
