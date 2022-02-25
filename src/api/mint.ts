@@ -8,7 +8,8 @@ import { canMint } from "../constants/whitelist";
 import { mint } from "../domain/game/sync";
 import { LimitedItem } from "../domain/game/types/craftables";
 import { logInfo } from "../services/logger";
-import { syncSignature, verifyAccount } from "../services/web3/signatures";
+import { verifyJwt } from "../services/jwt";
+import { syncSignature } from "../services/web3/signatures";
 
 const VALID_ITEMS: LimitedItem[] = [
   "Chicken Coop",
@@ -25,8 +26,6 @@ const VALID_ITEMS: LimitedItem[] = [
 const schema = Joi.object<MintBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
-  sender: Joi.string().required(),
-  signature: Joi.string().required(),
   item: Joi.string()
     .required()
     .valid(...VALID_ITEMS),
@@ -35,8 +34,6 @@ const schema = Joi.object<MintBody>({
 export type MintBody = {
   farmId: number;
   sessionId: string;
-  sender: string;
-  signature: string;
   item: LimitedItem;
 };
 
@@ -47,6 +44,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     throw new Error("No body found in event");
   }
 
+  const { address } = await verifyJwt(event.headers.authorization as string);
+
   const body: MintBody = JSON.parse(event.body);
   logInfo("Mint API: ", { body });
 
@@ -55,26 +54,21 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     throw new Error(valid.error.message);
   }
 
-  verifyAccount({
-    address: body.sender,
-    signature: body.signature,
-  });
-
   if (process.env.NETWORK !== "mumbai") {
-    if (!canMint(body.sender)) {
+    if (!canMint(address)) {
       throw new Error("Not on whitelist");
     }
   }
 
   const changeset = await mint({
     farmId: Number(body.farmId),
-    account: body.sender,
+    account: address,
     item: body.item,
   });
 
   // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({
-    sender: body.sender,
+    sender: address,
     farmId: body.farmId,
     sessionId: body.sessionId,
     sfl: changeset.balance,
@@ -82,7 +76,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   });
 
   logInfo(
-    `Minted ${body.item} for ${body.sender} at ${body.farmId}`,
+    `Minted ${body.item} for ${address} at ${body.farmId}`,
     JSON.stringify(changeset, null, 2)
   );
 

@@ -4,60 +4,46 @@ import { getFarmsMock } from "../repository/__mocks__/db";
 import { loadNFTFarmMock } from "../services/web3/__mocks__/polygon";
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, SessionBody } from "./session";
+import { generateJwt } from "../services/jwt";
 
 describe("api.session", () => {
-  it("requires sender", async () => {
-    const body: SessionBody = {
-      farmId: 1,
-      sender: "",
-      signature: "0x9123",
-      sessionId: "0x123",
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain('"sender" is not allowed to be empty');
-  });
-
-  it("requires signature", async () => {
-    const body: SessionBody = {
-      farmId: 1,
-      sender: "0x9123",
-      signature: "",
-      sessionId: "0x123",
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain('"signature" is not allowed to be empty');
-  });
-
-  it("requires farm ID", async () => {
+  it("requires a valid JWT", async () => {
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "0x123",
     } as SessionBody;
 
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
+
+  it("requires farm ID", async () => {
+    const body = {
+      sessionId: "0x123",
+    } as SessionBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address:
+                "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -70,14 +56,20 @@ describe("api.session", () => {
 
   it("requires a session ID", async () => {
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "",
     } as SessionBody;
 
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address:
+                "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -86,28 +78,6 @@ describe("api.session", () => {
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
     ).rejects.toContain('"sessionId" is not allowed to be empty');
-  });
-
-  it("requires a valid signature", async () => {
-    const body: SessionBody = {
-      sender: "0x9123",
-      signature:
-        "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
-      farmId: 1,
-      sessionId: "0x123",
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Unable to verify account");
   });
 
   it("loads a session", async () => {
@@ -152,9 +122,6 @@ describe("api.session", () => {
     ]);
 
     const body: SessionBody = {
-      sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-      signature:
-        "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
       farmId: 2,
       sessionId: "0x123",
     };
@@ -162,6 +129,13 @@ describe("api.session", () => {
     const result = (await handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
