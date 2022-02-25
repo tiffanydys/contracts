@@ -39375,7 +39375,7 @@ export const balances: Record<string, Inventory> = {
     "Sunflower Statue": "2",
   },
   "0xc2756446dfe264418e2d8b4b4dbcf3bee12fe760": { "Christmas Tree": "1" },
-  "0x7e919704c83fFe7F19F88E72321783b06C800904": {
+  "0x7e919704c83ffe7f19f88e72321783b06c800904": {
     "Farm Dog": "1",
     "Sunflower Rock": "1",
   },
@@ -40596,12 +40596,15 @@ export const balances: Record<string, Inventory> = {
   "0x00d27df1e552c47e5f7ab62dc4138f977565ec84": { "Sunflower Rock": "1" },
   "0x2ac7daa7d494e55b5717684be8da5c957b1692bd": { "Sunflower Rock": "1" },
   "0xbacae1ba4b2e591e98b158aa1bef27d16099ae0f": { "Sunflower Rock": "1" },
-  "0x307CED27048cCe9928C69eB7296F5BeD270b1954": {
+  "0x307ced27048cce9928c69eb7296f5bed270b1954": {
     "Sunflower Rock": "1",
     "Sunflower Statue": "1",
   },
-  "0x068BAb172FA62635DFB3cAbCF330EdbF63522cE4": { "Sunflower Rock": "1" },
-  "0xD637918139D44a2DeC4Bbd24F77D8Fca355Cf53E": { "Sunflower Rock": "1" },
-  "0x8Bcc3389261679718DB663B94e255485F81d2Ab4": { "Sunflower Rock": "1" },
-  "0x358A9bb416fe97231bAD833eb18215766F5788c2": { "Sunflower Rock": "1" },
+  "0x068bab172fa62635dfb3cabcf330edbf63522ce4": { "Sunflower Rock": "1" },
+  "0xd637918139d44a2dec4bbd24f77d8fca355cf53e": { "Sunflower Rock": "1" },
+  "0x8bcc3389261679718db663b94e255485f81d2ab4": { "Sunflower Rock": "1" },
+  "0x358a9bb416fe97231bad833eb18215766f5788c2": { "Sunflower Rock": "1" },
+  /**
+   * ALWAYS REMEMBER TO MAKE THE ADDRESSES LOWER CASE!!!
+   */
 };
