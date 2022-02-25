@@ -6,6 +6,7 @@ import {
   getFarms,
   updateGameState,
   createSession,
+  blacklist,
 } from "./db";
 import { FarmSession, Account } from "./types";
 import { makeDBItem } from "./utils";
@@ -99,5 +100,17 @@ export async function updateSession({
     owner,
     session: safeFarm,
     version,
+  });
+}
+
+type Blacklist = {
+  id: number;
+  owner: string;
+};
+
+export async function blacklistFarm({ id, owner }: Blacklist) {
+  return await blacklist({
+    id,
+    owner,
   });
 }

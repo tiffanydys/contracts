@@ -3,6 +3,7 @@ import { fromWei } from "web3-utils";
 import { getFarmById } from "../../repository/farms";
 
 import { withdrawSignature } from "../../services/web3/signatures";
+import { isBlackListed } from "./lib/blacklist";
 
 /**
  * Returns the tax rate when withdrawing SFL
@@ -57,7 +58,10 @@ export async function withdraw({
     throw new Error("Farm does not exist");
   }
 
-  // TODO throw error if blacklisted
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error("Blacklisted");
+  }
 
   // Smart contract does balance validation so don't worry about it here
   const signature = await withdrawSignature({

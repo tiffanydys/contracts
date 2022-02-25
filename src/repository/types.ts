@@ -25,4 +25,5 @@ export type Account = {
   previousGameState: FarmSession;
   version: number;
   flaggedCount: number;
+  blacklistedAt?: string;
 };

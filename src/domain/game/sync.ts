@@ -2,15 +2,17 @@ import Decimal from "decimal.js-light";
 import { toWei } from "web3-utils";
 
 import { getFarmById } from "../../repository/farms";
+import { loadItemSupply } from "../../services/web3/polygon";
+import { syncSignature } from "../../services/web3/signatures";
+
 import { GameState, InventoryItemName, Inventory } from "./types/game";
 import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
 import { getItemUnit } from "../../services/web3/utils";
 import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
-import { loadItemSupply } from "../../services/web3/polygon";
+import { isBlackListed } from "./lib/blacklist";
 import { KNOWN_IDS } from "./types";
-import { syncSignature } from "../../services/web3/signatures";
 
 type CalculateChangesetArgs = {
   id: number;
@@ -23,12 +25,17 @@ export async function sync({ id, owner }: CalculateChangesetArgs) {
     throw new Error("Farm does not exist");
   }
 
-  // TODO throw error if blacklisted
-
   const current = makeGame(farm.gameState);
   const previous = makeGame(farm.previousGameState);
 
   const changeset = calculateChangeset({ current, previous });
+
+  // TODO: Check the sync signature compared to the last, is it the same. Add 5 flag points
+
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error("Blacklisted");
+  }
 
   const signature = await syncSignature({
     sender: owner,
@@ -97,7 +104,10 @@ export async function mint({ farmId, account, item }: MintOptions) {
     throw new Error("Farm does not exist");
   }
 
-  // TODO: prevent if blacklisted
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error("Blacklisted");
+  }
 
   // Pass numbers into a safe format before processing.
   const gameState = makeGame(farm.gameState);

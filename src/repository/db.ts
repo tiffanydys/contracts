@@ -112,3 +112,23 @@ export async function createSession({
   };
   await dynamoDb.update(updateParams).promise();
 }
+
+type Blacklist = {
+  id: number;
+  owner: string;
+};
+
+export async function blacklist({ id, owner }: Blacklist) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+      owner,
+    },
+    UpdateExpression: "SET blacklistedAt = :blacklistedAt",
+    ExpressionAttributeValues: {
+      ":blacklistedAt": new Date().toISOString(),
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
