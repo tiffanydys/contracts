@@ -38,8 +38,8 @@ const HUMAN_BUFFER_MILLSECONDS = 200;
 // Let them save one minute in the future as well to prevent people with clock issues
 export const FUTURE_SAVE_BUFFER_MS = 60 * 1000;
 
-// If they chop faster than 2 seconds something is up
-export const TREE_CHOP_TIME = 2 * 1000;
+// If they chop faster than 1.3 seconds something is up
+export const TREE_CHOP_TIME = 1300;
 
 export function processActions(state: GameState, actions: GameAction[]) {
   // Validate actions
