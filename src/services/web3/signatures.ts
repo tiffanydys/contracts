@@ -299,12 +299,16 @@ type HashArgs = {
 };
 
 export function generateMessage({ address }: HashArgs) {
+  // Epoch day stamp
+  const nonce = Math.floor(Date.now() / 8.64e7);
+
   const MESSAGE = [
     "Welcome to Sunflower Land!",
     "Click to sign in and accept the Sunflower Land Terms of Service: https://docs.sunflower-land.com/support/terms-of-service",
     "This request will not trigger a blockchain transaction or cost any gas fees.",
     "Your authentication status will reset after each session.",
     `Wallet address: ${address}`,
+    `Nonce: ${nonce}`,
   ].join("\n\n");
 
   return MESSAGE;

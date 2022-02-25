@@ -1,7 +1,11 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { verifyAccount, withdrawSignature } from "../services/web3/signatures";
+
+import { withdrawSignature } from "../services/web3/signatures";
+import { verifyJwt } from "../services/jwt";
+
 import { canSync } from "../constants/whitelist";
+
 import { KNOWN_IDS } from "../domain/game/types";
 import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
 import { InventoryItemName } from "../domain/game/types/game";
@@ -23,8 +27,6 @@ const VALID_IDS = VALID_ITEMS.map((id) => KNOWN_IDS[id]);
 const schema = Joi.object<WithdrawBody>({
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
-  sender: Joi.string().required(),
-  signature: Joi.string().required(),
   sfl: Joi.string().required(),
   ids: Joi.array()
     .items(Joi.number().valid(...VALID_IDS))
@@ -36,8 +38,6 @@ const schema = Joi.object<WithdrawBody>({
 export type WithdrawBody = {
   farmId: number;
   sessionId: string;
-  sender: string;
-  signature: string;
   sfl: string;
   ids: number[];
   amounts: string[];
@@ -48,6 +48,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
+  const { address } = await verifyJwt(event.headers.authorization as string);
   const body: WithdrawBody = JSON.parse(event.body);
   logInfo("Withdraw", JSON.stringify(body, null, 2));
 
@@ -56,21 +57,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  verifyAccount({
-    address: body.sender,
-    signature: body.signature,
-  });
-
   // TODO - new can withdraw
   if (process.env.NETWORK !== "mumbai") {
-    if (!canSync(body.sender)) {
+    if (!canSync(address)) {
       throw new Error("Not on whitelist");
     }
   }
 
   // Smart contract does balance validation so don't worry about it here
   const signature = await withdrawSignature({
-    sender: body.sender,
+    sender: address,
     farmId: body.farmId,
     sessionId: body.sessionId,
     sfl: body.sfl,

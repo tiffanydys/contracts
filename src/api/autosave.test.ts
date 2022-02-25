@@ -5,68 +5,11 @@ import "../services/__mocks__/kms";
 
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, AutosaveBody } from "./autosave";
+import { generateJwt } from "../services/jwt";
 
 describe("api.autosave", () => {
-  it("requires sender", async () => {
-    const body: AutosaveBody = {
-      farmId: 1,
-      sender: "",
-      signature: "0x9123",
-      sessionId: "0x",
-      actions: [
-        {
-          type: "item.harvested",
-          index: 1,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain('"sender" is not allowed to be empty');
-  });
-
-  it("requires signature", async () => {
-    const body: AutosaveBody = {
-      farmId: 1,
-      sender: "0x9123",
-      signature: "",
-      sessionId: "0x",
-      actions: [
-        {
-          type: "item.harvested",
-          index: 1,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain('"signature" is not allowed to be empty');
-  });
-
-  it("requires farm ID", async () => {
+  it("requires a valid JWT", async () => {
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "0x",
       actions: [
         {
@@ -80,6 +23,41 @@ describe("api.autosave", () => {
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ey123`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<SyncSignature>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("jwt malformed");
+  });
+
+  it("requires farm ID", async () => {
+    const body = {
+      sessionId: "0x",
+      actions: [
+        {
+          type: "item.harvested",
+          index: 1,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    } as AutosaveBody;
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -92,8 +70,6 @@ describe("api.autosave", () => {
 
   it("requires actions", async () => {
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "0x",
       actions: [],
     } as any as AutosaveBody;
@@ -101,6 +77,13 @@ describe("api.autosave", () => {
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -113,8 +96,6 @@ describe("api.autosave", () => {
 
   it("requires a valid action", async () => {
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       farmId: 1,
       sessionId: "0x",
       actions: [
@@ -129,6 +110,13 @@ describe("api.autosave", () => {
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -143,8 +131,6 @@ describe("api.autosave", () => {
     const tenMinutesAgo = new Date(new Date().getTime() - 10 * 60 * 1000);
 
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "0x",
       farmId: 1,
       actions: [
@@ -159,6 +145,13 @@ describe("api.autosave", () => {
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -173,8 +166,6 @@ describe("api.autosave", () => {
     const twoMinutesInFuture = new Date(new Date().getTime() + 1000 * 60 * 2);
 
     const body = {
-      sender: "0x9123",
-      signature: "0x9123",
       sessionId: "0x",
       farmId: 1,
       actions: [
@@ -189,6 +180,13 @@ describe("api.autosave", () => {
     const result = handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
@@ -197,35 +195,6 @@ describe("api.autosave", () => {
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
     ).rejects.toContain('"actions[0]" does not match any of the allowed types');
-  });
-
-  it("requires a valid signature", async () => {
-    const body: AutosaveBody = {
-      sender: "0x9123",
-      sessionId: "0x",
-      signature:
-        "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
-      farmId: 1,
-      actions: [
-        {
-          type: "item.harvested",
-          index: 1,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
-
-    const result = handler(
-      {
-        body: JSON.stringify(body),
-      } as any,
-      {} as any,
-      () => {}
-    ) as Promise<SyncSignature>;
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Unable to verify account");
   });
 
   it("autosaves", async () => {
@@ -261,9 +230,6 @@ describe("api.autosave", () => {
     const oneMinutesAgo = new Date(new Date().getTime() - 1 * 60 * 1000);
 
     const body = {
-      sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-      signature:
-        "0x48277e15582f8c51e4b04896af2311ab130b29fb0c023a713c31cacc68b57b8a3ab2b3a3b6402c181d311e96252f8d70fb9c56c4fcd37f7666fe1e21f8bd09641b",
       farmId: 1,
       sessionId: "0x",
       actions: [
@@ -284,6 +250,13 @@ describe("api.autosave", () => {
     const result = (await handler(
       {
         body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
       } as any,
       {} as any,
       () => {}
