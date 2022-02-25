@@ -46,6 +46,8 @@ export async function createFarm({
     updatedAt: new Date().toISOString(),
     gameState: makeDBItem(gameState),
     previousGameState: makeDBItem(previousGameState),
+    version: 1,
+    flaggedCount: 0,
   };
 
   return create(item);
@@ -55,14 +57,21 @@ type UpdateFarm = {
   id: number;
   owner: string;
   gameState: GameState;
+  flaggedCount: number;
 };
 
-export async function updateFarm({ id, owner, gameState }: UpdateFarm) {
+export async function updateFarm({
+  id,
+  owner,
+  gameState,
+  flaggedCount,
+}: UpdateFarm) {
   const safeItem = makeDBItem(gameState);
   return await updateGameState({
     id,
     owner,
     session: safeItem,
+    flaggedCount,
   });
 }
 
@@ -72,6 +81,7 @@ type UpdateSession = {
   sessionId: string;
   gameState: GameState;
   previousGameState?: GameState;
+  version: number;
 };
 
 export async function updateSession({
@@ -79,8 +89,15 @@ export async function updateSession({
   sessionId,
   owner,
   gameState,
+  version,
 }: UpdateSession) {
   const safeFarm = makeDBItem(gameState);
 
-  return await createSession({ id, sessionId, owner, session: safeFarm });
+  return await createSession({
+    id,
+    sessionId,
+    owner,
+    session: safeFarm,
+    version,
+  });
 }

@@ -52,19 +52,27 @@ type UpdateFarm = {
   id: number;
   owner: string;
   session: FarmSession;
+  flaggedCount: number;
 };
 
-export async function updateGameState({ id, owner, session }: UpdateFarm) {
+export async function updateGameState({
+  id,
+  owner,
+  session,
+  flaggedCount,
+}: UpdateFarm) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
       owner,
     },
-    UpdateExpression: "SET updatedAt = :updatedAt, gameState = :gameState",
+    UpdateExpression:
+      "SET updatedAt = :updatedAt, gameState = :gameState, flaggedCount = :flaggedCount",
     ExpressionAttributeValues: {
       ":updatedAt": new Date().toISOString(),
       ":gameState": session,
+      ":flaggedCount": flaggedCount,
     },
   };
   await dynamoDb.update(updateParams).promise();
@@ -75,6 +83,7 @@ type UpdateSession = {
   owner: string;
   sessionId: string;
   session: FarmSession;
+  version: number;
 };
 
 export async function createSession({
@@ -82,6 +91,7 @@ export async function createSession({
   sessionId,
   owner,
   session,
+  version,
 }: UpdateSession) {
   const updateParams = {
     TableName: process.env.tableName as string,
@@ -91,12 +101,13 @@ export async function createSession({
     },
     // Update the "tally" column
     UpdateExpression:
-      "SET sessionId = :sessionId, updatedAt = :updatedAt, gameState = :gameState, previousGameState = :previousGameState",
+      "SET sessionId = :sessionId, updatedAt = :updatedAt, gameState = :gameState, previousGameState = :previousGameState, version = :version",
     ExpressionAttributeValues: {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
       ":gameState": session,
       ":previousGameState": session,
+      ":version": version,
     },
   };
   await dynamoDb.update(updateParams).promise();

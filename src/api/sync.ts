@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
-import { getChangeset } from "../domain/game/sync";
+import { sync } from "../domain/game/sync";
 import { syncSignature } from "../services/web3/signatures";
 import { verifyJwt } from "../services/jwt";
 import { canSync } from "../constants/whitelist";
@@ -37,22 +37,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     }
   }
 
-  const changeset = await getChangeset({
+  const signature = await sync({
     id: Number(body.farmId),
     owner: address,
   });
 
-  const signature = await syncSignature({
-    sender: address,
-    farmId: body.farmId,
-    sessionId: body.sessionId,
-    sfl: changeset.balance,
-    inventory: changeset.inventory,
-  });
-
   logInfo(
     `Synced ${address} for ${body.farmId}`,
-    JSON.stringify(changeset, null, 2)
+    JSON.stringify(signature, null, 2)
   );
 
   return {

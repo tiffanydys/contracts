@@ -1,5 +1,8 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
+import { getFarmById } from "../../repository/farms";
+
+import { withdrawSignature } from "../../services/web3/signatures";
 
 /**
  * Returns the tax rate when withdrawing SFL
@@ -30,4 +33,42 @@ export function getTax(sfl: string) {
 
   // 10%
   return 100;
+}
+
+type Options = {
+  sessionId: string;
+  sender: string;
+  farmId: number;
+  sfl: string;
+  ids: number[];
+  amounts: string[];
+};
+
+export async function withdraw({
+  sender,
+  sessionId,
+  farmId,
+  sfl,
+  ids,
+  amounts,
+}: Options) {
+  const farm = await getFarmById(sender, farmId);
+  if (!farm) {
+    throw new Error("Farm does not exist");
+  }
+
+  // TODO throw error if blacklisted
+
+  // Smart contract does balance validation so don't worry about it here
+  const signature = await withdrawSignature({
+    sender: sender,
+    farmId: farmId,
+    sessionId: sessionId,
+    sfl: sfl,
+    ids: ids,
+    amounts: amounts,
+    tax: getTax(sfl),
+  });
+
+  return signature;
 }

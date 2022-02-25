@@ -2,7 +2,7 @@ import Decimal from "decimal.js-light";
 import { toWei } from "web3-utils";
 import { getFarmMock } from "../../repository/__mocks__/db";
 import { loadItemSupplyMock } from "../../services/web3/__mocks__/polygon";
-import { calculateChangeset, getChangeset, mint } from "./sync";
+import { calculateChangeset, sync, mint } from "./sync";
 import { FOODS, LimitedItems, TOOLS } from "./types/craftables";
 import { CROPS, SEEDS } from "./types/crops";
 import { GameState, Inventory, InventoryItemName } from "./types/game";
@@ -13,7 +13,7 @@ describe("game.sync", () => {
     it("throws an error if the farm does not exist", async () => {
       getFarmMock.mockReturnValueOnce(null);
 
-      const result = getChangeset({
+      const result = sync({
         id: 13,
         owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
@@ -54,7 +54,7 @@ describe("game.sync", () => {
         },
       });
 
-      const result = await getChangeset({
+      const result = await sync({
         id: 13,
         owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });

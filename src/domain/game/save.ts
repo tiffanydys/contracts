@@ -3,7 +3,8 @@ import { EVENTS, GameEvent } from "./events";
 import { GameState } from "./types/game";
 
 import { makeGame } from "./lib/transforms";
-import { storeEvents } from "../../repository/eventStore";
+import { storeFlaggedEvents } from "../../repository/eventStore";
+import { logInfo } from "../../services/logger";
 
 export type GameAction = GameEvent & {
   createdAt: string;
@@ -33,15 +34,23 @@ export const MILLISECONDS_TO_SAVE = 5 * 60 * 1000;
 export const MAX_SECONDS_RANGE = 2 * 60;
 
 // Humanly possible time before executing 2 distinct actions
-const HUMAN_BUFFER_MILLSECONDS = 200;
+const HUMAN_BUFFER_MILLSECONDS = 50;
 
 // Let them save one minute in the future as well to prevent people with clock issues
 export const FUTURE_SAVE_BUFFER_MS = 60 * 1000;
 
-// If they chop faster than 1.3 seconds something is up
-export const TREE_CHOP_TIME = 1300;
+// If they chop faster than 1 seconds something is up
+export const TREE_CHOP_TIME = 1000;
 
-export function processActions(state: GameState, actions: GameAction[]) {
+type UpdatedGame = {
+  state: GameState;
+  flaggedCount: number;
+};
+
+export function processActions(
+  state: GameState,
+  actions: GameAction[]
+): UpdatedGame {
   // Validate actions
   if (!Array.isArray(actions)) {
     throw new Error("Expected actions to be an array");
@@ -55,15 +64,17 @@ export function processActions(state: GameState, actions: GameAction[]) {
     throw new Error("Event range is too large");
   }
 
+  let flaggedCount = 0;
+
   // If they have done multiple actions, make sure it is humanly possible
   if (actions.length > 2) {
     const average = timeRange / actions.length;
     if (average < HUMAN_BUFFER_MILLSECONDS) {
-      throw new Error("Too many events in a short time");
+      flaggedCount += 1;
     }
   }
 
-  return actions.reduce((farm, action, index) => {
+  const newState = actions.reduce((farm, action, index) => {
     const createdAt = new Date(action.createdAt);
     if (index > 0) {
       const previousAction = actions[index - 1];
@@ -74,12 +85,12 @@ export function processActions(state: GameState, actions: GameAction[]) {
       const difference =
         createdAt.getTime() - new Date(previousAction.createdAt).getTime();
 
-      if (difference < 100) {
-        throw new Error("Event fired too quickly");
+      if (difference < HUMAN_BUFFER_MILLSECONDS) {
+        flaggedCount += 1;
       }
 
       if (action.type === "tree.chopped" && difference < TREE_CHOP_TIME) {
-        throw new Error("Tree was chopped too quickly");
+        flaggedCount += 1;
       }
     }
 
@@ -94,6 +105,11 @@ export function processActions(state: GameState, actions: GameAction[]) {
 
     return processEvent(farm, action);
   }, state);
+
+  return {
+    state: newState,
+    flaggedCount,
+  };
 }
 
 type SaveArgs = {
@@ -111,20 +127,29 @@ export async function save({ farmId, account, actions }: SaveArgs) {
   // Pass numbers into a safe format before processing.
   const gameState = makeGame(farm.gameState);
 
-  const newGameState = processActions(gameState, actions);
+  const { state, flaggedCount } = processActions(gameState, actions);
+
+  if (flaggedCount > 0) {
+    logInfo(
+      `Account ${account} flagged (${flaggedCount}) for: `,
+      JSON.stringify(actions, null, 2)
+    );
+
+    storeFlaggedEvents({
+      account,
+      farmId,
+      events: actions,
+      state,
+      version: farm.version,
+    });
+  }
 
   await updateFarm({
     id: farmId,
-    gameState: newGameState,
+    gameState: state,
     owner: account,
+    flaggedCount: farm.flaggedCount + flaggedCount,
   });
 
-  await storeEvents({
-    account,
-    farmId,
-    events: actions,
-    state: newGameState,
-  });
-
-  return newGameState;
+  return state;
 }

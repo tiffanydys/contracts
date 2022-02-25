@@ -4,15 +4,22 @@ import { GameState } from "../domain/game/types/game";
 
 const s3 = new S3();
 
-type PlayerEvent = {
+type FlaggedEvent = {
   account: string;
   farmId: number;
   events: GameEvent[];
   state: GameState;
+  version: number;
 };
 
-export function storeEvents({ account, farmId, events, state }: PlayerEvent) {
-  const key = `${farmId}/${Date.now()}.json`;
+export function storeFlaggedEvents({
+  account,
+  farmId,
+  events,
+  state,
+  version,
+}: FlaggedEvent) {
+  const key = `${farmId}/flagged/${version}.json`;
 
   const params = {
     Bucket: process.env.bucketName as string,
@@ -21,6 +28,36 @@ export function storeEvents({ account, farmId, events, state }: PlayerEvent) {
       events,
       account,
       state,
+    }),
+  };
+
+  return s3.putObject(params).promise();
+}
+
+type SyncEvent = {
+  account: string;
+  farmId: number;
+  state: GameState;
+  previous: GameState;
+  version: number;
+};
+
+export function storeState({
+  account,
+  farmId,
+  version,
+  state,
+  previous,
+}: SyncEvent) {
+  const key = `${farmId}/sync/${version}.json`;
+
+  const params = {
+    Bucket: process.env.bucketName as string,
+    Key: key,
+    Body: JSON.stringify({
+      account,
+      state,
+      previous,
     }),
   };
 

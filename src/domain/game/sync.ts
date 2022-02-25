@@ -10,25 +10,35 @@ import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
 import { loadItemSupply } from "../../services/web3/polygon";
 import { KNOWN_IDS } from "./types";
+import { syncSignature } from "../../services/web3/signatures";
 
 type CalculateChangesetArgs = {
   id: number;
   owner: string;
 };
 
-export async function getChangeset({
-  id,
-  owner,
-}: CalculateChangesetArgs): Promise<GameState> {
-  let farm = await getFarmById(owner, id);
+export async function sync({ id, owner }: CalculateChangesetArgs) {
+  const farm = await getFarmById(owner, id);
   if (!farm) {
     throw new Error("Farm does not exist");
   }
 
+  // TODO throw error if blacklisted
+
   const current = makeGame(farm.gameState);
   const previous = makeGame(farm.previousGameState);
 
-  return calculateChangeset({ current, previous });
+  const changeset = calculateChangeset({ current, previous });
+
+  const signature = await syncSignature({
+    sender: owner,
+    farmId: id,
+    sessionId: farm.sessionId as string,
+    sfl: changeset.balance,
+    inventory: changeset.inventory,
+  });
+
+  return signature;
 }
 
 export function calculateChangeset({
@@ -86,6 +96,8 @@ export async function mint({ farmId, account, item }: MintOptions) {
   if (!farm) {
     throw new Error("Farm does not exist");
   }
+
+  // TODO: prevent if blacklisted
 
   // Pass numbers into a safe format before processing.
   const gameState = makeGame(farm.gameState);

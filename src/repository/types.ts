@@ -23,4 +23,6 @@ export type Account = {
   updatedAt: string;
   gameState: FarmSession;
   previousGameState: FarmSession;
+  version: number;
+  flaggedCount: number;
 };
