@@ -44,7 +44,6 @@ export function makeGame(gameState: Account["gameState"]): GameState {
       [Number(index)]: tree,
     };
   }, {} as Record<InventoryItemName, Decimal>);
-  console.log({ gameState });
 
   return {
     ...gameState,

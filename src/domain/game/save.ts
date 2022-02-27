@@ -3,8 +3,9 @@ import { EVENTS, GameEvent } from "./events";
 import { GameState } from "./types/game";
 
 import { makeGame } from "./lib/transforms";
-import { storeFlaggedEvents } from "../../repository/eventStore";
+import { storeEvents, storeFlaggedEvents } from "../../repository/eventStore";
 import { logInfo } from "../../services/logger";
+import { verifyCaptcha } from "../../services/captcha";
 
 export type GameAction = GameEvent & {
   createdAt: string;
@@ -89,7 +90,7 @@ export function processActions(
         flaggedCount += 1;
       }
 
-      if (action.type === "tree.chopped" && difference < TREE_CHOP_TIME) {
+      if (action.type === "tree.chopped" && difference > TREE_CHOP_TIME) {
         flaggedCount += 1;
       }
     }
@@ -116,12 +117,18 @@ type SaveArgs = {
   farmId: number;
   account: string;
   actions: GameAction[];
+  captcha?: string;
 };
 
-export async function save({ farmId, account, actions }: SaveArgs) {
-  const farm = await getFarmById(account, farmId);
-  if (!farm) {
+export async function save({ farmId, account, actions, captcha }: SaveArgs) {
+  const farm = await getFarmById(farmId);
+  if (!farm || farm.updatedBy !== account) {
     throw new Error("Farm does not exist");
+  }
+
+  const verified = verifyCaptcha({ farm, captcha });
+  if (!verified) {
+    return { verified: false };
   }
 
   // Pass numbers into a safe format before processing.
@@ -151,5 +158,12 @@ export async function save({ farmId, account, actions }: SaveArgs) {
     flaggedCount: farm.flaggedCount + flaggedCount,
   });
 
-  return state;
+  await storeEvents({
+    account,
+    farmId,
+    events: actions,
+    version: farm.version,
+  });
+
+  return { state, verified: true };
 }

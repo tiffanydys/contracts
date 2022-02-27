@@ -17,13 +17,20 @@ export type FarmSession = Omit<
 
 export type Account = {
   id: number;
-  owner: string;
-  sessionId?: string;
+  sessionId: string;
+
+  createdBy: string;
   createdAt: string;
+  updatedBy: string;
   updatedAt: string;
+
   gameState: FarmSession;
   previousGameState: FarmSession;
+
   version: number;
   flaggedCount: number;
   blacklistedAt?: string;
+
+  // Future timestamp where they need to solve captcha before being able to continue
+  verifyAt: string;
 };

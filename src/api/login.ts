@@ -25,7 +25,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   }
 
   const body: LoginBody = JSON.parse(event.body);
-  console.log({ body });
 
   const valid = schema.validate(body);
   if (valid.error) {

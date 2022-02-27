@@ -19,7 +19,7 @@ describe("game", () => {
 
   describe("processActions", () => {
     it("processes an event", () => {
-      const state = processActions(INITIAL_FARM, [
+      const { state } = processActions(INITIAL_FARM, [
         {
           type: "item.harvested",
           index: 0,
@@ -32,7 +32,7 @@ describe("game", () => {
     });
 
     it("processes multiple events", () => {
-      const state = processActions(
+      const { state } = processActions(
         { ...INITIAL_FARM, inventory: { "Sunflower Seed": new Decimal(1) } },
         [
           {
@@ -132,88 +132,88 @@ describe("game", () => {
 
     it("ensures events are not fired too quickly after one another", () => {
       // First event to last event are within 2 minutes
-      expect(() =>
-        processActions(
+      const { flaggedCount } = processActions(
+        {
+          ...INITIAL_FARM,
+          inventory: { Sunflower: new Decimal(1000) },
+        },
+        [
           {
-            ...INITIAL_FARM,
-            inventory: { Sunflower: new Decimal(1000) },
+            type: "item.sell",
+            item: "Sunflower",
+            amount: 1,
+            createdAt: new Date(Date.now() - 200).toISOString(),
           },
-          [
-            {
-              type: "item.sell",
-              item: "Sunflower",
-              amount: 1,
-              createdAt: new Date(Date.now() - 100).toISOString(),
-            },
-            {
-              type: "item.sell",
-              item: "Sunflower",
-              amount: 1,
-              createdAt: new Date(Date.now() - 5).toISOString(),
-            },
-          ]
-        )
-      ).toThrow("Event fired too quickly");
+          {
+            type: "item.sell",
+            item: "Sunflower",
+            amount: 1,
+            createdAt: new Date(Date.now() - 175).toISOString(),
+          },
+        ]
+      );
+
+      expect(flaggedCount).toEqual(1);
     });
 
     it("ensures all events are done in a time humanly possible", () => {
-      expect(() =>
-        processActions(
+      const { flaggedCount } = processActions(
+        {
+          ...INITIAL_FARM,
+          inventory: { Sunflower: new Decimal(1000) },
+        },
+        [
           {
-            ...INITIAL_FARM,
-            inventory: { Sunflower: new Decimal(1000) },
+            type: "item.sell",
+            item: "Sunflower",
+            amount: 1,
+            createdAt: new Date(Date.now() - 100).toISOString(),
           },
-          [
-            {
-              type: "item.sell",
-              item: "Sunflower",
-              amount: 1,
-              createdAt: new Date(Date.now() - 400).toISOString(),
-            },
-            {
-              type: "item.sell",
-              item: "Sunflower",
-              amount: 1,
-              createdAt: new Date(Date.now() - 250).toISOString(),
-            },
-            {
-              type: "item.sell",
-              item: "Sunflower",
-              amount: 1,
-              createdAt: new Date(Date.now() - 50).toISOString(),
-            },
-          ]
-        )
-      ).toThrow("Too many events in a short time");
+          {
+            type: "item.sell",
+            item: "Sunflower",
+            amount: 1,
+            createdAt: new Date(Date.now() - 75).toISOString(),
+          },
+          {
+            type: "item.sell",
+            item: "Sunflower",
+            amount: 1,
+            createdAt: new Date(Date.now() - 50).toISOString(),
+          },
+        ]
+      );
+
+      expect(flaggedCount).toEqual(3);
     });
 
     it("ensures wood is not chopped too quickly", () => {
-      expect(() =>
-        processActions(
+      const { flaggedCount } = processActions(
+        {
+          ...INITIAL_FARM,
+          inventory: { Axe: new Decimal(5) },
+        },
+        [
           {
-            ...INITIAL_FARM,
-            inventory: { Axe: new Decimal(5) },
+            type: "tree.chopped",
+            index: 1,
+            item: "Axe",
+            createdAt: new Date(Date.now() - 1200).toISOString(),
           },
-          [
-            {
-              type: "tree.chopped",
-              index: 1,
-              item: "Axe",
-              createdAt: new Date(Date.now() - 1000).toISOString(),
-            },
-            {
-              type: "tree.chopped",
-              index: 2,
-              item: "Axe",
-              createdAt: new Date().toISOString(),
-            },
-          ]
-        )
-      ).toThrow("Tree was chopped too quickly");
+          {
+            type: "tree.chopped",
+            index: 2,
+            item: "Axe",
+            createdAt: new Date().toISOString(),
+          },
+        ]
+      );
+
+      expect(flaggedCount).toEqual(1);
     });
 
     it("allows wood to be chopped after time", () => {
-      const state = processActions(
+      const { state } = processActions(
         {
           ...INITIAL_FARM,
           inventory: { Axe: new Decimal(5) },
@@ -272,7 +272,8 @@ describe("game", () => {
 
       getFarmMock.mockReturnValueOnce({
         id: 13,
-        session:
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         gameState: {
           fields: {},
@@ -283,6 +284,7 @@ describe("game", () => {
           balance: "20",
           trees: {},
         },
+        flaggedCount: 0,
       });
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
@@ -315,18 +317,22 @@ describe("game", () => {
           },
           trees: {},
         },
+        flaggedCount: 0,
       });
 
       expect(session).toEqual({
-        balance: new Decimal(19.9),
-        fields: {},
-        inventory: {
-          "Potato Seed": new Decimal(5),
+        state: {
+          balance: new Decimal(19.9),
+          fields: {},
+          inventory: {
+            "Potato Seed": new Decimal(5),
+          },
+          stock: {
+            "Potato Seed": new Decimal(2),
+          },
+          trees: {},
         },
-        stock: {
-          "Potato Seed": new Decimal(2),
-        },
-        trees: {},
+        verified: true,
       });
     });
 
@@ -338,6 +344,7 @@ describe("game", () => {
 
       getFarmMock.mockReturnValueOnce({
         id: 13,
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
         session:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         gameState: {

@@ -13,6 +13,7 @@ import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
 import { isBlackListed } from "./lib/blacklist";
 import { KNOWN_IDS } from "./types";
+import { storeSync } from "../../repository/eventStore";
 
 type CalculateChangesetArgs = {
   id: number;
@@ -20,8 +21,8 @@ type CalculateChangesetArgs = {
 };
 
 export async function sync({ id, owner }: CalculateChangesetArgs) {
-  const farm = await getFarmById(owner, id);
-  if (!farm) {
+  const farm = await getFarmById(id);
+  if (!farm || farm.updatedBy !== owner) {
     throw new Error("Farm does not exist");
   }
 
@@ -43,6 +44,15 @@ export async function sync({ id, owner }: CalculateChangesetArgs) {
     sessionId: farm.sessionId as string,
     sfl: changeset.balance,
     inventory: changeset.inventory,
+  });
+
+  // Store sync
+  await storeSync({
+    account: owner,
+    farmId: id,
+    sessionId: farm.sessionId as string,
+    changeset,
+    version: farm.version,
   });
 
   return signature;
@@ -99,8 +109,8 @@ type MintOptions = {
  * Creates the changeset
  */
 export async function mint({ farmId, account, item }: MintOptions) {
-  const farm = await getFarmById(account, farmId);
-  if (!farm) {
+  const farm = await getFarmById(farmId);
+  if (!farm || farm.updatedBy !== account) {
     throw new Error("Farm does not exist");
   }
 

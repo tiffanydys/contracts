@@ -55,7 +55,8 @@ describe("repository.farms", () => {
     expect(createMock).toHaveBeenCalledWith({
       id: 2,
       sessionId: "0x8123",
-      owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      createdBy: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      updatedBy: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       gameState: {
         id: 2,
         balance: "100",
@@ -92,6 +93,8 @@ describe("repository.farms", () => {
       },
       updatedAt: expect.any(String),
       createdAt: expect.any(String),
+      flaggedCount: 0,
+      version: 1,
     });
   });
 
@@ -125,6 +128,7 @@ describe("repository.farms", () => {
         },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      flaggedCount: 0,
     });
 
     expect(updateGameStateMock).toHaveBeenCalledWith({
@@ -156,6 +160,7 @@ describe("repository.farms", () => {
           },
         },
       },
+      flaggedCount: 0,
     });
   });
 
@@ -190,6 +195,7 @@ describe("repository.farms", () => {
         },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      version: 2,
     });
 
     expect(createSessionMock).toHaveBeenCalledWith({
@@ -222,6 +228,7 @@ describe("repository.farms", () => {
           },
         },
       },
+      version: 2,
     });
   });
 });

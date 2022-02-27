@@ -2,6 +2,8 @@ import Decimal from "decimal.js-light";
 import { toWei } from "web3-utils";
 import { getFarmMock } from "../../repository/__mocks__/db";
 import { loadItemSupplyMock } from "../../services/web3/__mocks__/polygon";
+import "../../services/__mocks__/kms";
+import "../../repository/__mocks__/eventStore";
 import { calculateChangeset, sync, mint } from "./sync";
 import { FOODS, LimitedItems, TOOLS } from "./types/craftables";
 import { CROPS, SEEDS } from "./types/crops";
@@ -26,7 +28,7 @@ describe("game.sync", () => {
     it("calculates the changeset from a farm in the DB", async () => {
       getFarmMock.mockReturnValueOnce({
         id: 13,
-        session:
+        sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         gameState: {
           balance: "20",
@@ -52,6 +54,7 @@ describe("game.sync", () => {
           },
           trees: {},
         },
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
 
       const result = await sync({
@@ -60,18 +63,17 @@ describe("game.sync", () => {
       });
 
       expect(result).toEqual({
-        balance: new Decimal("10000000000000000000"),
-        fields: {},
-        inventory: {
-          "Farm Cat": new Decimal(1),
-          Gold: new Decimal(toWei("3")),
-          "Potato Seed": new Decimal(toWei("-4")),
-          Sunflower: new Decimal(toWei("4")),
-        },
-        stock: {
-          "Potato Seed": new Decimal("7"),
-        },
-        trees: {},
+        burnAmounts: ["4000000000000000000"],
+        burnIds: [102],
+        deadline: expect.any(Number),
+        farmId: 13,
+        mintAmounts: ["4000000000000000000", "1", "3000000000000000000"],
+        mintIds: [201, 405, 604],
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        sessionId:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        signature: "0x0asd0j234nsd0",
+        tokens: "10000000000000000000",
       });
     });
   });
@@ -304,7 +306,7 @@ describe("game.sync", () => {
     it("crafts an item", async () => {
       getFarmMock.mockReturnValueOnce({
         id: 13,
-        session:
+        sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         gameState: {
           balance: "2000",
@@ -331,6 +333,7 @@ describe("game.sync", () => {
           },
           trees: {},
         },
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
 
       const changeset = await mint({
@@ -371,6 +374,7 @@ describe("game.sync", () => {
           },
           trees: {},
         },
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
 
       const result = mint({
@@ -416,6 +420,7 @@ describe("game.sync", () => {
           },
           trees: {},
         },
+        updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
 
       const result = mint({

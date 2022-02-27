@@ -1,6 +1,7 @@
 import "../services/web3/__mocks__/polygon";
 import "../services/__mocks__/kms";
-import { getFarmsMock } from "../repository/__mocks__/db";
+import "../repository/__mocks__/eventStore";
+import { getFarmMock } from "../repository/__mocks__/db";
 import { loadNFTFarmMock } from "../services/web3/__mocks__/polygon";
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, SessionBody } from "./session";
@@ -87,39 +88,37 @@ describe("api.session", () => {
       id: 2,
     });
 
-    getFarmsMock.mockReturnValue([
-      {
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        gameState: {
-          balance: "100000",
-          fields: {},
-          id: 2,
-          inventory: {
-            Sunflower: "10000",
-            Stone: "1000",
-          },
-          stock: {},
-          address: "0x291019282",
-          trees: {},
-        },
+    getFarmMock.mockReturnValue({
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      gameState: {
+        balance: "100000",
+        fields: {},
         id: 2,
-        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-        previousGameState: {
-          balance: "100000",
-          fields: {},
-          id: 2,
-          inventory: {
-            Sunflower: "10000",
-            Stone: "1000",
-          },
-          stock: {},
-          address: "0x291019282",
-          trees: {},
+        inventory: {
+          Sunflower: "10000",
+          Stone: "1000",
         },
-        sessionId: "0x123",
+        stock: {},
+        address: "0x291019282",
+        trees: {},
       },
-    ]);
+      id: 2,
+      updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      previousGameState: {
+        balance: "100000",
+        fields: {},
+        id: 2,
+        inventory: {
+          Sunflower: "10000",
+          Stone: "1000",
+        },
+        stock: {},
+        address: "0x291019282",
+        trees: {},
+      },
+      sessionId: "0x123",
+    });
 
     const body: SessionBody = {
       farmId: 2,

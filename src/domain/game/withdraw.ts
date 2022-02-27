@@ -1,5 +1,6 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
+import { storeWithdraw } from "../../repository/eventStore";
 import { getFarmById } from "../../repository/farms";
 
 import { withdrawSignature } from "../../services/web3/signatures";
@@ -53,8 +54,8 @@ export async function withdraw({
   ids,
   amounts,
 }: Options) {
-  const farm = await getFarmById(sender, farmId);
-  if (!farm) {
+  const farm = await getFarmById(farmId);
+  if (!farm || farm.updatedBy !== sender) {
     throw new Error("Farm does not exist");
   }
 
@@ -72,6 +73,16 @@ export async function withdraw({
     ids: ids,
     amounts: amounts,
     tax: getTax(sfl),
+  });
+
+  storeWithdraw({
+    account: sender,
+    sessionId,
+    farmId,
+    sfl,
+    ids,
+    amounts,
+    version: farm.version,
   });
 
   return signature;

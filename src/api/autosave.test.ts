@@ -8,6 +8,10 @@ import { handler, AutosaveBody } from "./autosave";
 import { generateJwt } from "../services/jwt";
 
 describe("api.autosave", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("requires a valid JWT", async () => {
     const body = {
       sessionId: "0x",
@@ -213,7 +217,7 @@ describe("api.autosave", () => {
         trees: {},
       },
       id: 2,
-      owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       previousGameState: {
         balance: "20000",
         stock: {},

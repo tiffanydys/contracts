@@ -6,28 +6,10 @@ export { FarmSession, Account };
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export async function getFarms(account: string): Promise<Account[]> {
-  const getParams = {
-    TableName: process.env.tableName as string,
-    KeyConditionExpression: "#owner = :owner",
-    ExpressionAttributeNames: {
-      "#owner": "owner",
-    },
-    ExpressionAttributeValues: {
-      ":owner": account,
-    },
-  };
-
-  const results = await dynamoDb.query(getParams).promise();
-
-  return results.Items as Account[];
-}
-
-export async function getFarm(account: string, id: number): Promise<Account> {
+export async function getFarm(id: number): Promise<Account> {
   const getParams = {
     TableName: process.env.tableName as string,
     Key: {
-      owner: account,
       id,
     },
   };
@@ -65,12 +47,12 @@ export async function updateGameState({
     TableName: process.env.tableName as string,
     Key: {
       id,
-      owner,
     },
     UpdateExpression:
-      "SET updatedAt = :updatedAt, gameState = :gameState, flaggedCount = :flaggedCount",
+      "SET updatedAt = :updatedAt, updatedBy = :updatedBy, gameState = :gameState, flaggedCount = :flaggedCount",
     ExpressionAttributeValues: {
       ":updatedAt": new Date().toISOString(),
+      ":updatedBy": owner,
       ":gameState": session,
       ":flaggedCount": flaggedCount,
     },
@@ -99,12 +81,12 @@ export async function createSession({
       id,
       owner,
     },
-    // Update the "tally" column
     UpdateExpression:
-      "SET sessionId = :sessionId, updatedAt = :updatedAt, gameState = :gameState, previousGameState = :previousGameState, version = :version",
+      "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, gameState = :gameState, previousGameState = :previousGameState, version = :version",
     ExpressionAttributeValues: {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
+      ":updatedBy": owner,
       ":gameState": session,
       ":previousGameState": session,
       ":version": version,
@@ -115,15 +97,13 @@ export async function createSession({
 
 type Blacklist = {
   id: number;
-  owner: string;
 };
 
-export async function blacklist({ id, owner }: Blacklist) {
+export async function blacklist({ id }: Blacklist) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
-      owner,
     },
     UpdateExpression: "SET blacklistedAt = :blacklistedAt",
     ExpressionAttributeValues: {

@@ -3,7 +3,6 @@ import { GameState } from "../domain/game/types/game";
 import {
   create,
   getFarm,
-  getFarms,
   updateGameState,
   createSession,
   blacklist,
@@ -13,15 +12,8 @@ import { makeDBItem } from "./utils";
 
 export { FarmSession, Account };
 
-export async function getFarmsByAccount(account: string): Promise<Account[]> {
-  return getFarms(account);
-}
-
-export async function getFarmById(
-  account: string,
-  id: number
-): Promise<Account> {
-  return getFarm(account, id);
+export async function getFarmById(id: number): Promise<Account> {
+  return getFarm(id);
 }
 
 type CreateFarm = {
@@ -43,8 +35,9 @@ export async function createFarm({
     id: id,
     sessionId: sessionId,
     createdAt: new Date().toISOString(),
-    owner,
+    createdBy: owner,
     updatedAt: new Date().toISOString(),
+    updatedBy: owner,
     gameState: makeDBItem(gameState),
     previousGameState: makeDBItem(previousGameState),
     version: 1,
@@ -105,12 +98,10 @@ export async function updateSession({
 
 type Blacklist = {
   id: number;
-  owner: string;
 };
 
-export async function blacklistFarm({ id, owner }: Blacklist) {
+export async function blacklistFarm({ id }: Blacklist) {
   return await blacklist({
     id,
-    owner,
   });
 }

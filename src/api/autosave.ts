@@ -58,6 +58,7 @@ const schema = () =>
       .min(1),
     farmId: Joi.number().required(),
     sessionId: Joi.string().required(),
+    captcha: Joi.string(),
   });
 
 export type AutosaveBody = {
@@ -65,6 +66,7 @@ export type AutosaveBody = {
   farmId: number;
   // Not actually used, but throw people off the scent of how our sessions work
   sessionId: string;
+  captcha?: string;
 };
 
 /**
@@ -85,19 +87,33 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  const game = await save({
+  const { verified, state } = await save({
     farmId: body.farmId,
     account: address,
     actions: body.actions,
+    captcha: body.captcha,
   });
 
-  logInfo(`Saved ${address} for ${body.farmId}`, JSON.stringify(game, null, 2));
+  if (!verified) {
+    return {
+      statusCode: 429,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        captcha: false,
+      }),
+    };
+  }
+
+  logInfo(
+    `Saved ${address} for ${body.farmId}`,
+    JSON.stringify(state, null, 2)
+  );
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm: game,
+      farm: state,
     }),
   };
 };
