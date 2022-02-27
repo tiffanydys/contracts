@@ -6,6 +6,7 @@ import { makeGame } from "./lib/transforms";
 import { storeEvents, storeFlaggedEvents } from "../../repository/eventStore";
 import { logInfo } from "../../services/logger";
 import { verifyCaptcha } from "../../services/captcha";
+import { isBlackListed } from "./lib/blacklist";
 
 export type GameAction = GameEvent & {
   createdAt: string;
@@ -124,6 +125,11 @@ export async function save({ farmId, account, actions, captcha }: SaveArgs) {
   const farm = await getFarmById(farmId);
   if (!farm || farm.updatedBy !== account) {
     throw new Error("Farm does not exist");
+  }
+
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error("Blacklisted");
   }
 
   const verified = await verifyCaptcha({ farm, captcha });
