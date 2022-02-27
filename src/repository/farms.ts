@@ -6,6 +6,8 @@ import {
   updateGameState,
   createSession,
   blacklist,
+  updateFlaggedCount,
+  verifyAccount,
 } from "./db";
 import { FarmSession, Account } from "./types";
 import { makeDBItem } from "./utils";
@@ -103,5 +105,34 @@ type Blacklist = {
 export async function blacklistFarm({ id }: Blacklist) {
   return await blacklist({
     id,
+  });
+}
+
+type UpdateFlaggedCount = {
+  id: number;
+  flaggedCount: number;
+};
+
+export async function flag({ id, flaggedCount }: UpdateFlaggedCount) {
+  return await updateFlaggedCount({
+    id,
+    flaggedCount,
+  });
+}
+
+type Verify = {
+  id: number;
+};
+
+const VERIFIED_PERIOD = 1000 * 30;
+
+/**
+ * After solving a captcha, the account is verified for 30 minutes
+ * We set the next verifyAt timestamp for when this expires
+ */
+export async function verify({ id }: Verify) {
+  return await verifyAccount({
+    id,
+    verifyAt: new Date(Date.now() + VERIFIED_PERIOD).toISOString(),
   });
 }

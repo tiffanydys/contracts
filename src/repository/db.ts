@@ -112,3 +112,44 @@ export async function blacklist({ id }: Blacklist) {
   };
   await dynamoDb.update(updateParams).promise();
 }
+
+type UpdateFlaggedCount = {
+  id: number;
+  flaggedCount: number;
+};
+
+export async function updateFlaggedCount({
+  id,
+  flaggedCount,
+}: UpdateFlaggedCount) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    UpdateExpression: "SET flaggedCount = :flaggedCount",
+    ExpressionAttributeValues: {
+      ":flaggedCount": flaggedCount,
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
+
+type VerifyAccount = {
+  id: number;
+  verifyAt: string;
+};
+
+export async function verifyAccount({ id, verifyAt }: VerifyAccount) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    UpdateExpression: "SET verifyAt = :verifyAt",
+    ExpressionAttributeValues: {
+      ":verifyAt": verifyAt,
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}

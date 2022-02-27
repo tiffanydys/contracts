@@ -1,5 +1,4 @@
 import { S3 } from "aws-sdk";
-import { String } from "aws-sdk/clients/acm";
 import { GameEvent } from "../domain/game/events";
 import { GameState } from "../domain/game/types/game";
 
@@ -8,8 +7,8 @@ const s3 = new S3();
 type FlaggedEvent = {
   account: string;
   farmId: number;
-  events: GameEvent[];
-  state: GameState;
+  events: (GameEvent | { captcha: "failed" })[];
+  state?: GameState;
   version: number;
 };
 

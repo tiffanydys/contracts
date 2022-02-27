@@ -126,7 +126,8 @@ export async function save({ farmId, account, actions, captcha }: SaveArgs) {
     throw new Error("Farm does not exist");
   }
 
-  const verified = verifyCaptcha({ farm, captcha });
+  const verified = await verifyCaptcha({ farm, captcha });
+  console.log({ verified });
   if (!verified) {
     return { verified: false };
   }
