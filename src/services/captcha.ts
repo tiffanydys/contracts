@@ -9,14 +9,20 @@ type Response = {
 };
 
 async function request(token: string) {
-  const response = await fetch(
-    `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY}&response=${token}`,
-    {
-      method: "POST",
-    }
-  );
-  const data: Response = await response.json();
-  return data;
+  try {
+    const response = await fetch(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY}&response=${token}`,
+      {
+        method: "POST",
+      }
+    );
+    const data: Response = await response.json();
+    return data;
+  } catch (e) {
+    console.error(`Captcha verification failed: ${e}`);
+    // If the API call fails, give user benefit of the doubt and mark as verified
+    return { success: true, score: 1 };
+  }
 }
 
 type VerifyOptions = {
