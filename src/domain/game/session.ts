@@ -94,6 +94,7 @@ export async function startSession({
   const sessionMatches = farm.sessionId === sessionId;
   const ownerChanged = farm.updatedBy !== sender;
 
+  console.log({ farm });
   if (sessionMatches && !ownerChanged) {
     return farmState;
   }

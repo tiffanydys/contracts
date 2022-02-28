@@ -5,7 +5,6 @@ import {
 } from "./__mocks__/db";
 import { createFarm, updateFarm, updateSession } from "./farms";
 import Decimal from "decimal.js-light";
-import { INITIAL_TREES } from "../domain/game/lib/constants";
 
 describe("repository.farms", () => {
   beforeEach(() => {
@@ -93,6 +92,7 @@ describe("repository.farms", () => {
       },
       updatedAt: expect.any(String),
       createdAt: expect.any(String),
+      verifyAt: expect.any(String),
       flaggedCount: 0,
       version: 1,
     });

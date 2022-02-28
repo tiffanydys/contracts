@@ -44,6 +44,8 @@ export async function createFarm({
     previousGameState: makeDBItem(previousGameState),
     version: 1,
     flaggedCount: 0,
+    // First verify period should be 15 minutes after playing the game.
+    verifyAt: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
   };
 
   return create(item);
@@ -124,7 +126,8 @@ type Verify = {
   id: number;
 };
 
-const VERIFIED_PERIOD = 1000 * 30;
+// Every 6 hours during beta
+const VERIFIED_PERIOD = 1000 * 60 * 60 * 6;
 
 /**
  * After solving a captcha, the account is verified for 30 minutes

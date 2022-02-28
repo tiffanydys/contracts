@@ -2,7 +2,6 @@ import fetch from "node-fetch";
 import { storeFlaggedEvents } from "../repository/eventStore";
 import { flag, verify } from "../repository/farms";
 import { Account } from "../repository/types";
-import { verifyAccount } from "./web3/signatures";
 
 type Response = {
   success: boolean;
@@ -10,8 +9,6 @@ type Response = {
 };
 
 async function request(token: string) {
-  console.log({ token });
-
   const response = await fetch(
     `https://www.google.com/recaptcha/api/siteverify?secret=6Lfqm6MeAAAAAE9WRcv-mS0-xWUa2hmj2AcYb5YB&response=${token}`,
     {
@@ -19,7 +16,6 @@ async function request(token: string) {
     }
   );
   const data: Response = await response.json();
-  console.log({ data });
   return data;
 }
 
@@ -30,14 +26,12 @@ type VerifyOptions = {
 export async function verifyCaptcha({ farm, captcha }: VerifyOptions) {
   const timeToVerify = !farm.verifyAt || new Date() > new Date(farm.verifyAt);
 
-  console.log({ timeToVerify, farm });
   if (timeToVerify) {
     if (!captcha) {
       return false;
     }
 
     const response = await request(captcha);
-    console.log({ response });
 
     // Check the score of the captcha
     if (!response.success) {

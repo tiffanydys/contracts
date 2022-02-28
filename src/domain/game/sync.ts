@@ -35,7 +35,7 @@ export async function sync({ id, owner }: CalculateChangesetArgs) {
 
   const blacklisted = await isBlackListed(farm);
   if (blacklisted) {
-    throw new Error("Blacklisted");
+    throw new Error(`Farm #${id} - ${farm.updatedBy} is blacklisted`);
   }
 
   const signature = await syncSignature({
@@ -116,7 +116,7 @@ export async function mint({ farmId, account, item }: MintOptions) {
 
   const blacklisted = await isBlackListed(farm);
   if (blacklisted) {
-    throw new Error("Blacklisted");
+    throw new Error(`Farm #${farmId} - ${farm.updatedBy} is blacklisted`);
   }
 
   // Pass numbers into a safe format before processing.

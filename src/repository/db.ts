@@ -79,7 +79,6 @@ export async function createSession({
     TableName: process.env.tableName as string,
     Key: {
       id,
-      owner,
     },
     UpdateExpression:
       "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, gameState = :gameState, previousGameState = :previousGameState, version = :version",

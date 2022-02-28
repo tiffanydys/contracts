@@ -129,11 +129,10 @@ export async function save({ farmId, account, actions, captcha }: SaveArgs) {
 
   const blacklisted = await isBlackListed(farm);
   if (blacklisted) {
-    throw new Error("Blacklisted");
+    throw new Error(`Farm #${farmId} - ${account} is blacklisted`);
   }
 
   const verified = await verifyCaptcha({ farm, captcha });
-  console.log({ verified });
   if (!verified) {
     return { verified: false };
   }
@@ -165,7 +164,7 @@ export async function save({ farmId, account, actions, captcha }: SaveArgs) {
     flaggedCount: farm.flaggedCount + flaggedCount,
   });
 
-  await storeEvents({
+  storeEvents({
     account,
     farmId,
     events: actions,

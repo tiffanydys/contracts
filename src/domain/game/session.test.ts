@@ -134,6 +134,7 @@ describe("game", () => {
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         updatedAt: expect.any(String),
+        verifyAt: expect.any(String),
         flaggedCount: 0,
         version: 1,
       });
@@ -185,6 +186,7 @@ describe("game", () => {
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         updatedAt: expect.any(String),
+        verifyAt: expect.any(String),
         version: 1,
         flaggedCount: 0,
       });

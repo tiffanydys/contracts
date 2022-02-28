@@ -61,7 +61,7 @@ export async function withdraw({
 
   const blacklisted = await isBlackListed(farm);
   if (blacklisted) {
-    throw new Error("Blacklisted");
+    throw new Error(`Farm #${farmId} - ${farm.updatedBy} is blacklisted`);
   }
 
   // Smart contract does balance validation so don't worry about it here

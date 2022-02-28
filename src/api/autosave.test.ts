@@ -228,6 +228,8 @@ describe("api.autosave", () => {
         trees: {},
       },
       sessionId: "0x8123",
+      // Account is verified
+      verifyAt: "2030-01-01T00:00:00.000Z",
     });
 
     const twoMinutesAgo = new Date(new Date().getTime() - 2 * 60 * 1000);
@@ -281,5 +283,67 @@ describe("api.autosave", () => {
         address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       },
     });
+  });
+
+  it("requires a captcha", async () => {
+    getFarmMock.mockReturnValue({
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      gameState: {
+        balance: "100000",
+        fields: {},
+        stock: {},
+        id: 2,
+        inventory: {
+          "Sunflower Seed": "5",
+        },
+        address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        trees: {},
+      },
+      id: 2,
+      updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      previousGameState: {
+        balance: "20000",
+        stock: {},
+        fields: {},
+        id: 2,
+        inventory: {},
+        address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        trees: {},
+      },
+      sessionId: "0x8123",
+      // Account is unverified
+      verifyAt: "2010-01-01T00:00:00.000Z",
+    });
+
+    const body = {
+      farmId: 1,
+      sessionId: "0x",
+      actions: [
+        {
+          type: "item.planted",
+          item: "Sunflower Seed",
+          index: 1,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    } as AutosaveBody;
+
+    const result = (await handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+            }).token
+          }`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    )) as any;
+
+    expect(result.statusCode).toEqual(429);
   });
 });

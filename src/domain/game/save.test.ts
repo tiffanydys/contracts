@@ -285,6 +285,8 @@ describe("game", () => {
           trees: {},
         },
         flaggedCount: 0,
+        // Account is verified
+        verifyAt: "2030-01-01T00:00:00.000Z",
       });
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
@@ -356,6 +358,8 @@ describe("game", () => {
           balance: "20",
           trees: {},
         },
+        // Account is verified
+        verifyAt: "2030-01-01T00:00:00.000Z",
       });
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
