@@ -40,6 +40,7 @@ export default class ApiStack extends sst.Stack {
       SFF_TOKEN_ADDRESS: process.env.SFF_TOKEN_ADDRESS as string,
       SFF_FARM_ADDRESS: process.env.SFF_FARM_ADDRESS as string,
       KMS_KEY_ID: process.env.KMS_KEY_ID as string,
+      RECAPTCHA_KEY: process.env.RECAPTCHA_KEY as string,
     };
 
     const api = new sst.Api(this, "Api", {
@@ -62,6 +63,7 @@ export default class ApiStack extends sst.Stack {
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
+            ...web3EnvironmentVariables,
           },
         },
         "POST    /session": {

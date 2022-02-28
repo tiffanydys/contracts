@@ -10,7 +10,7 @@ type Response = {
 
 async function request(token: string) {
   const response = await fetch(
-    `https://www.google.com/recaptcha/api/siteverify?secret=6Lfqm6MeAAAAAE9WRcv-mS0-xWUa2hmj2AcYb5YB&response=${token}`,
+    `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY}&response=${token}`,
     {
       method: "POST",
     }
