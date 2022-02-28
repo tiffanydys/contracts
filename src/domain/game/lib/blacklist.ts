@@ -5,14 +5,18 @@ import { Account } from "../../../repository/types";
 const FLAG_COUNT = 10;
 export async function isBlackListed(account: Account) {
   if (account.blacklistedAt) {
-    return true;
+    // TODO turn on blacklisting in future
+    //return true;
+    return false;
   }
 
   // Not yet blacklisted but should be
   if (account.flaggedCount > FLAG_COUNT) {
     await blacklistFarm(account);
 
-    return true;
+    // TODO turn on blacklisting in future
+    //return true;
+    return false;
   }
 
   return false;

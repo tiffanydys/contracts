@@ -198,7 +198,7 @@ describe("game", () => {
             type: "tree.chopped",
             index: 1,
             item: "Axe",
-            createdAt: new Date(Date.now() - 1200).toISOString(),
+            createdAt: new Date(Date.now() - 800).toISOString(),
           },
           {
             type: "tree.chopped",

@@ -91,7 +91,7 @@ export function processActions(
         flaggedCount += 1;
       }
 
-      if (action.type === "tree.chopped" && difference > TREE_CHOP_TIME) {
+      if (action.type === "tree.chopped" && difference < TREE_CHOP_TIME) {
         flaggedCount += 1;
       }
     }
