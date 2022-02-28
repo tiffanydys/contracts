@@ -1,11 +1,7 @@
 import Decimal from "decimal.js-light";
 import { fromWei } from "web3-utils";
 
-import {
-  getFarmsByAccount,
-  createFarm,
-  updateSession,
-} from "../../repository/farms";
+import { createFarm, getFarmById, updateSession } from "../../repository/farms";
 import { GameState } from "./types/game";
 
 import {
@@ -21,6 +17,10 @@ import { getV1GameState } from "../sunflowerFarmers/sunflowerFarmers";
 import { IDS } from "./types";
 import { makeGame, makeInventory } from "./lib/transforms";
 import { logInfo } from "../../services/logger";
+import {
+  getMigrationEvent,
+  storeMigrationEvent,
+} from "../../repository/eventStore";
 
 type StartSessionArgs = {
   farmId: number;
@@ -33,56 +33,30 @@ export async function startSession({
   sender,
   sessionId,
 }: StartSessionArgs): Promise<GameState> {
-  // We don't really care about this - they could create a session but never be able to save it
-  const nftFarm = await loadNFTFarm(farmId);
-  if (nftFarm.owner !== sender) {
-    throw new Error("You do not own this farm");
-  }
+  const farm = await getFarmById(farmId);
 
-  const farms = await getFarmsByAccount(sender);
-
-  const farm = farms.find((farm) => farm.id === farmId);
-
-  // TODO: Support cases where someone just transferred a farm from someone else ;)
-  // Fetch on chain data
-
-  // Support case where DB goes down?
-  // Fetch on chain data
-
-  // We always want to be fetching on chain first just in case to set the previousGameState
-
-  // No session was ever created for this farm + account
+  // No session was ever created for this farm NFT
   if (!farm) {
-    // We don't really care about this - they could create a session but never be able to save it
     const nftFarm = await loadNFTFarm(farmId);
     if (nftFarm.owner !== sender) {
       throw new Error("You do not own this farm");
     }
 
     let initialFarm: GameState = {
-      // Keep the planted fields
       ...INITIAL_FARM,
-      // Load the token + NFT balances
-      balance: new Decimal(0),
     };
 
-    //If a user session does not exist in Sessions.sol, it is represented as 0, which is the following:
-    const isInitialSession =
-      // We nuke testnet a lot so ignore
-      process.env.NETWORK !== "mainnet" ||
-      sessionId ===
-        "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const migration = await getMigrationEvent(sender);
 
     /**
-     * Double check they do not already have a farm migrated.
-     * Beta.sol allows only one farm per account but still check!
+     * Beta.sol allows only one farm per account
+     * If a user has a migarte event, we assume they have already performed the migration
      */
-    if (farms.length === 0 && isInitialSession) {
+    if (!migration) {
       // Load a V1 snapshot (any resources/inventory they had from the old game)
       const sunflowerFarmersSnapshot = await getV1GameState({
         address: sender,
       });
-      logInfo("Session.snapshot: ", { sunflowerFarmersSnapshot });
 
       if (sunflowerFarmersSnapshot) {
         initialFarm = {
@@ -91,6 +65,12 @@ export async function startSession({
           inventory: sunflowerFarmersSnapshot.inventory,
         };
       }
+
+      await storeMigrationEvent({
+        account: sender,
+        farmId,
+        state: initialFarm,
+      });
     }
 
     await createFarm({
@@ -98,14 +78,10 @@ export async function startSession({
       owner: sender,
       gameState: initialFarm,
 
-      // We want to be able to calculate the changeset for the farm
       previousGameState: {
         ...INITIAL_FARM,
-        // Remove the seeds as we want these minted as well
-        inventory: {},
       },
 
-      // Will be 0 but still let UI pass it in
       sessionId: sessionId,
     });
 
@@ -116,25 +92,30 @@ export async function startSession({
 
   // Does the session ID match?
   const sessionMatches = farm.sessionId === sessionId;
+  const ownerChanged = farm.updatedBy !== sender;
 
-  if (sessionMatches) {
+  console.log({ farm });
+  if (sessionMatches && !ownerChanged) {
     return farmState;
   }
 
   // We are out of sync with the Blockchain
   const onChainData = await fetchOnChainData({
     farmId: farmId,
-    farm: nftFarm,
     sessionId,
+    sender,
   });
 
   const gameState: GameState = {
     ...farmState,
     balance: onChainData.balance,
     inventory: onChainData.inventory,
-    // Reset the stock
-    stock: INITIAL_STOCK,
   };
+
+  // Reset the stock only on new sessions (not transferring ownership)
+  if (!ownerChanged) {
+    gameState.stock = INITIAL_STOCK;
+  }
 
   await updateSession({
     id: farmId,
@@ -143,6 +124,7 @@ export async function startSession({
     previousGameState: gameState,
     sessionId: sessionId,
     owner: sender,
+    version: farm.version + 1,
   });
 
   return gameState;
@@ -150,29 +132,34 @@ export async function startSession({
 
 export async function fetchOnChainData({
   farmId,
-  farm,
   sessionId,
+  sender,
 }: {
   farmId: number;
-  farm: FarmNFT;
   sessionId: string;
+  sender: string;
 }) {
+  const nftFarm = await loadNFTFarm(farmId);
+  if (nftFarm.owner !== sender) {
+    throw new Error("You do not own this farm");
+  }
+
   const currentSessionId = await loadSession(farmId);
   if (sessionId !== currentSessionId) {
     throw new Error("Session ID does not match");
   }
 
-  const balanceString = await loadBalance(farm.account);
+  const balanceString = await loadBalance(nftFarm.account);
   const balance = new Decimal(fromWei(balanceString, "ether"));
 
-  const inventory = await loadInventory(IDS, farm.account);
+  const inventory = await loadInventory(IDS, nftFarm.account);
   const friendlyInventory = makeInventory(inventory);
 
   return {
     balance,
     inventory: friendlyInventory,
     id: farmId,
-    address: farm.account,
+    address: nftFarm.account,
     fields: {},
     stock: {},
     trees: {},

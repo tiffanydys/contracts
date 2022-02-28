@@ -1,4 +1,6 @@
 import { signMock } from "../services/__mocks__/kms";
+import "../repository/__mocks__/eventStore";
+import { getFarmMock } from "../repository/__mocks__/db";
 
 import { WithdrawArgs } from "../services/web3/signatures";
 import { handler, WithdrawBody } from "./withdraw";
@@ -7,6 +9,12 @@ import { toWei } from "web3-utils";
 import { generateJwt } from "../services/jwt";
 
 describe("api.withdraw", () => {
+  beforeEach(() => {
+    getFarmMock.mockReturnValue({
+      updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+    });
+  });
+
   it("requires a valid jwt", async () => {
     const body = {
       amounts: [],

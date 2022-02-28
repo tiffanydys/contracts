@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
-import { withdrawSignature } from "../services/web3/signatures";
 import { verifyJwt } from "../services/jwt";
 
 import { canSync } from "../constants/whitelist";
@@ -9,7 +8,7 @@ import { canSync } from "../constants/whitelist";
 import { KNOWN_IDS } from "../domain/game/types";
 import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
 import { InventoryItemName } from "../domain/game/types/game";
-import { getTax } from "../domain/game/withdraw";
+import { withdraw } from "../domain/game/withdraw";
 import { RESOURCES } from "../domain/game/types/resources";
 import { logInfo } from "../services/logger";
 
@@ -65,14 +64,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   // Smart contract does balance validation so don't worry about it here
-  const signature = await withdrawSignature({
+  const signature = await withdraw({
     sender: address,
     farmId: body.farmId,
     sessionId: body.sessionId,
     sfl: body.sfl,
     ids: body.ids,
     amounts: body.amounts,
-    tax: getTax(body.sfl),
   });
 
   return {

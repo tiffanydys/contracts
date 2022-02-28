@@ -3,7 +3,7 @@ import { toWei } from "web3-utils";
 import {
   createMock,
   createSessionMock,
-  getFarmsMock,
+  getFarmMock,
 } from "../../repository/__mocks__/db";
 import {
   loadNFTFarmMock,
@@ -13,6 +13,7 @@ import {
   loadInventoryMock,
   loadSessionMock,
 } from "../../services/web3/__mocks__/polygon";
+import { getMigrationEventMock } from "../../repository/__mocks__/eventStore";
 import { INITIAL_FIELDS, INITIAL_STOCK, INITIAL_TREES } from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
 
@@ -93,7 +94,7 @@ describe("game", () => {
     });
 
     it("creates a farm if no session exists", async () => {
-      getFarmsMock.mockReturnValueOnce([]);
+      getFarmMock.mockReturnValueOnce(null);
 
       // This should not come through
       loadV1FarmMock.mockReturnValueOnce([]);
@@ -120,7 +121,8 @@ describe("game", () => {
         createdAt: expect.any(String),
         gameState,
         id: 13,
-        owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        createdBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        updatedBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
           balance: "0",
           fields: INITIAL_FIELDS,
@@ -132,6 +134,9 @@ describe("game", () => {
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         updatedAt: expect.any(String),
+        verifyAt: expect.any(String),
+        flaggedCount: 0,
+        version: 1,
       });
 
       expect(session).toEqual({
@@ -145,13 +150,9 @@ describe("game", () => {
     });
 
     it("does not migrate if farm already exists", async () => {
-      getFarmsMock.mockReturnValueOnce([
-        {
-          farmId: 13,
-        },
-      ]);
       // This should not come through
       loadV1BalanceMock.mockReturnValueOnce("60000000000000000000");
+      getMigrationEventMock.mockReturnValue({ balance: "1" });
 
       await startSession({
         farmId: 13,
@@ -172,7 +173,8 @@ describe("game", () => {
           trees: initialTreeJSON,
         },
         id: 13,
-        owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        createdBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        updatedBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
           balance: "0",
           fields: INITIAL_FIELDS,
@@ -184,6 +186,9 @@ describe("game", () => {
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         updatedAt: expect.any(String),
+        verifyAt: expect.any(String),
+        version: 1,
+        flaggedCount: 0,
       });
     });
 
@@ -191,20 +196,20 @@ describe("game", () => {
       // Avoid migrations
       process.env.NETWORK = "mainnet";
 
-      getFarmsMock.mockReturnValueOnce([
-        {
-          id: 13,
-          session:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          gameState: {
-            fields: {},
-            inventory: {},
-            stock: {},
-            balance: "20",
-            trees: initialTreeJSON,
-          },
+      getFarmMock.mockReturnValueOnce({
+        id: 13,
+        session:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        gameState: {
+          fields: {},
+          inventory: {},
+          stock: {},
+          balance: "20",
+          trees: initialTreeJSON,
         },
-      ]);
+        updatedBy: sender,
+        version: 3,
+      });
 
       loadBalanceMock.mockReturnValue("120000000000000000000");
       loadInventoryMock.mockReturnValue([toWei("1"), toWei("2")]);
@@ -231,6 +236,7 @@ describe("game", () => {
           trees: initialTreeJSON,
         },
         sessionId: "0x123",
+        version: 4,
       });
 
       expect(session).toEqual({
@@ -251,15 +257,21 @@ describe("game", () => {
       loadBalanceMock.mockReturnValue(toWei("35"));
       loadInventoryMock.mockReturnValue([]);
       loadSessionMock.mockReturnValue("0xabc");
+      loadNFTFarmMock.mockReturnValue({
+        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        account: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        id: 2,
+      });
 
       const result = fetchOnChainData({
         farmId: 13,
         sessionId: "0x123",
-        farm: {
-          account: "0xD7123601239123",
-          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-          tokenId: 2,
-        },
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        // farm: {
+        //   account: "0xD7123601239123",
+        //   owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        //   tokenId: 2,
+        // },
       });
 
       await expect(
@@ -271,15 +283,22 @@ describe("game", () => {
       loadBalanceMock.mockReturnValue(toWei("35"));
       loadInventoryMock.mockReturnValue([]);
       loadSessionMock.mockReturnValue("0x123");
+      loadNFTFarmMock.mockReturnValue({
+        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        account: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        id: 2,
+      });
 
       const result = await fetchOnChainData({
         farmId: 13,
         sessionId: "0x123",
-        farm: {
-          account: "0xD7123601239123",
-          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-          tokenId: 2,
-        },
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+
+        // farm: {
+        //   account: "0xD7123601239123",
+        //   owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        //   tokenId: 2,
+        // },
       });
 
       expect(result.balance).toEqual(new Decimal("35"));
@@ -348,16 +367,23 @@ describe("game", () => {
         toWei("80"),
         toWei("2000"),
       ]);
+      loadNFTFarmMock.mockReturnValue({
+        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        account: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        id: 2,
+      });
       loadSessionMock.mockReturnValue("0x123");
 
       const result = await fetchOnChainData({
         farmId: 13,
         sessionId: "0x123",
-        farm: {
-          account: "0xD7123601239123",
-          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-          tokenId: 2,
-        },
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+
+        // farm: {
+        //   account: "0xD7123601239123",
+        //   owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        //   tokenId: 2,
+        // },
       });
 
       expect(result.balance).toEqual(new Decimal(0));
@@ -419,6 +445,11 @@ describe("game", () => {
      * Hardcoded data but we should test every item here
      */
     it("loads basic inventory from chain", async () => {
+      loadNFTFarmMock.mockReturnValue({
+        owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        account: "0x71ce61c1a29959797493f882F01961567bE56f6E",
+        id: 2,
+      });
       loadBalanceMock.mockReturnValue(toWei("0"));
       loadInventoryMock.mockReturnValue([
         // Seeds
@@ -480,11 +511,7 @@ describe("game", () => {
       const result = await fetchOnChainData({
         farmId: 13,
         sessionId: "0x123",
-        farm: {
-          account: "0xD7123601239123",
-          owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
-          tokenId: 2,
-        },
+        sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       });
 
       expect(result.balance).toEqual(new Decimal(0));

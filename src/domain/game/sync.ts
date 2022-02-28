@@ -2,33 +2,60 @@ import Decimal from "decimal.js-light";
 import { toWei } from "web3-utils";
 
 import { getFarmById } from "../../repository/farms";
+import { loadItemSupply } from "../../services/web3/polygon";
+import { syncSignature } from "../../services/web3/signatures";
+
 import { GameState, InventoryItemName, Inventory } from "./types/game";
 import { LimitedItems, CraftableName, LimitedItem } from "./types/craftables";
 
 import { getItemUnit } from "../../services/web3/utils";
 import { craft } from "./events/craft";
 import { makeGame } from "./lib/transforms";
-import { loadItemSupply } from "../../services/web3/polygon";
+import { isBlackListed } from "./lib/blacklist";
 import { KNOWN_IDS } from "./types";
+import { storeSync } from "../../repository/eventStore";
 
 type CalculateChangesetArgs = {
   id: number;
   owner: string;
 };
 
-export async function getChangeset({
-  id,
-  owner,
-}: CalculateChangesetArgs): Promise<GameState> {
-  let farm = await getFarmById(owner, id);
-  if (!farm) {
+export async function sync({ id, owner }: CalculateChangesetArgs) {
+  const farm = await getFarmById(id);
+  if (!farm || farm.updatedBy !== owner) {
     throw new Error("Farm does not exist");
   }
 
   const current = makeGame(farm.gameState);
   const previous = makeGame(farm.previousGameState);
 
-  return calculateChangeset({ current, previous });
+  const changeset = calculateChangeset({ current, previous });
+
+  // TODO: Check the sync signature compared to the last, is it the same. Add 5 flag points
+
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error(`Farm #${id} - ${farm.updatedBy} is blacklisted`);
+  }
+
+  const signature = await syncSignature({
+    sender: owner,
+    farmId: id,
+    sessionId: farm.sessionId as string,
+    sfl: changeset.balance,
+    inventory: changeset.inventory,
+  });
+
+  // Store sync
+  await storeSync({
+    account: owner,
+    farmId: id,
+    sessionId: farm.sessionId as string,
+    changeset,
+    version: farm.version,
+  });
+
+  return signature;
 }
 
 export function calculateChangeset({
@@ -82,9 +109,14 @@ type MintOptions = {
  * Creates the changeset
  */
 export async function mint({ farmId, account, item }: MintOptions) {
-  const farm = await getFarmById(account, farmId);
-  if (!farm) {
+  const farm = await getFarmById(farmId);
+  if (!farm || farm.updatedBy !== account) {
     throw new Error("Farm does not exist");
+  }
+
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    throw new Error(`Farm #${farmId} - ${farm.updatedBy} is blacklisted`);
   }
 
   // Pass numbers into a safe format before processing.

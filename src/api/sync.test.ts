@@ -1,6 +1,7 @@
 import { KNOWN_IDS } from "../domain/game/types";
 import { getFarmMock } from "../repository/__mocks__/db";
 import "../services/__mocks__/kms";
+import "../repository/__mocks__/eventStore";
 
 import { SyncSignature } from "../services/web3/signatures";
 import { handler, SyncBody } from "./sync";
@@ -127,7 +128,7 @@ describe("api.sync", () => {
         trees: {},
       },
       id: 2,
-      owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
+      updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       previousGameState: {
         balance: "20000",
         fields: {},
@@ -141,8 +142,7 @@ describe("api.sync", () => {
         stock: {},
         trees: {},
       },
-      // TODO real ID
-      sessionId: "0x8123",
+      sessionId: "0x123",
     });
 
     const body: SyncBody = {

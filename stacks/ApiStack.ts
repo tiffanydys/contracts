@@ -4,17 +4,24 @@ export default class ApiStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
 
-    const sessionTable = new sst.Table(this, "Farms", {
+    const sessionTable = new sst.Table(this, "Land", {
       fields: {
-        owner: sst.TableFieldType.STRING,
         id: sst.TableFieldType.NUMBER,
         sessionId: sst.TableFieldType.STRING,
-        updatedAt: sst.TableFieldType.STRING,
+
+        createdBy: sst.TableFieldType.STRING,
         createdAt: sst.TableFieldType.STRING,
+        updatedAt: sst.TableFieldType.STRING,
+        updatedBy: sst.TableFieldType.STRING,
+
         gameState: sst.TableFieldType.STRING,
         previousGameState: sst.TableFieldType.STRING,
+
+        verifyAt: sst.TableFieldType.STRING,
+        flaggedCount: sst.TableFieldType.NUMBER,
+        blacklistedAt: sst.TableFieldType.STRING,
       },
-      primaryIndex: { partitionKey: "owner", sortKey: "id" },
+      primaryIndex: { partitionKey: "id" },
     });
 
     const bucket = new sst.Bucket(this, "PlayerEvents", {
@@ -33,6 +40,7 @@ export default class ApiStack extends sst.Stack {
       SFF_TOKEN_ADDRESS: process.env.SFF_TOKEN_ADDRESS as string,
       SFF_FARM_ADDRESS: process.env.SFF_FARM_ADDRESS as string,
       KMS_KEY_ID: process.env.KMS_KEY_ID as string,
+      RECAPTCHA_KEY: process.env.RECAPTCHA_KEY as string,
     };
 
     const api = new sst.Api(this, "Api", {
@@ -55,6 +63,7 @@ export default class ApiStack extends sst.Stack {
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
+            ...web3EnvironmentVariables,
           },
         },
         "POST    /session": {
@@ -64,6 +73,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            bucketName: bucket.bucketName,
             ...web3EnvironmentVariables,
           },
         },
@@ -74,6 +84,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            bucketName: bucket.bucketName,
             ...web3EnvironmentVariables,
           },
         },
@@ -84,6 +95,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            bucketName: bucket.bucketName,
             ...web3EnvironmentVariables,
           },
         },
@@ -94,6 +106,7 @@ export default class ApiStack extends sst.Stack {
           },
           environment: {
             tableName: sessionTable.dynamodbTable.tableName,
+            bucketName: bucket.bucketName,
             ...web3EnvironmentVariables,
           },
         },

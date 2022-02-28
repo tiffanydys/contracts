@@ -29,6 +29,7 @@
     "@types/aws-lambda": "^8.10.70",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "<15.0.0",
+    "@types/node-fetch": "^2.6.1",
     "chokidar-cli": "^3.0.0",
     "lint-staged": "^12.2.2",
     "prettier": "2.5.1"
@@ -44,6 +45,7 @@
     "ethereumjs-tx": "^2.1.2",
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
+    "node-fetch": "2",
     "web3": "^1.6.1",
     "web3-eth-abi": "^1.7.0",
     "web3-eth-accounts": "^1.7.0",

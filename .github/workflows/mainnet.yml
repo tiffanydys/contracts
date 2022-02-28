@@ -27,6 +27,7 @@ jobs:
           SFF_TOKEN_ADDRESS: "0xdf9B4b57865B403e08c85568442f95c26b7896b0"
           SFF_FARM_ADDRESS: "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0"
           KMS_KEY_ID: 45480807-7a1f-4cb3-823e-d38f20d77ca2
+          RECAPTCHA_KEY: ${{ secrets.RECAPTCHA_KEY }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1.5.9
@@ -52,3 +53,4 @@ jobs:
           SFF_TOKEN_ADDRESS: "0xdf9B4b57865B403e08c85568442f95c26b7896b0"
           SFF_FARM_ADDRESS: "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0"
           KMS_KEY_ID: 45480807-7a1f-4cb3-823e-d38f20d77ca2
+          RECAPTCHA_KEY: ${{ secrets.RECAPTCHA_KEY }}

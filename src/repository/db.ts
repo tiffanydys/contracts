@@ -6,28 +6,10 @@ export { FarmSession, Account };
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export async function getFarms(account: string): Promise<Account[]> {
-  const getParams = {
-    TableName: process.env.tableName as string,
-    KeyConditionExpression: "#owner = :owner",
-    ExpressionAttributeNames: {
-      "#owner": "owner",
-    },
-    ExpressionAttributeValues: {
-      ":owner": account,
-    },
-  };
-
-  const results = await dynamoDb.query(getParams).promise();
-
-  return results.Items as Account[];
-}
-
-export async function getFarm(account: string, id: number): Promise<Account> {
+export async function getFarm(id: number): Promise<Account> {
   const getParams = {
     TableName: process.env.tableName as string,
     Key: {
-      owner: account,
       id,
     },
   };
@@ -52,19 +34,27 @@ type UpdateFarm = {
   id: number;
   owner: string;
   session: FarmSession;
+  flaggedCount: number;
 };
 
-export async function updateGameState({ id, owner, session }: UpdateFarm) {
+export async function updateGameState({
+  id,
+  owner,
+  session,
+  flaggedCount,
+}: UpdateFarm) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
-      owner,
     },
-    UpdateExpression: "SET updatedAt = :updatedAt, gameState = :gameState",
+    UpdateExpression:
+      "SET updatedAt = :updatedAt, updatedBy = :updatedBy, gameState = :gameState, flaggedCount = :flaggedCount",
     ExpressionAttributeValues: {
       ":updatedAt": new Date().toISOString(),
+      ":updatedBy": owner,
       ":gameState": session,
+      ":flaggedCount": flaggedCount,
     },
   };
   await dynamoDb.update(updateParams).promise();
@@ -75,6 +65,7 @@ type UpdateSession = {
   owner: string;
   sessionId: string;
   session: FarmSession;
+  version: number;
 };
 
 export async function createSession({
@@ -82,21 +73,81 @@ export async function createSession({
   sessionId,
   owner,
   session,
+  version,
 }: UpdateSession) {
   const updateParams = {
     TableName: process.env.tableName as string,
     Key: {
       id,
-      owner,
     },
-    // Update the "tally" column
     UpdateExpression:
-      "SET sessionId = :sessionId, updatedAt = :updatedAt, gameState = :gameState, previousGameState = :previousGameState",
+      "SET sessionId = :sessionId, updatedAt = :updatedAt, updatedBy = :updatedBy, gameState = :gameState, previousGameState = :previousGameState, version = :version",
     ExpressionAttributeValues: {
       ":sessionId": sessionId,
       ":updatedAt": new Date().toISOString(),
+      ":updatedBy": owner,
       ":gameState": session,
       ":previousGameState": session,
+      ":version": version,
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
+
+type Blacklist = {
+  id: number;
+};
+
+export async function blacklist({ id }: Blacklist) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    UpdateExpression: "SET blacklistedAt = :blacklistedAt",
+    ExpressionAttributeValues: {
+      ":blacklistedAt": new Date().toISOString(),
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
+
+type UpdateFlaggedCount = {
+  id: number;
+  flaggedCount: number;
+};
+
+export async function updateFlaggedCount({
+  id,
+  flaggedCount,
+}: UpdateFlaggedCount) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    UpdateExpression: "SET flaggedCount = :flaggedCount",
+    ExpressionAttributeValues: {
+      ":flaggedCount": flaggedCount,
+    },
+  };
+  await dynamoDb.update(updateParams).promise();
+}
+
+type VerifyAccount = {
+  id: number;
+  verifyAt: string;
+};
+
+export async function verifyAccount({ id, verifyAt }: VerifyAccount) {
+  const updateParams = {
+    TableName: process.env.tableName as string,
+    Key: {
+      id,
+    },
+    UpdateExpression: "SET verifyAt = :verifyAt",
+    ExpressionAttributeValues: {
+      ":verifyAt": verifyAt,
     },
   };
   await dynamoDb.update(updateParams).promise();
