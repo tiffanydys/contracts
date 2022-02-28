@@ -10,8 +10,9 @@ import "./Inventory.sol";
 import "./Token.sol";
 import "./Farm.sol";
 // import "./Uniswap.sol";
+import "./GameOwner.sol";
 
-contract SunflowerLandSession is Ownable {
+contract SunflowerLandSession is Ownable, GameOwner {
     using ECDSA for bytes32;
 
     event SessionChanged(address indexed owner, bytes32 indexed sessionId, uint indexed farmId);
@@ -84,6 +85,7 @@ contract SunflowerLandSession is Ownable {
         wishingWell = _wishingWell;
     }
 
+
     function getWithdrawnAt(uint tokenId) public view returns(uint) {
         return withdrawnAt[tokenId];
     }
@@ -95,6 +97,11 @@ contract SunflowerLandSession is Ownable {
 
     function getSessionId(uint tokenId) public view returns(bytes32) {
         return sessions[tokenId];
+    }
+
+    function updateSession(uint tokenId) public onlyGame returns(bool) {
+        sessions[tokenId] =  generateSessionId(tokenId);
+        return true;
     }
 
     function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
