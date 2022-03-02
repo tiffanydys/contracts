@@ -42,7 +42,7 @@ export async function verifyCaptcha({ farm, captcha }: VerifyOptions) {
     // Check the score of the captcha
     if (!response.success) {
       // Update the verifyAt in the database
-      storeFlaggedEvents({
+      await storeFlaggedEvents({
         account: farm.updatedBy,
         farmId: farm.id,
         events: [{ captcha: "failed" }],

@@ -134,8 +134,14 @@ const VERIFIED_PERIOD = 1000 * 60 * 60 * 6;
  * We set the next verifyAt timestamp for when this expires
  */
 export async function verify({ id }: Verify) {
+  // Do not make the captcha predictable, add a buffer period
+  const buffer = VERIFIED_PERIOD / 5;
+  const randomBuffer = Math.floor(Math.random() * buffer);
+
   return await verifyAccount({
     id,
-    verifyAt: new Date(Date.now() + VERIFIED_PERIOD).toISOString(),
+    verifyAt: new Date(
+      Date.now() + VERIFIED_PERIOD + randomBuffer
+    ).toISOString(),
   });
 }

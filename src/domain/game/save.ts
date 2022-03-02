@@ -164,12 +164,13 @@ export async function save({ farmId, account, actions, captcha }: SaveArgs) {
     flaggedCount: farm.flaggedCount + flaggedCount,
   });
 
-  storeEvents({
-    account,
-    farmId,
-    events: actions,
-    version: farm.version,
-  });
+  // TODO support this once syncing is enabled (otherwise files get too big)
+  // await storeEvents({
+  //   account,
+  //   farmId,
+  //   events: actions,
+  //   version: farm.version,
+  // });
 
   return { state, verified: true };
 }
