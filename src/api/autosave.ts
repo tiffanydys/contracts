@@ -32,7 +32,7 @@ const schema = () =>
           Joi.object({
             type: Joi.string().equal("item.sell"),
             item: Joi.string(),
-            amount: Joi.number().min(1).max(1000).integer(),
+            amount: Joi.number().min(1).integer(),
             createdAt: eventTimeValidation(),
           }),
           Joi.object({
