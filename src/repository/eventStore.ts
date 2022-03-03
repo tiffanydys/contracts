@@ -50,7 +50,6 @@ export function storeSync({
   changeset,
   sessionId,
 }: SyncEvent) {
-  console.log("Real sync");
   const key = `land/${farmId}/sync/${version}.json`;
 
   const params = {
@@ -213,16 +212,16 @@ export async function getMigrationEvent(
     Bucket: process.env.bucketName as string,
     Key: key,
   };
-  console.log({ params });
 
   try {
     const migration = await s3.getObject(params).promise();
     return migration.Body as Migration;
   } catch (e) {
-    console.log({ e });
     if ((e as any).code === "NoSuchKey") {
       return null;
     }
+    console.log({ e });
+
     throw e;
   }
 }

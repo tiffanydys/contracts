@@ -203,7 +203,7 @@ describe("Farm contract", () => {
       .tokenURI(1)
       .call({ from: TestAccount.TEAM.address });
 
-    expect(url).toEqual("https://sunflower-land.com/api/nfts/farm/1");
+    expect(url).toEqual("https://sunflower-land.com/play/nfts/farm/1");
 
     await farm.methods.setBaseUri("https://test.com/").send({
       from: TestAccount.TEAM.address,

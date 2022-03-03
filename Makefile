@@ -35,11 +35,11 @@ lint: | $(pre-reqs) ## Lint all files
 
 .PHONY: test
 test: | $(pre-reqs) ## Run docker-compose up eth before running this target. `JEST_OPTS="any jest options" make test` to pass jest options
-	yarn test $(JEST_FLAGS)
+	yarn test $(JEST_FLAGS) --runInBand
 
 .PHONY: test.watch
 test.watch: | $(pre-reqs) ## Run tests in watch mode. This can also be done with `JEST_OPTS="--watch" make test`
-	yarn test --watch
+	yarn test --watch --runInBand
 
 .PHONY: contracts.watch
 contracts.watch: | $(pre-reqs) ## Continuously compile contracts

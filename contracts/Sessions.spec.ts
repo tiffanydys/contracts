@@ -4,8 +4,7 @@ import { deploySFLContracts, gasLimit, TestAccount } from "./test-support";
 
 describe("Session contract", () => {
   describe("sync", () => {
-    // 10 seconds in the future
-    const validDeadline = Math.floor(Date.now() / 1000) + 1000;
+    const validDeadline = 10000000000000;
     const fee = toWei("0.1");
     it("requires the transaction is submitted before the deadline", async () => {
       const web3 = new Web3(
@@ -525,9 +524,6 @@ describe("Session contract", () => {
         gas: gasLimit,
       });
 
-      // Used to check the fee works
-      const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
-
       const sessionId = await session.methods
         .getSessionId(1)
         .call({ from: TestAccount.PLAYER.address });
@@ -543,6 +539,9 @@ describe("Session contract", () => {
         burnAmounts: [],
         tokens: 60,
       });
+
+      // Used to check the fee works
+      const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
 
       await session.methods
         .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
@@ -636,9 +635,7 @@ describe("Session contract", () => {
   });
 
   describe("withdraw", () => {
-    // 100 seconds in the future
-    const validDeadline = Math.floor(Date.now() / 1000) + 100;
-    const fee = toWei("0.1");
+    const validDeadline = 10000000000000;
 
     it("requires the transaction is submitted before the deadline", async () => {
       const web3 = new Web3(
@@ -1021,13 +1018,13 @@ describe("Session contract", () => {
       const teamAmount = totalTax * 0.7;
       const wishingWellAmount = totalTax * 0.3;
 
-      let teamBalance = await token.methods
+      const teamBalance = await token.methods
         .balanceOf(TestAccount.TEAM.address)
         .call({ from: TestAccount.PLAYER.address });
 
       expect(teamBalance).toEqual(teamAmount.toString());
 
-      let wishingWellBalance = await token.methods
+      const wishingWellBalance = await token.methods
         .balanceOf(wishingWell.options.address)
         .call({ from: TestAccount.PLAYER.address });
 
