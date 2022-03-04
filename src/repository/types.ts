@@ -1,18 +1,30 @@
-import { GameState, InventoryItemName, Tree } from "../domain/game/types/game";
+import {
+  GameState,
+  InventoryItemName,
+  Rock,
+  Tree,
+} from "../domain/game/types/game";
 
 export type SanitizedTree = Omit<Tree, "wood"> & {
   wood: string;
 };
 
+export type SanitizedRock = Omit<Rock, "amount"> & {
+  amount: string;
+};
+
 // Store decimal values as strings instead
 export type FarmSession = Omit<
   GameState,
-  "balance" | "inventory" | "stock" | "trees"
+  "balance" | "inventory" | "stock" | "trees" | "stones" | "iron" | "gold"
 > & {
   balance: string;
   inventory: Partial<Record<InventoryItemName, string>>;
   stock: Partial<Record<InventoryItemName, string>>;
   trees: Record<number, SanitizedTree>;
+  stone: Record<number, SanitizedRock>;
+  iron: Record<number, SanitizedRock>;
+  gold: Record<number, SanitizedRock>;
 };
 
 export type Account = {

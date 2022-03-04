@@ -1,6 +1,6 @@
 import { GameState, InventoryItemName, Tree } from "../domain/game/types/game";
 
-import { FarmSession, SanitizedTree } from "./types";
+import { FarmSession, SanitizedTree, SanitizedRock } from "./types";
 
 /**
  * Santize the farm data
@@ -44,12 +44,48 @@ export function makeDBItem(farm: GameState): FarmSession {
     };
   }, {} as Record<number, SanitizedTree>);
 
+  const stones = Object.keys(farm.stones).reduce((items, index) => {
+    const stone = farm.stones[Number(index)];
+    return {
+      ...items,
+      [index]: {
+        ...stone,
+        amount: stone.amount.toString(),
+      } as SanitizedRock,
+    };
+  }, {} as Record<number, SanitizedRock>);
+
+  const iron = Object.keys(farm.iron).reduce((items, index) => {
+    const rock = farm.iron[Number(index)];
+    return {
+      ...items,
+      [index]: {
+        ...rock,
+        amount: rock.amount.toString(),
+      } as SanitizedRock,
+    };
+  }, {} as Record<number, SanitizedRock>);
+
+  const gold = Object.keys(farm.gold).reduce((items, index) => {
+    const rock = farm.gold[Number(index)];
+    return {
+      ...items,
+      [index]: {
+        ...rock,
+        amount: rock.amount.toString(),
+      } as SanitizedRock,
+    };
+  }, {} as Record<number, SanitizedRock>);
+
   return {
     ...farm,
     balance: farm.balance.toString(),
     inventory,
     stock,
     trees,
+    stones,
+    iron,
+    gold,
   };
 }
 

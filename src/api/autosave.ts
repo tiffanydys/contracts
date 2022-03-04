@@ -51,6 +51,21 @@ const schema = () =>
             item: Joi.string(),
             index: Joi.number().min(0).max(5).integer(),
             createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("stone.mined"),
+            index: Joi.number().min(0).max(2).integer(),
+            createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("iron.mined"),
+            index: Joi.number().min(0).max(1).integer(),
+            createdAt: eventTimeValidation(),
+          }),
+          Joi.object({
+            type: Joi.string().equal("gold.mined"),
+            index: Joi.number().min(0).max(1).integer(),
+            createdAt: eventTimeValidation(),
           })
         )
       )
