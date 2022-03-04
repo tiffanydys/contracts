@@ -18,22 +18,22 @@ import { INITIAL_FIELDS, INITIAL_STOCK, INITIAL_TREES } from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
 
 const initialStockJSON = {
+  "Cauliflower Seed": "80",
+  "Iron Pickaxe": "5",
+  "Parsnip Seed": "40",
+  Pickaxe: "30",
+  "Potato Seed": "200",
+  "Pumpkin Seed": "100",
+  "Stone Pickaxe": "10",
+  "Sunflower Seed": "400",
   Axe: "50",
   "Beetroot Seed": "80",
   "Cabbage Seed": "90",
   "Carrot Seed": "100",
-  "Cauliflower Seed": "70",
-  "Iron Pickaxe": "50",
-  "Parsnip Seed": "50",
-  Pickaxe: "50",
-  "Potato Seed": "300",
-  "Pumpkin Seed": "200",
   "Pumpkin Soup": "1",
   "Radish Seed": "40",
   "Roasted Cauliflower": "1",
   Sauerkraut: "1",
-  "Stone Pickaxe": "50",
-  "Sunflower Seed": "1000",
 };
 
 const initialTreeJSON = {
