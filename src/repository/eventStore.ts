@@ -63,7 +63,12 @@ export function storeSync({
     }),
   };
 
-  return s3.putObject(params).promise();
+  try {
+    return s3.putObject(params).promise();
+  } catch (e) {
+    console.log({ e });
+    throw e;
+  }
 }
 
 type StoredEvents = {
@@ -167,7 +172,12 @@ export function storeWithdraw({
     }),
   };
 
-  return s3.putObject(params).promise();
+  try {
+    return s3.putObject(params).promise();
+  } catch (e) {
+    console.log({ e });
+    throw e;
+  }
 }
 
 type MigrationEvent = {
