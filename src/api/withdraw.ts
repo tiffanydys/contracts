@@ -3,7 +3,7 @@ import Joi from "joi";
 
 import { verifyJwt } from "../services/jwt";
 
-import { canSync } from "../constants/whitelist";
+import { canSync, canWithdraw } from "../constants/whitelist";
 
 import { KNOWN_IDS } from "../domain/game/types";
 import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
@@ -58,10 +58,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   // TODO - new can withdraw
   if (process.env.NETWORK !== "mumbai") {
-    if (!canSync(address)) {
+    if (!canWithdraw(address)) {
       throw new Error("Not on whitelist");
     }
   }
+
+  // TODO - validate they are the right session and have enough to withdraw
 
   // Smart contract does balance validation so don't worry about it here
   const signature = await withdraw({

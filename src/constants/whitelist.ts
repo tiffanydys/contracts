@@ -1,4 +1,4 @@
-const SYNC_WHITELIST = [
+const WITHDRAW_WHITELIST = [
   "0xD755984F4A5D885919451eD25e1a854daa5086C9",
   "0xc23Ea4b3fFA70DF89874ff65759031d78e40251d",
   "0x481a58b9385868267Ff39ab285D22234B50871eD",
@@ -7,9 +7,7 @@ const SYNC_WHITELIST = [
 ];
 
 // Lots of duplicates but does not really matter
-const CREATE_FARM_WHITELIST = [
-  ...SYNC_WHITELIST,
-
+const PLAY_WHITELIST = [
   "0x1ecb0a64f8AADdDF5AC176E890A8D418694ec666",
   "0x43B1633AE106Ab279db9CE79bc2b051F85Ab0738",
   "0xcC9bb698585E78355211710cc1c48fa15868a5d4",
@@ -174,7 +172,7 @@ export function canCreateFarm(address: string) {
   if (network !== "mainnet") {
     return true;
   }
-  return CREATE_FARM_WHITELIST.includes(address);
+  return PLAY_WHITELIST.includes(address);
 }
 
 export function canSync(address: string) {
@@ -182,7 +180,7 @@ export function canSync(address: string) {
   if (network !== "mainnet") {
     return true;
   }
-  return SYNC_WHITELIST.includes(address);
+  return PLAY_WHITELIST.includes(address);
 }
 
 export function canMint(address: string) {
@@ -190,5 +188,13 @@ export function canMint(address: string) {
   if (network !== "mainnet") {
     return true;
   }
-  return SYNC_WHITELIST.includes(address);
+  return WITHDRAW_WHITELIST.includes(address);
+}
+
+export function canWithdraw(address: string) {
+  const network = process.env.NETWORK as "mumbai" | "mainnet";
+  if (network !== "mainnet") {
+    return true;
+  }
+  return WITHDRAW_WHITELIST.includes(address);
 }

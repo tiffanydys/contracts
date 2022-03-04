@@ -75,7 +75,7 @@ export async function withdraw({
     tax: getTax(sfl),
   });
 
-  storeWithdraw({
+  await storeWithdraw({
     account: sender,
     sessionId,
     farmId,

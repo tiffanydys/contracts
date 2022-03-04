@@ -16,6 +16,7 @@ export type SyncBody = {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  console.log("Sync that handler!");
   if (!event.body) {
     throw new Error("No body found in event");
   }
