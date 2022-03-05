@@ -14,7 +14,14 @@ import {
   loadSessionMock,
 } from "../../services/web3/__mocks__/polygon";
 import { getMigrationEventMock } from "../../repository/__mocks__/eventStore";
-import { INITIAL_FIELDS, INITIAL_STOCK, INITIAL_TREES } from "./lib/constants";
+import {
+  INITIAL_FIELDS,
+  INITIAL_GOLD,
+  INITIAL_IRON,
+  INITIAL_STOCK,
+  INITIAL_STONE,
+  INITIAL_TREES,
+} from "./lib/constants";
 import { fetchOnChainData, startSession } from "./session";
 
 const initialStockJSON = {
@@ -56,6 +63,39 @@ const initialTreeJSON = {
   4: {
     wood: "3",
     choppedAt: 0,
+  },
+};
+
+const initialStoneJson = {
+  0: {
+    amount: "2",
+    minedAt: 0,
+  },
+  1: {
+    amount: "3",
+    minedAt: 0,
+  },
+  2: {
+    amount: "4",
+    minedAt: 0,
+  },
+};
+
+const initialIronJson = {
+  0: {
+    amount: "2",
+    minedAt: 0,
+  },
+  1: {
+    amount: "3",
+    minedAt: 0,
+  },
+};
+
+const initialGoldJson = {
+  0: {
+    amount: "2",
+    minedAt: 0,
   },
 };
 
@@ -110,10 +150,12 @@ describe("game", () => {
       const gameState = {
         balance: "60",
         fields: INITIAL_FIELDS,
-        id: 1,
         inventory: {},
         stock: initialStockJSON,
         trees: initialTreeJSON,
+        stones: initialStoneJson,
+        iron: initialIronJson,
+        gold: initialGoldJson,
       };
 
       // Initial farm values
@@ -126,10 +168,12 @@ describe("game", () => {
         previousGameState: {
           balance: "0",
           fields: INITIAL_FIELDS,
-          id: 1,
           inventory: {},
           stock: initialStockJSON,
           trees: initialTreeJSON,
+          stones: initialStoneJson,
+          iron: initialIronJson,
+          gold: initialGoldJson,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -142,10 +186,12 @@ describe("game", () => {
       expect(session).toEqual({
         balance: new Decimal(60),
         fields: INITIAL_FIELDS,
-        id: 1,
         inventory: {},
         stock: INITIAL_STOCK,
         trees: INITIAL_TREES,
+        stones: INITIAL_STONE,
+        iron: INITIAL_IRON,
+        gold: INITIAL_GOLD,
       });
     });
 
@@ -167,10 +213,12 @@ describe("game", () => {
         gameState: {
           balance: "0",
           fields: INITIAL_FIELDS,
-          id: 1,
           inventory: {},
           stock: initialStockJSON,
           trees: initialTreeJSON,
+          stones: initialStoneJson,
+          iron: initialIronJson,
+          gold: initialGoldJson,
         },
         id: 13,
         createdBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
@@ -178,10 +226,12 @@ describe("game", () => {
         previousGameState: {
           balance: "0",
           fields: INITIAL_FIELDS,
-          id: 1,
           inventory: {},
           stock: initialStockJSON,
           trees: initialTreeJSON,
+          stones: initialStoneJson,
+          iron: initialIronJson,
+          gold: initialGoldJson,
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -206,6 +256,9 @@ describe("game", () => {
           stock: {},
           balance: "20",
           trees: initialTreeJSON,
+          stones: initialStoneJson,
+          iron: initialIronJson,
+          gold: initialGoldJson,
         },
         updatedBy: sender,
         version: 3,
@@ -234,6 +287,9 @@ describe("game", () => {
           },
           stock: initialStockJSON,
           trees: initialTreeJSON,
+          stones: initialStoneJson,
+          iron: initialIronJson,
+          gold: initialGoldJson,
         },
         sessionId: "0x123",
         version: 4,
@@ -248,6 +304,9 @@ describe("game", () => {
         },
         stock: INITIAL_STOCK,
         trees: INITIAL_TREES,
+        stones: INITIAL_STONE,
+        iron: INITIAL_IRON,
+        gold: INITIAL_GOLD,
       });
     });
   });

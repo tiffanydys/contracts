@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import Decimal from "decimal.js-light";
 import { GameState, InventoryItemName, Tree } from "../types/game";
 
@@ -64,11 +65,7 @@ export function chop({
       ...state.trees,
       [action.index]: {
         choppedAt: Date.now(),
-        /**
-         *  A pseudo random number to keep players engaged with variable rewards
-         *  Cycles between 3-5 rewards
-         */
-        wood: new Decimal(Math.max(tree.wood.add(1).toNumber() % 6, 3)),
+        wood: new Decimal(randomInt(3, 5)),
       },
     },
   };

@@ -283,6 +283,9 @@ describe("game", () => {
           },
           balance: "20",
           trees: {},
+          stones: {},
+          iron: {},
+          gold: {},
         },
         flaggedCount: 0,
         // Account is verified
@@ -318,6 +321,9 @@ describe("game", () => {
             "Potato Seed": "2",
           },
           trees: {},
+          stones: {},
+          iron: {},
+          gold: {},
         },
         flaggedCount: 0,
       });
@@ -333,6 +339,9 @@ describe("game", () => {
             "Potato Seed": new Decimal(2),
           },
           trees: {},
+          stones: {},
+          iron: {},
+          gold: {},
         },
         verified: true,
       });

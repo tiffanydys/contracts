@@ -71,7 +71,7 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     };
   }, {} as Record<InventoryItemName, Decimal>);
 
-  const dbIron = gameState.stones || INITIAL_IRON;
+  const dbIron = gameState.iron || INITIAL_IRON;
   // Convert the string values into decimals
   const iron = Object.keys(dbIron).reduce((items, index) => {
     const dbValue = dbIron[Number(index)];
