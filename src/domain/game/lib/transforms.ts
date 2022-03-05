@@ -4,8 +4,19 @@ import { fromWei } from "web3-utils";
 import { Account } from "../../../repository/farms";
 import { getItemUnit } from "../../../services/web3/utils";
 import { KNOWN_IDS } from "../types";
-import { GameState, Inventory, InventoryItemName, Tree } from "../types/game";
-import { INITIAL_TREES } from "./constants";
+import {
+  GameState,
+  Inventory,
+  InventoryItemName,
+  Rock,
+  Tree,
+} from "../types/game";
+import {
+  INITIAL_GOLD,
+  INITIAL_IRON,
+  INITIAL_STONE,
+  INITIAL_TREES,
+} from "./constants";
 
 export function makeGame(gameState: Account["gameState"]): GameState {
   // Convert the string values into decimals
@@ -45,13 +56,60 @@ export function makeGame(gameState: Account["gameState"]): GameState {
     };
   }, {} as Record<InventoryItemName, Decimal>);
 
+  const dbStones = gameState.stones || INITIAL_STONE;
+  // Convert the string values into decimals
+  const stones = Object.keys(dbStones).reduce((items, index) => {
+    const dbStone = dbStones[Number(index)];
+    const rock: Rock = {
+      minedAt: dbStone.minedAt,
+      amount: new Decimal(dbStone.amount),
+    };
+
+    return {
+      ...items,
+      [Number(index)]: rock,
+    };
+  }, {} as Record<InventoryItemName, Decimal>);
+
+  const dbIron = gameState.iron || INITIAL_IRON;
+  // Convert the string values into decimals
+  const iron = Object.keys(dbIron).reduce((items, index) => {
+    const dbValue = dbIron[Number(index)];
+    const rock: Rock = {
+      minedAt: dbValue.minedAt,
+      amount: new Decimal(dbValue.amount),
+    };
+
+    return {
+      ...items,
+      [Number(index)]: rock,
+    };
+  }, {} as Record<InventoryItemName, Decimal>);
+
+  const dbGold = gameState.gold || INITIAL_GOLD;
+  // Convert the string values into decimals
+  const gold = Object.keys(dbGold).reduce((items, index) => {
+    const dbValue = dbGold[Number(index)];
+    const rock: Rock = {
+      minedAt: dbValue.minedAt,
+      amount: new Decimal(dbValue.amount),
+    };
+
+    return {
+      ...items,
+      [Number(index)]: rock,
+    };
+  }, {} as Record<InventoryItemName, Decimal>);
+
   return {
     ...gameState,
     balance: new Decimal(gameState.balance),
     inventory,
     stock,
-    // In case they were running a version without the trees
-    trees: trees,
+    trees,
+    stones,
+    iron,
+    gold,
   };
 }
 

@@ -14,7 +14,6 @@ describe("repository.farms", () => {
     await createFarm({
       id: 2,
       gameState: {
-        id: 2,
         balance: new Decimal(100),
         fields: {
           "3": {
@@ -35,18 +34,50 @@ describe("repository.farms", () => {
           },
           1: {
             wood: new Decimal(2),
-            choppedAt: 169282029028,
+            choppedAt: 0,
+          },
+        },
+        stones: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          2: {
+            amount: new Decimal(3),
+            minedAt: 0,
+          },
+        },
+        iron: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+        },
+        gold: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
           },
         },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       previousGameState: {
-        id: 2,
         balance: new Decimal(50),
         fields: {},
         inventory: {},
         stock: {},
         trees: {},
+        stones: {},
+        iron: {},
+        gold: {},
       },
       sessionId: "0x8123",
     });
@@ -57,7 +88,6 @@ describe("repository.farms", () => {
       createdBy: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       updatedBy: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       gameState: {
-        id: 2,
         balance: "100",
         fields: {
           "3": {
@@ -78,17 +108,49 @@ describe("repository.farms", () => {
           },
           1: {
             wood: "2",
-            choppedAt: 169282029028,
+            choppedAt: 0,
+          },
+        },
+        stones: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 0,
+          },
+          2: {
+            amount: "3",
+            minedAt: 0,
+          },
+        },
+        iron: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 0,
+          },
+        },
+        gold: {
+          0: {
+            amount: "2",
+            minedAt: 0,
           },
         },
       },
       previousGameState: {
-        id: 2,
         balance: "50",
         fields: {},
         inventory: {},
         stock: {},
         trees: {},
+        stones: {},
+        iron: {},
+        gold: {},
       },
       updatedAt: expect.any(String),
       createdAt: expect.any(String),
@@ -102,7 +164,6 @@ describe("repository.farms", () => {
     await updateFarm({
       id: 2,
       gameState: {
-        id: 2,
         balance: new Decimal(100),
         fields: {
           "3": {
@@ -126,6 +187,36 @@ describe("repository.farms", () => {
             choppedAt: 169282029028,
           },
         },
+        stones: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+          2: {
+            amount: new Decimal(3),
+            minedAt: 169282029028,
+          },
+        },
+        iron: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+        },
+        gold: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+        },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       flaggedCount: 0,
@@ -135,7 +226,6 @@ describe("repository.farms", () => {
       id: 2,
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       session: {
-        id: 2,
         balance: "100",
         fields: {
           "3": {
@@ -159,6 +249,36 @@ describe("repository.farms", () => {
             choppedAt: 169282029028,
           },
         },
+        stones: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 169282029028,
+          },
+          2: {
+            amount: "3",
+            minedAt: 169282029028,
+          },
+        },
+        iron: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 169282029028,
+          },
+        },
+        gold: {
+          0: {
+            amount: "2",
+            minedAt: 169282029028,
+          },
+        },
       },
       flaggedCount: 0,
     });
@@ -169,7 +289,6 @@ describe("repository.farms", () => {
       id: 2,
       sessionId: "0x8123",
       gameState: {
-        id: 2,
         balance: new Decimal(100),
         fields: {
           "3": {
@@ -193,6 +312,36 @@ describe("repository.farms", () => {
             choppedAt: 169282029028,
           },
         },
+        stones: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+          2: {
+            amount: new Decimal(3),
+            minedAt: 169282029028,
+          },
+        },
+        iron: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 0,
+          },
+          1: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+        },
+        gold: {
+          0: {
+            amount: new Decimal(2),
+            minedAt: 169282029028,
+          },
+        },
       },
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       version: 2,
@@ -203,7 +352,6 @@ describe("repository.farms", () => {
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       sessionId: "0x8123",
       session: {
-        id: 2,
         balance: "100",
         fields: {
           "3": {
@@ -225,6 +373,36 @@ describe("repository.farms", () => {
           1: {
             wood: "2",
             choppedAt: 169282029028,
+          },
+        },
+        stones: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 169282029028,
+          },
+          2: {
+            amount: "3",
+            minedAt: 169282029028,
+          },
+        },
+        iron: {
+          0: {
+            amount: "2",
+            minedAt: 0,
+          },
+          1: {
+            amount: "2",
+            minedAt: 169282029028,
+          },
+        },
+        gold: {
+          0: {
+            amount: "2",
+            minedAt: 169282029028,
           },
         },
       },

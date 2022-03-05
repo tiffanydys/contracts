@@ -159,8 +159,12 @@ export async function fetchOnChainData({
     inventory: friendlyInventory,
     id: farmId,
     address: nftFarm.account,
+    // Off chain data
     fields: {},
     stock: {},
     trees: {},
+    stones: {},
+    iron: {},
+    gold: {},
   } as GameState;
 }
