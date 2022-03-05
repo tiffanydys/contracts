@@ -22,7 +22,7 @@ export type FarmSession = Omit<
   inventory: Partial<Record<InventoryItemName, string>>;
   stock: Partial<Record<InventoryItemName, string>>;
   trees: Record<number, SanitizedTree>;
-  stone: Record<number, SanitizedRock>;
+  stones: Record<number, SanitizedRock>;
   iron: Record<number, SanitizedRock>;
   gold: Record<number, SanitizedRock>;
 };
