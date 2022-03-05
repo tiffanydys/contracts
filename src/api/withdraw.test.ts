@@ -12,6 +12,7 @@ describe("api.withdraw", () => {
   beforeEach(() => {
     getFarmMock.mockReturnValue({
       updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      sessionId: "0x123",
       gameState: {
         balance: "2",
       },
@@ -243,7 +244,7 @@ describe("api.withdraw", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Not on whitelist");
+    ).rejects.toContain("Not enough SFL");
   });
 
   it("creates a withdraw signature", async () => {
@@ -253,7 +254,7 @@ describe("api.withdraw", () => {
     const body: WithdrawBody = {
       ids: [],
       amounts: [],
-      sfl: toWei("120"),
+      sfl: toWei("1"),
       farmId: 2,
       sessionId: "0x123",
     };
@@ -278,11 +279,11 @@ describe("api.withdraw", () => {
       sender: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       ids: [],
       amounts: [],
-      sfl: toWei("120"),
+      sfl: toWei("1"),
       farmId: 2,
       sessionId: "0x123",
       signature,
-      tax: 200,
+      tax: 300,
       deadline: expect.any(Number),
     });
   });
