@@ -1,10 +1,10 @@
+import { randomInt } from "crypto";
 import Decimal from "decimal.js-light";
-import { GameState, Rock, InventoryItemName } from "../types/game";
+import { GameState, Rock } from "../types/game";
 
 export type StoneMineAction = {
   type: "stone.mined";
   index: number;
-  item: InventoryItemName;
 };
 
 type Options = {
@@ -60,11 +60,7 @@ export function mineStone({
       ...state.stones,
       [action.index]: {
         minedAt: Date.now(),
-        /**
-         *  A pseudo random number to keep players engaged with variable rewards
-         *  Cycles between 2-4 rewards
-         */
-        amount: new Decimal(Math.max(amount.add(1).toNumber() % 5, 2)),
+        amount: new Decimal(randomInt(2, 4)),
       },
     },
   };
