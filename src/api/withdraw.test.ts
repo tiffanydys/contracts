@@ -12,6 +12,9 @@ describe("api.withdraw", () => {
   beforeEach(() => {
     getFarmMock.mockReturnValue({
       updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+      gameState: {
+        balance: "2",
+      },
     });
   });
 
@@ -199,6 +202,37 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
+            }).token
+          }`,
+        },
+      } as any,
+      {} as any,
+      () => {}
+    ) as Promise<WithdrawArgs>;
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("Not on whitelist");
+  });
+
+  it("requires they have SFL", async () => {
+    process.env.NETWORK = "mainnet";
+
+    const body: WithdrawBody = {
+      ids: [],
+      amounts: [],
+      sfl: toWei("3"),
+      farmId: 2,
+      sessionId: "0x123",
+    };
+
+    const result = handler(
+      {
+        body: JSON.stringify(body),
+        headers: {
+          authorization: `Bearer ${
+            generateJwt({
+              address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
             }).token
           }`,
         },
