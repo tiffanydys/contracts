@@ -39,7 +39,6 @@ export function getTax(sfl: string) {
 }
 
 type Options = {
-  sessionId: string;
   sender: string;
   farmId: number;
   sfl: string;
@@ -47,14 +46,7 @@ type Options = {
   amounts: string[];
 };
 
-export async function withdraw({
-  sender,
-  sessionId,
-  farmId,
-  sfl,
-  ids,
-  amounts,
-}: Options) {
+export async function withdraw({ sender, farmId, sfl, ids, amounts }: Options) {
   const farm = await getFarmById(farmId);
   if (!farm || farm.updatedBy !== sender) {
     throw new Error("Farm does not exist");

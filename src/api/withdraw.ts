@@ -24,6 +24,7 @@ const VALID_ITEMS = Object.keys({
 const VALID_IDS = VALID_ITEMS.map((id) => KNOWN_IDS[id]);
 
 const schema = Joi.object<WithdrawBody>({
+  // TODO - remove this
   sessionId: Joi.string().required(),
   farmId: Joi.number().required(),
   sfl: Joi.string().required(),
@@ -69,7 +70,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const signature = await withdraw({
     sender: address,
     farmId: body.farmId,
-    sessionId: body.sessionId,
     sfl: body.sfl,
     ids: body.ids,
     amounts: body.amounts,
