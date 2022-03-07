@@ -1,5 +1,5 @@
 import * as sst from "@serverless-stack/resources";
-
+import { CorsHttpMethod } from "@aws-cdk/aws-apigatewayv2";
 export default class ApiStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
@@ -44,6 +44,20 @@ export default class ApiStack extends sst.Stack {
     };
 
     const api = new sst.Api(this, "Api", {
+      cors: {
+        allowOrigins: [
+          "http://localhost:3000",
+          "https://sunflower-land.com",
+          "https://www.sunflower-land.com",
+        ],
+        allowMethods: [
+          CorsHttpMethod.OPTIONS,
+          CorsHttpMethod.GET,
+          CorsHttpMethod.POST,
+        ],
+        allowCredentials: true,
+        allowHeaders: ["Content-Type", "Authorization"],
+      },
       routes: {
         "POST    /farm": {
           handler: "src/api/createFarm.handler",
