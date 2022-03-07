@@ -48,6 +48,7 @@ export function mineIron({
   }
 
   const amount = state.inventory.Iron || new Decimal(0);
+  const experience = state.experience || new Decimal(0);
 
   return {
     ...state,
@@ -64,5 +65,6 @@ export function mineIron({
         amount: new Decimal(randomInt(2, 3)),
       },
     },
+    experience: experience.add(100),
   };
 }

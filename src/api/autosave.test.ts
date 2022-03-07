@@ -209,11 +209,9 @@ describe("api.autosave", () => {
         balance: "100000",
         fields: {},
         stock: {},
-        id: 2,
         inventory: {
           "Sunflower Seed": "5",
         },
-        address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
         trees: {},
         stones: {},
         iron: {},
@@ -225,9 +223,7 @@ describe("api.autosave", () => {
         balance: "20000",
         stock: {},
         fields: {},
-        id: 2,
         inventory: {},
-        address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
         trees: {},
         stones: {},
         iron: {},
@@ -279,7 +275,6 @@ describe("api.autosave", () => {
       farm: {
         balance: "100000",
         fields: {},
-        id: 2,
         inventory: {
           "Sunflower Seed": "4",
           Sunflower: "1",
@@ -289,7 +284,7 @@ describe("api.autosave", () => {
         stones: {},
         iron: {},
         gold: {},
-        address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+        experience: "1",
       },
     });
   });

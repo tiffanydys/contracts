@@ -123,7 +123,7 @@ export const INITIAL_GOLD: GameState["gold"] = {
 };
 
 export const INITIAL_FARM: GameState = {
-  balance: new Decimal(fromWei("0")),
+  balance: new Decimal(0),
   fields: INITIAL_FIELDS,
   inventory: {},
   stock: INITIAL_STOCK,
@@ -131,10 +131,11 @@ export const INITIAL_FARM: GameState = {
   stones: INITIAL_STONE,
   iron: INITIAL_IRON,
   gold: INITIAL_GOLD,
+  experience: new Decimal(0),
 };
 
 export const EMPTY: GameState = {
-  balance: new Decimal(fromWei("0")),
+  balance: new Decimal(0),
   fields: {},
   inventory: {},
   stock: {},
@@ -142,4 +143,5 @@ export const EMPTY: GameState = {
   stones: INITIAL_STONE,
   iron: INITIAL_IRON,
   gold: INITIAL_GOLD,
+  experience: new Decimal(0),
 };

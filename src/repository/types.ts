@@ -13,12 +13,22 @@ export type SanitizedRock = Omit<Rock, "amount"> & {
   amount: string;
 };
 
-// Store decimal values as strings instead
+/**
+ * We need to stringify Decimal values before committing otherwise they get saved as objects
+ */
 export type FarmSession = Omit<
   GameState,
-  "balance" | "inventory" | "stock" | "trees" | "stones" | "iron" | "gold"
+  | "balance"
+  | "experience"
+  | "inventory"
+  | "stock"
+  | "trees"
+  | "stones"
+  | "iron"
+  | "gold"
 > & {
   balance: string;
+  experience: string;
   inventory: Partial<Record<InventoryItemName, string>>;
   stock: Partial<Record<InventoryItemName, string>>;
   trees: Record<number, SanitizedTree>;
