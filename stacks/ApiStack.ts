@@ -126,12 +126,16 @@ export default class ApiStack extends sst.Stack {
         },
         "POST    /login": {
           handler: "src/api/login.handler",
-          bundle: {},
+          bundle: {
+            externalModules: ["electron"],
+          },
           environment: {},
         },
         "GET    /nfts/farm/{id}": {
           handler: "src/api/metadata.handler",
-          bundle: {},
+          bundle: {
+            externalModules: ["electron"],
+          },
           environment: {},
         },
       },
