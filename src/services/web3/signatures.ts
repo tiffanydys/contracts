@@ -12,8 +12,6 @@ type VerifyAccountArgs = {
   signature: string;
 };
 
-const web3 = new Web3();
-
 export function verifyAccount({ address, signature }: VerifyAccountArgs) {
   const message = generateMessage({ address });
   // HACK - Web3 incorrectly types the default class export: use any
@@ -78,6 +76,7 @@ export function encodeWithdrawFunction({
   sfl,
   tax,
 }: WithdrawArgs) {
+  const web3 = new Web3();
   return web3.utils.keccak256(
     web3.eth.abi.encodeParameters(
       [
@@ -169,6 +168,7 @@ export function encodeSyncFunction({
   burnAmounts,
   tokens,
 }: SyncArgs) {
+  const web3 = new Web3();
   return web3.utils.keccak256(
     web3.eth.abi.encodeParameters(
       [
