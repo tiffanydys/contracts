@@ -102,8 +102,9 @@ export function makeGame(gameState: Account["gameState"]): GameState {
   }, {} as Record<InventoryItemName, Decimal>);
 
   return {
-    ...gameState,
     balance: new Decimal(gameState.balance),
+    experience: new Decimal(gameState.experience || 0),
+    fields: gameState.fields,
     inventory,
     stock,
     trees,

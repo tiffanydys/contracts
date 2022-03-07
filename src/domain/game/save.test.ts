@@ -282,6 +282,7 @@ describe("game", () => {
             "Potato Seed": "7",
           },
           balance: "20",
+          experience: "1200343420",
           trees: {},
           stones: {},
           iron: {},
@@ -313,6 +314,7 @@ describe("game", () => {
         owner: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
         session: {
           balance: "19.9",
+          experience: "1200343420",
           fields: {},
           inventory: {
             "Potato Seed": "5",
@@ -331,6 +333,7 @@ describe("game", () => {
       expect(session).toEqual({
         state: {
           balance: new Decimal(19.9),
+          experience: new Decimal(1200343420),
           fields: {},
           inventory: {
             "Potato Seed": new Decimal(5),

@@ -156,6 +156,7 @@ describe("game", () => {
         stones: initialStoneJson,
         iron: initialIronJson,
         gold: initialGoldJson,
+        experience: "0",
       };
 
       // Initial farm values
@@ -167,6 +168,7 @@ describe("game", () => {
         updatedBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         previousGameState: {
           balance: "0",
+          experience: "0",
           fields: INITIAL_FIELDS,
           inventory: {},
           stock: initialStockJSON,
@@ -192,6 +194,7 @@ describe("game", () => {
         stones: INITIAL_STONE,
         iron: INITIAL_IRON,
         gold: INITIAL_GOLD,
+        experience: new Decimal(0),
       });
     });
 
@@ -219,6 +222,7 @@ describe("game", () => {
           stones: initialStoneJson,
           iron: initialIronJson,
           gold: initialGoldJson,
+          experience: "0",
         },
         id: 13,
         createdBy: "0x71ce61c1a29959797493f882F01961567bE56f6E",
@@ -232,6 +236,7 @@ describe("game", () => {
           stones: initialStoneJson,
           iron: initialIronJson,
           gold: initialGoldJson,
+          experience: "0",
         },
         sessionId:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -255,6 +260,7 @@ describe("game", () => {
           inventory: {},
           stock: {},
           balance: "20",
+          experience: "16",
           trees: initialTreeJSON,
           stones: initialStoneJson,
           iron: initialIronJson,
@@ -280,6 +286,7 @@ describe("game", () => {
         owner: "0x71ce61c1a29959797493f882F01961567bE56f6E",
         session: {
           balance: "120",
+          experience: "16",
           fields: {},
           inventory: {
             "Potato Seed": "2",
@@ -297,6 +304,7 @@ describe("game", () => {
 
       expect(session).toEqual({
         balance: new Decimal(120),
+        experience: new Decimal(16),
         fields: {},
         inventory: {
           "Potato Seed": new Decimal(2),

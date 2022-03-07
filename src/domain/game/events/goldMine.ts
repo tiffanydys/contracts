@@ -48,6 +48,7 @@ export function mineGold({
   }
 
   const amount = state.inventory.Gold || new Decimal(0);
+  const experience = state.experience || new Decimal(0);
 
   return {
     ...state,
@@ -63,5 +64,6 @@ export function mineGold({
         amount: new Decimal(randomInt(1, 2)),
       },
     },
+    experience: experience.add(200),
   };
 }

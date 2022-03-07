@@ -48,6 +48,7 @@ export function mineStone({
   }
 
   const amount = state.inventory.Stone || new Decimal(0);
+  const experience = state.experience || new Decimal(0);
 
   return {
     ...state,
@@ -63,5 +64,6 @@ export function mineStone({
         amount: new Decimal(randomInt(2, 4)),
       },
     },
+    experience: experience.add(50),
   };
 }

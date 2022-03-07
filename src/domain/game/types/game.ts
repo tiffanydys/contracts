@@ -47,6 +47,8 @@ export type GameState = {
   inventory: Inventory;
   stock: Inventory;
 
+  experience: Decimal;
+
   farmAddress?: string;
 };
 

@@ -93,8 +93,8 @@ describe("api.session", () => {
       updatedAt: new Date().toISOString(),
       gameState: {
         balance: "100000",
+        experience: "25",
         fields: {},
-        id: 2,
         inventory: {
           Sunflower: "10000",
           Stone: "1000",
@@ -142,14 +142,13 @@ describe("api.session", () => {
       updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       previousGameState: {
         balance: "100000",
+        experience: "0",
         fields: {},
-        id: 2,
         inventory: {
           Sunflower: "10000",
           Stone: "1000",
         },
         stock: {},
-        address: "0x291019282",
         trees: {},
         stones: {},
         iron: {},
@@ -184,13 +183,12 @@ describe("api.session", () => {
       farm: {
         balance: "100000",
         fields: {},
-        id: 2,
+        experience: "25",
         inventory: {
           Sunflower: "10000",
           Stone: "1000",
         },
         stock: {},
-        address: "0x291019282",
         trees: {
           0: {
             wood: "2",
