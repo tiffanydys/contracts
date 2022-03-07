@@ -1,5 +1,6 @@
 import Web3 from "web3";
-import { soliditySha3, toWei } from "web3-utils";
+import { toWei } from "web3-utils";
+import { encodeSyncFunction, SyncArgs } from "../src/services/web3/signatures";
 import { deploySFLContracts, gasLimit, TestAccount } from "./test-support";
 
 describe("Session contract", () => {
@@ -120,7 +121,7 @@ describe("Session contract", () => {
       ).rejects.toContain("SunflowerLand: You do not own this farm");
     });
 
-    it("mints items for a farm", async () => {
+    it.only("mints items for a farm", async () => {
       const web3 = new Web3(
         new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
       );
@@ -160,14 +161,24 @@ describe("Session contract", () => {
         sender: TestAccount.PLAYER.address,
         farmId: 1,
         mintIds: [1],
-        mintAmounts: [500],
+        mintAmounts: [toWei("500")],
         burnIds: [],
         burnAmounts: [],
-        tokens: 60,
+        tokens: toWei("60"),
       });
 
       await session.methods
-        .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
+        .sync(
+          signature,
+          sessionId,
+          validDeadline,
+          1,
+          [1],
+          [toWei("500")],
+          [],
+          [],
+          toWei("60")
+        )
         .send({
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
@@ -179,13 +190,13 @@ describe("Session contract", () => {
         .balanceOf(farmNFT.account)
         .call({ from: TestAccount.PLAYER.address });
 
-      expect(tokenBalance).toEqual("60");
+      expect(tokenBalance).toEqual(toWei("60"));
 
       inventoryBalance = await inventory.methods
         .balanceOf(farmNFT.account, 1)
         .call({ from: TestAccount.PLAYER.address });
 
-      expect(inventoryBalance).toEqual("500");
+      expect(inventoryBalance).toEqual(toWei("500"));
     });
 
     it("requires the mint IDs are in the signature", async () => {
@@ -560,71 +571,64 @@ describe("Session contract", () => {
       expect(Number(newTeamBalance)).toEqual(Number(teamBalance) + Number(fee));
     });
 
-    type SyncArgs = {
-      sessionId: string;
-      deadline: number;
-      sender: string;
-      farmId: number;
-      mintIds: number[];
-      mintAmounts: number[];
-      burnIds: number[];
-      burnAmounts: number[];
-      tokens: number;
-    };
+    // type SyncArgs = {
+    //   sessionId: string;
+    //   deadline: number;
+    //   sender: string;
+    //   farmId: number;
+    //   mintIds: number[];
+    //   mintAmounts: number[];
+    //   burnIds: number[];
+    //   burnAmounts: number[];
+    //   tokens: number;
+    // };
 
-    function encodeSyncFunction({
-      sessionId,
-      deadline,
-      sender,
-      farmId,
-      mintIds,
-      mintAmounts,
-      burnIds,
-      burnAmounts,
-      tokens,
-    }: SyncArgs) {
-      return soliditySha3(
-        {
-          type: "bytes32",
-          value: sessionId,
-        },
-        {
-          type: "uint256",
-          value: deadline.toString(),
-        },
-        {
-          type: "address",
-          value: sender,
-        },
-        {
-          type: "uint256",
-          value: farmId.toString(),
-        },
-        {
-          type: "uint256[]",
-          value: mintIds as any,
-        },
-        {
-          type: "uint256[]",
-          value: mintAmounts as any,
-        },
-        {
-          type: "uint256[]",
-          value: burnIds as any,
-        },
-        {
-          type: "uint256[]",
-          value: burnAmounts as any,
-        },
-        {
-          type: "int256",
-          value: tokens as any,
-        }
-      );
-    }
+    // function encodeSyncFunction2(
+    //   web3: Web3,
+    //   {
+    //     sessionId,
+    //     deadline,
+    //     sender,
+    //     farmId,
+    //     mintIds,
+    //     mintAmounts,
+    //     burnIds,
+    //     burnAmounts,
+    //     tokens,
+    //   }: SyncArgs
+    // ) {
+    //   return web3.utils.keccak256(
+    //     web3.eth.abi.encodeParameters(
+    //       [
+    //         "bytes32",
+    //         "int256",
+    //         "uint",
+    //         "uint256[]",
+    //         "uint256[]",
+    //         "address",
+    //         "uint256[]",
+    //         "uint256[]",
+    //         "uint",
+    //       ],
+    //       [
+    //         sessionId,
+    //         tokens,
+    //         farmId,
+    //         mintIds,
+    //         mintAmounts,
+    //         sender,
+    //         burnIds,
+    //         burnAmounts,
+    //         deadline,
+    //       ]
+    //     )
+    //   );
+    // }
 
     async function sign(web3: Web3, args: SyncArgs) {
-      const sha = encodeSyncFunction(args);
+      const sha = encodeSyncFunction({
+        ...args,
+      });
       const { signature } = await web3.eth.accounts.sign(
         sha,
         TestAccount.TEAM.privateKey
@@ -1042,54 +1046,38 @@ describe("Session contract", () => {
       tax: number;
     };
 
-    function encodeSyncFunction({
-      sessionId,
-      deadline,
-      sender,
-      farmId,
-      ids,
-      amounts,
-      sfl,
-      tax,
-    }: SyncArgs) {
-      return soliditySha3(
-        {
-          type: "bytes32",
-          value: sessionId,
-        },
-        {
-          type: "uint256",
-          value: deadline.toString(),
-        },
-        {
-          type: "address",
-          value: sender,
-        },
-        {
-          type: "uint256",
-          value: farmId.toString(),
-        },
-        {
-          type: "uint256[]",
-          value: ids as any,
-        },
-        {
-          type: "uint256[]",
-          value: amounts as any,
-        },
-        {
-          type: "uint256",
-          value: sfl as any,
-        },
-        {
-          type: "uint256",
-          value: tax as any,
-        }
+    function encodeSyncFunction(
+      web3: Web3,
+      { sessionId, deadline, sender, farmId, ids, amounts, sfl, tax }: SyncArgs
+    ) {
+      return web3.utils.keccak256(
+        web3.eth.abi.encodeParameters(
+          [
+            "bytes32",
+            "uint256",
+            "address",
+            "uint256",
+            "uint256[]",
+            "uint256[]",
+            "uint256",
+            "uint256",
+          ],
+          [
+            sessionId,
+            deadline.toString(),
+            sender,
+            farmId.toString(),
+            ids as any,
+            amounts as any,
+            sfl as any,
+            tax as any,
+          ]
+        )
       );
     }
 
     async function sign(web3: Web3, args: SyncArgs) {
-      const sha = encodeSyncFunction(args);
+      const sha = encodeSyncFunction(web3, args);
       const { signature } = await web3.eth.accounts.sign(
         sha,
         TestAccount.TEAM.privateKey

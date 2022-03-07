@@ -1,5 +1,7 @@
 import Decimal from "decimal.js-light";
 import Accounts from "web3-eth-accounts";
+import Web3 from "web3";
+
 import { soliditySha3, toWei } from "web3-utils";
 import { KNOWN_IDS } from "../../domain/game/types";
 import { Inventory, InventoryItemName } from "../../domain/game/types/game";
@@ -9,6 +11,8 @@ type VerifyAccountArgs = {
   address: string;
   signature: string;
 };
+
+const web3 = new Web3();
 
 export function verifyAccount({ address, signature }: VerifyAccountArgs) {
   const message = generateMessage({ address });
@@ -74,39 +78,29 @@ export function encodeWithdrawFunction({
   sfl,
   tax,
 }: WithdrawArgs) {
-  return soliditySha3(
-    {
-      type: "bytes32",
-      value: sessionId,
-    },
-    {
-      type: "uint256",
-      value: deadline.toString(),
-    },
-    {
-      type: "address",
-      value: sender,
-    },
-    {
-      type: "uint256",
-      value: farmId.toString(),
-    },
-    {
-      type: "uint256[]",
-      value: ids as any,
-    },
-    {
-      type: "uint256[]",
-      value: amounts as any,
-    },
-    {
-      type: "uint256",
-      value: sfl,
-    },
-    {
-      type: "uint256",
-      value: tax.toString(),
-    }
+  return web3.utils.keccak256(
+    web3.eth.abi.encodeParameters(
+      [
+        "bytes32",
+        "uint256",
+        "address",
+        "uint256",
+        "uint256[]",
+        "uint256[]",
+        "uint256",
+        "uint256",
+      ],
+      [
+        sessionId,
+        deadline.toString(),
+        sender,
+        farmId.toString(),
+        ids as any,
+        amounts as any,
+        sfl as any,
+        tax as any,
+      ]
+    )
   );
 }
 
@@ -175,43 +169,31 @@ export function encodeSyncFunction({
   burnAmounts,
   tokens,
 }: SyncArgs) {
-  return soliditySha3(
-    {
-      type: "bytes32",
-      value: sessionId,
-    },
-    {
-      type: "uint256",
-      value: deadline.toString(),
-    },
-    {
-      type: "address",
-      value: sender,
-    },
-    {
-      type: "uint256",
-      value: farmId.toString(),
-    },
-    {
-      type: "uint256[]",
-      value: mintIds as any,
-    },
-    {
-      type: "uint256[]",
-      value: mintAmounts as any,
-    },
-    {
-      type: "uint256[]",
-      value: burnIds as any,
-    },
-    {
-      type: "uint256[]",
-      value: burnAmounts as any,
-    },
-    {
-      type: "int256",
-      value: tokens.toString(),
-    }
+  return web3.utils.keccak256(
+    web3.eth.abi.encodeParameters(
+      [
+        "bytes32",
+        "int256",
+        "uint",
+        "uint256[]",
+        "uint256[]",
+        "address",
+        "uint256[]",
+        "uint256[]",
+        "uint",
+      ],
+      [
+        sessionId,
+        tokens,
+        farmId,
+        mintIds,
+        mintAmounts,
+        sender,
+        burnIds,
+        burnAmounts,
+        deadline,
+      ]
+    )
   );
 }
 

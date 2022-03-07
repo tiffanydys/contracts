@@ -66,6 +66,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     item: body.item,
   });
 
+  // TODO - move into mint function
   // Once an NFT is minted they need to immediately sync to the Blockchain
   const signature = await syncSignature({
     sender: address,

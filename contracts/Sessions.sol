@@ -91,8 +91,8 @@ contract SunflowerLandSession is Ownable, GameOwner {
     }
 
     // A unique nonce identifer for the account
-    function generateSessionId(uint tokenId) public view returns(bytes32) {
-        return keccak256(abi.encodePacked(_msgSender(), sessions[tokenId], block.timestamp)).toEthSignedMessageHash();
+    function generateSessionId(uint tokenId) private view returns(bytes32) {
+        return keccak256(abi.encodePacked(_msgSender(), sessions[tokenId], block.number)).toEthSignedMessageHash();
     }
 
     function getSessionId(uint tokenId) public view returns(bytes32) {
@@ -107,6 +107,22 @@ contract SunflowerLandSession is Ownable, GameOwner {
     function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
         return ethSignedHash.recover(signature) == signer;
+    }
+
+    function syncSignature(
+        bytes32 sessionId,
+        uint farmId,
+        uint deadline,
+        uint256[] memory mintIds,
+        uint256[] memory mintAmounts,
+        uint256[] memory burnIds,
+        uint256[] memory burnAmounts,
+        int256 tokens
+    ) private view returns(bytes32 success) {
+        /**
+         * Distinct order and abi.encode to avoid hash collisions
+         */
+        return keccak256(abi.encode(sessionId, tokens, farmId, mintIds, mintAmounts, _msgSender(), burnIds, burnAmounts, deadline));
     }
     
     /**
@@ -140,28 +156,26 @@ contract SunflowerLandSession is Ownable, GameOwner {
         sessions[farmId] = newSessionId;
 
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, mintIds, mintAmounts, burnIds, burnAmounts, tokens));
+        bytes32 txHash = syncSignature(sessionId, farmId, deadline, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;
 
-        address farmOwner = farm.ownerOf(farmId);
+        // Get the holding address of the farm
+        Farm memory farmNFT = farm.getFarm(farmId);
 
         // Check they own the farm
         require(
-            farmOwner == _msgSender(),
+            farmNFT.owner == _msgSender(),
             "SunflowerLand: You do not own this farm"
         );
-
-        // Get the holding address of the farm
-        Farm memory farmNFT = farm.getFarm(farmId);
 
         updateBalance(farmNFT.account, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
 
         (bool teamSent,) = team.call{value: msg.value}("");
         require(teamSent, "SunflowerLand: Fee Failed");
 
-        emit SessionChanged(farmOwner, newSessionId, farmId);
+        emit SessionChanged(farmNFT.owner, newSessionId, farmId);
 
         return true;
     }
@@ -220,23 +234,21 @@ contract SunflowerLandSession is Ownable, GameOwner {
         withdrawnAt[farmId] = block.timestamp;
 
         // Verify
-        bytes32 txHash = keccak256(abi.encodePacked(sessionId, deadline,  _msgSender(), farmId, ids, amounts, sfl, tax));
+        bytes32 txHash = keccak256(abi.encode(sessionId, deadline,  _msgSender(), farmId, ids, amounts, sfl, tax));
         require(!executed[txHash], "SunflowerLand: Tx Executed");
         require(verify(txHash, signature), "SunflowerLand: Unauthorised");
         executed[txHash] = true;
 
-        address farmOwner = farm.ownerOf(farmId);
-
-        // Check they own the farm
-        require(
-            farmOwner == _msgSender(),
-            "SunflowerLand: You do not own this farm"
-        );
-
         // Get the holding address of the farm
         Farm memory farmNFT = farm.getFarm(farmId);
 
-        // Withdrawal tax
+        // Check they own the farm
+        require(
+            farmNFT.owner == _msgSender(),
+            "SunflowerLand: You do not own this farm"
+        );
+
+        // Distribution fee
         uint teamFee = sfl * tax / 1000;
         takeFee(farmNFT.account, teamFee);
 
@@ -245,7 +257,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         inventory.gameTransferFrom(farmNFT.account, _msgSender(), ids, amounts, "");
         token.gameTransfer(farmNFT.account, _msgSender(), remaining);
 
-        emit SessionChanged(farmOwner, newSessionId, farmId);
+        emit SessionChanged(farmNFT.owner, newSessionId, farmId);
 
         return true;
     }
