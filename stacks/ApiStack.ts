@@ -56,7 +56,13 @@ export default class ApiStack extends sst.Stack {
           CorsHttpMethod.POST,
         ],
         allowCredentials: true,
-        allowHeaders: ["Content-Type", "Authorization"],
+        allowHeaders: [
+          "Content-Type",
+          "Authorization",
+          // Our fake bot detection header
+          "Cache-Control",
+          "X-Fingerprint",
+        ],
       },
       routes: {
         "POST    /farm": {
