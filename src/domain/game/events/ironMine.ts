@@ -61,8 +61,8 @@ export function mineIron({
       ...state.iron,
       [action.index]: {
         minedAt: Date.now(),
-        // Placeholder, server does randomization
-        amount: new Decimal(randomInt(2, 3)),
+        // 2 - 4
+        amount: new Decimal(randomInt(2, 4)),
       },
     },
     experience: experience.add(100),

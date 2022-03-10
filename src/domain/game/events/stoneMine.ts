@@ -61,7 +61,8 @@ export function mineStone({
       ...state.stones,
       [action.index]: {
         minedAt: Date.now(),
-        amount: new Decimal(randomInt(2, 4)),
+        // 2 - 4
+        amount: new Decimal(randomInt(2, 5)),
       },
     },
     experience: experience.add(50),

@@ -66,7 +66,8 @@ export function chop({
       ...state.trees,
       [action.index]: {
         choppedAt: Date.now(),
-        wood: new Decimal(randomInt(3, 5)),
+        // 3 - 5
+        wood: new Decimal(randomInt(3, 6)),
       },
     },
     experience: experience.add(50),

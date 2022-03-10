@@ -61,7 +61,8 @@ export function mineGold({
       ...state.gold,
       [action.index]: {
         minedAt: Date.now(),
-        amount: new Decimal(randomInt(1, 2)),
+        // 1-2
+        amount: new Decimal(randomInt(1, 3)),
       },
     },
     experience: experience.add(200),
