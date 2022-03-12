@@ -8,13 +8,18 @@ export type UserAccess = {
   mintCollectible: boolean;
 };
 
+const network = process.env.NETWORK as "mumbai" | "mainnet";
+
 export function getUserAccess(address: string): UserAccess {
   return {
     withdraw: canWithdraw(address),
     sync: canSync(address),
     mintCollectible: canWithdraw(address),
-    // Unless authorized with Discord, this will be false
-    createFarm: false,
+    /**
+     * Users only get createFarm privileges if they have oauthed through Discord
+     * Or in develop
+     */
+    createFarm: network === "mumbai",
   };
 }
 
