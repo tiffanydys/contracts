@@ -19,7 +19,7 @@ export async function authorize(
     body: new URLSearchParams({
       client_id: process.env.DISCORD_CLIENT_ID as string,
       client_secret: process.env.DISCORD_CLIENT_SECRET as string,
-      grant_type: "client_credentials",
+      grant_type: "authorization_code",
       code: code,
       redirect_uri: process.env.DISCORD_REDIRECT_URI as string,
       scope: "guilds.members.read",

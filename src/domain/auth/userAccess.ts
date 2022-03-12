@@ -23,7 +23,6 @@ export async function getDiscordAccess(
 ): Promise<Pick<UserAccess, "createFarm">> {
   const { access_token } = await authorize(code);
   const roles = await getRoles(access_token);
-
   return {
     createFarm: roles.includes("beta"),
   };
