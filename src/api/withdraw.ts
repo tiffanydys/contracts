@@ -3,8 +3,6 @@ import Joi from "joi";
 
 import { verifyJwt } from "../services/jwt";
 
-import { canSync, canWithdraw } from "../constants/whitelist";
-
 import { KNOWN_IDS } from "../domain/game/types";
 import { TOOLS, LimitedItems } from "../domain/game/types/craftables";
 import { InventoryItemName } from "../domain/game/types/game";
@@ -48,7 +46,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.authorization as string);
+  const { address, userAccess } = await verifyJwt(
+    event.headers.authorization as string
+  );
   const body: WithdrawBody = JSON.parse(event.body);
   logInfo("Withdraw", JSON.stringify(body, null, 2));
 
@@ -57,11 +57,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  // TODO - new can withdraw
-  if (process.env.NETWORK !== "mumbai") {
-    if (!canWithdraw(address)) {
-      throw new Error("Not on whitelist");
-    }
+  if (!userAccess.withdraw) {
+    throw new Error(`${address} does not have access to withdraw`);
   }
 
   // TODO - validate they are the right session and have enough to withdraw

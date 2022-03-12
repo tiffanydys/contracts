@@ -2,7 +2,6 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 
 import { CHARITIES } from "../constants/charities";
-import { canCreateFarm } from "../constants/whitelist";
 import { logInfo } from "../services/logger";
 
 import { verifyJwt } from "../services/jwt";
@@ -25,7 +24,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.authorization as string);
+  const { address, userAccess } = await verifyJwt(
+    event.headers.authorization as string
+  );
 
   const body: CreateFarmBody = JSON.parse(event.body);
   logInfo("Create Farm", JSON.stringify(body, null, 2));
@@ -35,13 +36,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  if (!canCreateFarm(address)) {
-    throw new Error("Not on whitelist");
+  if (!userAccess.createFarm) {
+    throw new Error(`${address} does not have permissions to create a farm`);
   }
-
-  // No signature validation as not needed
-
-  // Whitelist farms
 
   const { signature, charity, donation } = await createFarmSignature({
     address,

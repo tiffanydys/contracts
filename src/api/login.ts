@@ -3,6 +3,7 @@ import {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import Joi from "joi";
+import { getUserAccess } from "../domain/auth/userAccess";
 
 import { generateJwt } from "../services/jwt";
 import { verifyAccount } from "../services/web3/signatures";
@@ -10,11 +11,13 @@ import { verifyAccount } from "../services/web3/signatures";
 const schema = Joi.object<LoginBody>({
   address: Joi.string().required(),
   signature: Joi.string().required(),
+  discord_access_code: Joi.string(),
 });
 
 export type LoginBody = {
   address: string;
   signature: string;
+  discord_access_code: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (
@@ -36,8 +39,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     signature: body.signature,
   });
 
+  const userAccess = getUserAccess(body.address);
+
   const { token } = await generateJwt({
     address: body.address,
+    userAccess,
   });
 
   return {

@@ -3,7 +3,6 @@ import {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import Joi from "joi";
-import { canMint } from "../constants/whitelist";
 
 import { mint } from "../domain/game/sync";
 import { LimitedItem } from "../domain/game/types/craftables";
@@ -44,7 +43,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.authorization as string);
+  const { address, userAccess } = await verifyJwt(
+    event.headers.authorization as string
+  );
 
   const body: MintBody = JSON.parse(event.body);
   logInfo("Mint API: ", { body });
@@ -54,10 +55,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     throw new Error(valid.error.message);
   }
 
-  if (process.env.NETWORK !== "mumbai") {
-    if (!canMint(address)) {
-      throw new Error("Not on whitelist");
-    }
+  if (userAccess.mintCollectible) {
+    throw new Error("Not on whitelist");
   }
 
   const changeset = await mint({

@@ -1,0 +1,88 @@
+import DiscordOauth2, { Member, TokenRequestResult } from "discord-oauth2";
+import fetch from "node-fetch";
+import { URLSearchParams } from "url";
+
+// Sunflower Land Server ID
+const GUILD_ID = "880987707214544966";
+
+const oauth = new DiscordOauth2({});
+
+export async function authorize(
+  code: string
+): Promise<{ access_token: string }> {
+  const options = {
+    url: "https://discord.com/api/oauth2/token",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID as string,
+      client_secret: process.env.DISCORD_CLIENT_SECRET as string,
+      grant_type: "client_credentials",
+      code: code,
+      redirect_uri: process.env.DISCORD_REDIRECT_URI as string,
+      scope: "guilds.members.read",
+    }),
+  };
+
+  const discordData = await fetch(
+    "https://discord.com/api/oauth2/token",
+    options
+  )
+    .then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      return response;
+    });
+  console.log({ discordData });
+
+  return discordData;
+}
+
+type DiscordRole =
+  | "beta"
+  | "golden egg"
+  | "international ambasssador"
+  | "ambassador";
+
+const ROLES: Record<string, DiscordRole> = {
+  "935397030027747348": "beta",
+  "927745651259879476": "golden egg",
+  "927775987024924713": "international ambasssador",
+  "927131260843864144": "ambassador",
+};
+
+export async function requestRoles(accessToken: string) {
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      authorization: `Bearer ${accessToken}`, // Define the authorization
+    },
+  };
+
+  const discordRoles = await fetch(
+    `https://discord.com/api//users/@me/guilds/${GUILD_ID}/member`,
+    options
+  )
+    .then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      return response;
+    });
+  console.log({ discordRoles });
+
+  return discordRoles;
+}
+
+export async function getRoles(accessToken: string): Promise<DiscordRole[]> {
+  console.log("Get guidl member: ", accessToken);
+  const guildMember: Member = await requestRoles(accessToken);
+
+  console.log({ guildMember });
+
+  return guildMember.roles.map((roleId) => ROLES[roleId]);
+}

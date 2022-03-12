@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { UserAccess } from "../domain/auth/userAccess";
 
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
@@ -72,6 +73,7 @@ kY5XreAsmqauKupykxTRUpcCAwEAAQ==
 
 type Token = {
   address: string;
+  userAccess: UserAccess;
 };
 
 export function generateJwt(payload: Token) {
