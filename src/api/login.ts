@@ -11,13 +11,11 @@ import { verifyAccount } from "../services/web3/signatures";
 const schema = Joi.object<LoginBody>({
   address: Joi.string().required(),
   signature: Joi.string().required(),
-  discord_access_code: Joi.string(),
 });
 
 export type LoginBody = {
   address: string;
   signature: string;
-  discord_access_code: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (
