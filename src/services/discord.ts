@@ -51,8 +51,8 @@ type DiscordRole =
 const ROLES: Record<string, DiscordRole> = {
   "935397030027747348": "beta",
   "927745651259879476": "golden egg",
-  "927775987024924713": "international ambasssador",
   "927131260843864144": "ambassador",
+  "927775987024924713": "international ambasssador",
   "925391410969071628": "moderator",
 };
 
