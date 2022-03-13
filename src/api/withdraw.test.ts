@@ -58,6 +58,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -87,6 +93,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -115,6 +127,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -143,6 +161,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -172,6 +196,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -185,7 +215,7 @@ describe("api.withdraw", () => {
     ).rejects.toContain('ids[0]" must be one of');
   });
 
-  it("requires user is on the whitelist", async () => {
+  it("requires user has permissions to withdraw", async () => {
     process.env.NETWORK = "mainnet";
 
     const body: WithdrawBody = {
@@ -203,6 +233,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: false,
+              },
             }).token
           }`,
         },
@@ -213,7 +249,7 @@ describe("api.withdraw", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Not on whitelist");
+    ).rejects.toContain("does not have permissions");
   });
 
   it("requires they have SFL", async () => {
@@ -234,6 +270,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -266,6 +308,12 @@ describe("api.withdraw", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },

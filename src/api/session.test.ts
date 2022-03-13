@@ -40,6 +40,12 @@ describe("api.session", () => {
         headers: {
           authorization: `Bearer ${
             generateJwt({
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
               address:
                 "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
             }).token
@@ -66,6 +72,12 @@ describe("api.session", () => {
         headers: {
           authorization: `Bearer ${
             generateJwt({
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
               address:
                 "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
             }).token
@@ -169,6 +181,12 @@ describe("api.session", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },

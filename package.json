@@ -42,6 +42,7 @@
     "asn1.js": "^5.4.1",
     "aws-sdk": "^2.1063.0",
     "decimal.js-light": "^2.5.1",
+    "discord-oauth2": "^2.9.0",
     "ethereumjs-tx": "^2.1.2",
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",

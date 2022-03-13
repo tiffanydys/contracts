@@ -59,6 +59,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -85,6 +91,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -118,6 +130,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -153,6 +171,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -188,6 +212,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -262,6 +292,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -340,6 +376,12 @@ describe("api.autosave", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },

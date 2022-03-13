@@ -2,7 +2,6 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import Joi from "joi";
 import { sync } from "../domain/game/sync";
 import { verifyJwt } from "../services/jwt";
-import { canSync } from "../constants/whitelist";
 import { logInfo } from "../services/logger";
 
 const schema = Joi.object<SyncBody>({
@@ -20,7 +19,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.authorization as string);
+  const { address, userAccess } = await verifyJwt(
+    event.headers.authorization as string
+  );
 
   const body: SyncBody = JSON.parse(event.body);
   logInfo("Sync API: ", { body });
@@ -30,10 +31,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  if (process.env.NETWORK !== "mumbai") {
-    if (!canSync(address)) {
-      throw new Error("Not on whitelist");
-    }
+  if (!userAccess.sync) {
+    throw new Error(`${address} does not have permissions to sync`);
   }
 
   const signature = await sync({

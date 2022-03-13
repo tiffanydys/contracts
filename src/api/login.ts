@@ -3,6 +3,7 @@ import {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import Joi from "joi";
+import { getUserAccess } from "../domain/auth/userAccess";
 
 import { generateJwt } from "../services/jwt";
 import { verifyAccount } from "../services/web3/signatures";
@@ -36,8 +37,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     signature: body.signature,
   });
 
+  const userAccess = await getUserAccess(body.address);
+
   const { token } = await generateJwt({
     address: body.address,
+    userAccess,
   });
 
   return {

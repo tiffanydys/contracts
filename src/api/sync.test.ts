@@ -42,6 +42,12 @@ describe("api.sync", () => {
             generateJwt({
               address:
                 "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -68,6 +74,12 @@ describe("api.sync", () => {
             generateJwt({
               address:
                 "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -81,7 +93,7 @@ describe("api.sync", () => {
     ).rejects.toContain('"sessionId" is not allowed to be empty');
   });
 
-  it("requires user is on the whitelist", async () => {
+  it("requires user has permissions", async () => {
     process.env.NETWORK = "mainnet";
 
     const body: SyncBody = {
@@ -97,6 +109,12 @@ describe("api.sync", () => {
             generateJwt({
               address:
                 "0x81b61c8d9da5117a7ce8fed7666be0d76b683a3838f6d28916961d1edfc27d35422fe75a60733df4d3843d0e93d4736064b0438c4b37dd2f86425fbb2574ec461c",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: false,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -107,10 +125,10 @@ describe("api.sync", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Not on whitelist");
+    ).rejects.toContain("does not have permissions");
   });
 
-  it("mints an item", async () => {
+  it("syncs a session", async () => {
     getFarmMock.mockReturnValue({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -157,6 +175,12 @@ describe("api.sync", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },

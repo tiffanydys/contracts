@@ -24,13 +24,22 @@ export default class ApiStack extends sst.Stack {
       primaryIndex: { partitionKey: "id" },
     });
 
+    const discordUserTable = new sst.Table(this, "DiscordUsers", {
+      fields: {
+        discordId: sst.TableFieldType.STRING,
+        address: sst.TableFieldType.STRING,
+        createdAt: sst.TableFieldType.STRING,
+      },
+      primaryIndex: { partitionKey: "discordId" },
+    });
+
     const bucket = new sst.Bucket(this, "PlayerEvents", {
       s3Bucket: {
         bucketName: `${scope.stage}-player-events`,
       },
     });
 
-    const web3EnvironmentVariables = {
+    const environmentVariables = {
       NETWORK: process.env.NETWORK as string,
       ALCHEMY_KEY: process.env.ALCHEMY_KEY as string,
       TOKEN_ADDRESS: process.env.TOKEN_ADDRESS as string,
@@ -41,6 +50,13 @@ export default class ApiStack extends sst.Stack {
       SFF_FARM_ADDRESS: process.env.SFF_FARM_ADDRESS as string,
       KMS_KEY_ID: process.env.KMS_KEY_ID as string,
       RECAPTCHA_KEY: process.env.RECAPTCHA_KEY as string,
+      DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID as string,
+      DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET as string,
+      DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI as string,
+      JWT_SECRET: process.env.JWT_SECRET as string,
+
+      SESSION_TABLE_NAME: sessionTable.dynamodbTable.tableName,
+      DISCORD_USER_TABLE_NAME: discordUserTable.dynamodbTable.tableName,
     };
 
     const api = new sst.Api(this, "Api", {
@@ -71,8 +87,7 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /autosave": {
@@ -81,9 +96,8 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /session": {
@@ -92,9 +106,8 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /sync": {
@@ -103,9 +116,8 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /mint": {
@@ -114,9 +126,8 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /withdraw": {
@@ -125,9 +136,8 @@ export default class ApiStack extends sst.Stack {
             externalModules: ["electron"],
           },
           environment: {
-            tableName: sessionTable.dynamodbTable.tableName,
             bucketName: bucket.bucketName,
-            ...web3EnvironmentVariables,
+            ...environmentVariables,
           },
         },
         "POST    /login": {
@@ -135,7 +145,18 @@ export default class ApiStack extends sst.Stack {
           bundle: {
             externalModules: ["electron"],
           },
-          environment: {},
+          environment: {
+            ...environmentVariables,
+          },
+        },
+        "POST    /oauth": {
+          handler: "src/api/oauth.handler",
+          bundle: {
+            externalModules: ["electron"],
+          },
+          environment: {
+            ...environmentVariables,
+          },
         },
         "GET    /nfts/farm/{id}": {
           handler: "src/api/metadata.handler",
@@ -147,7 +168,7 @@ export default class ApiStack extends sst.Stack {
       },
     });
 
-    api.attachPermissions([sessionTable, bucket]);
+    api.attachPermissions([sessionTable, discordUserTable, bucket]);
 
     this.addOutputs({
       ApiEndpoint: api.url,
