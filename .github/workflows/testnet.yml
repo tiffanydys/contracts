@@ -27,7 +27,7 @@ jobs:
           SFF_FARM_ADDRESS: "0x6e5Fa679211d7F6b54e14E187D34bA547c5d3fe0"
           KMS_KEY_ID: be934479-ce0b-41ab-871e-de078bd6b7fd
           RECAPTCHA_KEY: ${{ secrets.RECAPTCHA_KEY }}
-          DISCORD_CLIENT_ID: 946044940008435803
+          DISCORD_CLIENT_ID: "946044940008435803"
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
           DISCORD_REDIRECT_URI: "https://sunflower-land.com/testnet/"
 
