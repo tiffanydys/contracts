@@ -1,4 +1,4 @@
-import { canSync, canWithdraw } from "../../constants/whitelist";
+import { canWithdraw } from "../../constants/whitelist";
 import { getDiscordUser, createDiscordUser } from "../../repository/db";
 import { authorize, getRoles } from "../../services/discord";
 
@@ -13,8 +13,8 @@ const network = process.env.NETWORK as "mumbai" | "mainnet";
 
 export function getUserAccess(address: string): UserAccess {
   return {
+    sync: true,
     withdraw: canWithdraw(address),
-    sync: canSync(address),
     mintCollectible: canWithdraw(address),
     /**
      * Users only get createFarm privileges if they have oauthed through Discord

@@ -37,6 +37,12 @@ describe("api.createFarm", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -63,6 +69,12 @@ describe("api.createFarm", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -89,6 +101,12 @@ describe("api.createFarm", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -102,7 +120,7 @@ describe("api.createFarm", () => {
     ).rejects.toContain('"donation" must be greater than or equal to 1');
   });
 
-  it("requires user is on the whitelist", async () => {
+  it("requires user has permissions to create farm", async () => {
     process.env.NETWORK = "mainnet";
 
     const body: CreateFarmBody = {
@@ -117,6 +135,12 @@ describe("api.createFarm", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
+              userAccess: {
+                createFarm: false,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -127,7 +151,7 @@ describe("api.createFarm", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Not on whitelist");
+    ).rejects.toContain("does not have permissions");
   });
 
   it("creates a farm signature", async () => {
@@ -146,6 +170,12 @@ describe("api.createFarm", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },

@@ -58,7 +58,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   if (!userAccess.withdraw) {
-    throw new Error(`${address} does not have access to withdraw`);
+    throw new Error(`${address} does not have permissions to withdraw`);
   }
 
   // TODO - validate they are the right session and have enough to withdraw

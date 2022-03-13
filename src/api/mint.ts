@@ -55,8 +55,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     throw new Error(valid.error.message);
   }
 
-  if (userAccess.mintCollectible) {
-    throw new Error("Not on whitelist");
+  if (!userAccess.mintCollectible) {
+    throw new Error(`${address} does not have permissions to create a farm`);
   }
 
   const changeset = await mint({

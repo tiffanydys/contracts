@@ -45,6 +45,12 @@ describe("api.mint", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -71,6 +77,12 @@ describe("api.mint", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -97,6 +109,12 @@ describe("api.mint", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -110,7 +128,7 @@ describe("api.mint", () => {
     ).rejects.toContain('"sessionId" is not allowed to be empty');
   });
 
-  it("requires user is on the whitelist", async () => {
+  it("requires user has permissions to mint", async () => {
     process.env.NETWORK = "mainnet";
 
     const body: MintBody = {
@@ -126,6 +144,12 @@ describe("api.mint", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xf199968e2Aa67c3f8eb5913547DD1f9e9A578798",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: false,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
@@ -136,7 +160,7 @@ describe("api.mint", () => {
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("Not on whitelist");
+    ).rejects.toContain("does not have permissions");
   });
 
   it("mints an item", async () => {
@@ -189,6 +213,12 @@ describe("api.mint", () => {
           authorization: `Bearer ${
             generateJwt({
               address: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
+              userAccess: {
+                createFarm: true,
+                mintCollectible: true,
+                sync: true,
+                withdraw: true,
+              },
             }).token
           }`,
         },
