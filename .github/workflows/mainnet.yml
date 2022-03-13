@@ -31,6 +31,7 @@ jobs:
           DISCORD_CLIENT_ID: "946044940008435803"
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
           DISCORD_REDIRECT_URI: "https://sunflower-land.com/play/"
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1.5.9
@@ -60,3 +61,4 @@ jobs:
           DISCORD_CLIENT_ID: "946044940008435803"
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
           DISCORD_REDIRECT_URI: "https://sunflower-land.com/play/"
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
