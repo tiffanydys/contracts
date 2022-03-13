@@ -31,10 +31,23 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  const { createFarm, id } = await getDiscordAccess({
+  const response = await getDiscordAccess({
     code: body.code,
     address,
   });
+
+  if (response instanceof Error) {
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        errorCode: "DISCORD_USER_EXISTS",
+        errorMessage: "Discord user already exists",
+      }),
+    };
+  }
+
+  const { createFarm, id } = response;
 
   // Generate new token with Discord permissions
   const { token } = await generateJwt({

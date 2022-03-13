@@ -41,7 +41,7 @@ export async function getDiscordAccess({
   const user = await getDiscordUser(id);
 
   if (user && user.address !== address) {
-    throw new Error(`Discord #${id} already exists for ${address}`);
+    return new Error(`Discord #${id} already exists for ${address}`);
   }
 
   await createDiscordUser({

@@ -5,8 +5,6 @@ import { URLSearchParams } from "url";
 // Sunflower Land Server ID
 const GUILD_ID = "880987707214544966";
 
-const oauth = new DiscordOauth2({});
-
 export async function authorize(
   code: string
 ): Promise<{ access_token: string }> {
