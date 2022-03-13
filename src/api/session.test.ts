@@ -13,7 +13,7 @@ describe("api.session", () => {
       sessionId: "0x123",
     } as SessionBody;
 
-    const result = handler(
+    const result = (await handler(
       {
         body: JSON.stringify(body),
         headers: {
@@ -22,11 +22,9 @@ describe("api.session", () => {
       } as any,
       {} as any,
       () => {}
-    ) as Promise<SyncSignature>;
+    )) as any;
 
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("jwt malformed");
+    expect(result.statusCode).toEqual(401);
   });
 
   it("requires farm ID", async () => {

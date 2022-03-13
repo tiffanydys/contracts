@@ -24,7 +24,7 @@ describe("api.autosave", () => {
       ],
     } as AutosaveBody;
 
-    const result = handler(
+    const result = (await handler(
       {
         body: JSON.stringify(body),
         headers: {
@@ -33,11 +33,9 @@ describe("api.autosave", () => {
       } as any,
       {} as any,
       () => {}
-    ) as Promise<SyncSignature>;
+    )) as any;
 
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("jwt malformed");
+    expect(result.statusCode).toEqual(401);
   });
 
   it("requires farm ID", async () => {

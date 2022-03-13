@@ -92,7 +92,18 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error("No body found in event");
   }
 
-  const { address } = await verifyJwt(event.headers.authorization as string);
+  let address: string;
+  try {
+    const verified = await verifyJwt(event.headers.authorization as string);
+    address = verified.address;
+  } catch (e) {
+    console.log(e);
+
+    return {
+      statusCode: 401,
+      headers: { "Content-Type": "application/json" },
+    };
+  }
 
   const body: AutosaveBody = JSON.parse(event.body);
   logInfo("Autosave", JSON.stringify(body, null, 2));
