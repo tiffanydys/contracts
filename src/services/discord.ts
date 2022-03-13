@@ -24,6 +24,8 @@ export async function authorize(
     }),
   };
 
+  console.log({ options });
+
   const discordData = await fetch(
     "https://discord.com/api/oauth2/token",
     options
