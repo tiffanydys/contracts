@@ -78,11 +78,18 @@ export async function requestRoles(accessToken: string) {
   return discordRoles;
 }
 
-export async function getRoles(accessToken: string): Promise<DiscordRole[]> {
+export async function getRoles(
+  accessToken: string
+): Promise<{ roles: DiscordRole[]; id: string }> {
   console.log("Get guidl member: ", accessToken);
   const guildMember: Member = await requestRoles(accessToken);
 
   console.log({ guildMember });
 
-  return guildMember.roles.map((roleId) => ROLES[roleId]);
+  const roles = guildMember.roles.map((roleId) => ROLES[roleId]);
+
+  return {
+    id: guildMember?.user?.id as string,
+    roles,
+  };
 }

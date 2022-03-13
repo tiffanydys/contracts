@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
 import { UserAccess } from "../domain/auth/userAccess";
 
-const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+/**
+ * Only used in local host testing, .env file has issues storing this
+ */
+const dummyPrivateKey = `-----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
 DEK-Info: AES-128-CBC,4CA59A904E35A7BBD5E22FEA47150C03
 
@@ -56,30 +59,18 @@ glZO+B1NR/SPoK8FH32Ssdz64hox2SDXbl581o4DxPdFDwWeJZwTpGjhn5afc1l9
 AkqGYNhD5pQs2t+kllUhVy2ifkhkSYxnUjygtmSr1kZ3IjeqrQ7bk0zgAO4hnrFv
 -----END RSA PRIVATE KEY-----`;
 
-const publicKey = `-----BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEApXx+Nky0R0ijYRIY0GAr
-UXqiwX1vVnncCiM3WBc20UXrWBoyD7MLia9QfuVbCinRewNjjjIt+SrkMIVJIuNZ
-q4avqZnJkG4Qau49e+m5GxXaKWWwg2Rent6/sbj3O6LmLTmPwxkibLGDoE2mdaot
-aZqEN1Jh1Sjido+7ERUt7r+QDUYk4RJen3+1U+rVCnGISiZlE3QVlTZLmiCiAFQ1
-ukXA5+DM2kvXaEH20GGNUcWR6Gve3U8jtK9acLE5NFzt9pkMQKPCNXKbJcHCZUUS
-8aDb4ksg2FWYHp/C0vfuRtUhokBt8SJGvwkS+9MgdBRli3WbRB6vR56fvuPkcpzB
-yjfAz1TEg8Ffz4yPIbyaajWas07lxnsRU8aEjeIJz8y1Sr/dAYmuSNGH3Aq4KT9J
-IqVx+EyIegptBiXqLybkDXz4Dl4ElvCbVf9i7oa85fSnoG2PQqdHax2spqruJulo
-/gOmQAO938mvBLUbuc4WUuB++T6DInDZaBtZ9KBxTcDfFVW9F9uY2GJ+aPX9xfpS
-SLa8pfgwzoT8qp2dDc8SFIeC6pLF2fqR0/TAvMrnJzJH/JmIxybNBazkb6GrFQFk
-125d2bZj5wp7ENFiXZh/EQco3N9NQPp49zbdVmMtiyGZ5lY0WnvAZpE3PXBbWbkL
-kY5XreAsmqauKupykxTRUpcCAwEAAQ==
------END PUBLIC KEY-----`;
+const KEY = process.env.JWT_SECRET || dummyPrivateKey;
 
 type Token = {
   address: string;
   userAccess: UserAccess;
+  discordId?: string;
 };
 
 export function generateJwt(payload: Token) {
   const token = jwt.sign(
     payload,
-    privateKey,
+    KEY,
     // Seconds - 1 day
     { expiresIn: 60 * 60 * 24 }
   );
@@ -96,7 +87,7 @@ export async function verifyJwt(rawToken: string) {
   // Remove the 'Bearer '
   const token = rawToken.slice(7);
 
-  const decoded = await jwt.verify(token, privateKey);
+  const decoded = await jwt.verify(token, KEY);
 
   return decoded as Token;
 }

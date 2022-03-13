@@ -31,7 +31,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  const { createFarm } = await getDiscordAccess(body.code);
+  const { createFarm, id } = await getDiscordAccess({
+    code: body.code,
+    address,
+  });
 
   // Generate new token with Discord permissions
   const { token } = await generateJwt({
@@ -40,6 +43,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       ...userAccess,
       createFarm,
     },
+    discordId: id,
   });
 
   return {

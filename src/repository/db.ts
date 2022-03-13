@@ -8,7 +8,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 export async function getFarm(id: number): Promise<Account> {
   const getParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -21,7 +21,7 @@ export async function getFarm(id: number): Promise<Account> {
 
 export async function create(item: Account): Promise<Account> {
   const putParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Item: item,
   };
 
@@ -44,7 +44,7 @@ export async function updateGameState({
   flaggedCount,
 }: UpdateFarm) {
   const updateParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -76,7 +76,7 @@ export async function createSession({
   version,
 }: UpdateSession) {
   const updateParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -100,7 +100,7 @@ type Blacklist = {
 
 export async function blacklist({ id }: Blacklist) {
   const updateParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -122,7 +122,7 @@ export async function updateFlaggedCount({
   flaggedCount,
 }: UpdateFlaggedCount) {
   const updateParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -141,7 +141,7 @@ type VerifyAccount = {
 
 export async function verifyAccount({ id, verifyAt }: VerifyAccount) {
   const updateParams = {
-    TableName: process.env.tableName as string,
+    TableName: process.env.SESSION_TABLE_NAME as string,
     Key: {
       id,
     },
@@ -151,4 +151,34 @@ export async function verifyAccount({ id, verifyAt }: VerifyAccount) {
     },
   };
   await dynamoDb.update(updateParams).promise();
+}
+
+export type User = {
+  discordId: string;
+  address: string;
+  createdAt: string;
+};
+
+export async function createDiscordUser(user: User): Promise<User> {
+  const putParams = {
+    TableName: process.env.DISCORD_USER_TABLE_NAME as string,
+    Item: user,
+  };
+
+  await dynamoDb.put(putParams).promise();
+
+  return user;
+}
+
+export async function getDiscordUser(discordId: string): Promise<User> {
+  const getParams = {
+    TableName: process.env.DISCORD_USER_TABLE_NAME as string,
+    Key: {
+      discordId,
+    },
+  };
+
+  const results = await dynamoDb.get(getParams).promise();
+
+  return results.Item as User;
 }

@@ -39,7 +39,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     signature: body.signature,
   });
 
-  const userAccess = getUserAccess(body.address);
+  const userAccess = await getUserAccess(body.address);
 
   const { token } = await generateJwt({
     address: body.address,
