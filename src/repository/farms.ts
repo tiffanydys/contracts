@@ -124,24 +124,34 @@ export async function flag({ id, flaggedCount }: UpdateFlaggedCount) {
 
 type Verify = {
   id: number;
+  createdAt: string;
 };
 
-// Every 6 hours during beta
-const VERIFIED_PERIOD = 1000 * 60 * 60 * 6;
+// Every 30 days during beta
+const VERIFIED_PERIOD = 1000 * 60 * 60 * 24 * 30;
+
+// 8 hours
+const EIGHT_HOURS = 1000 * 60 * 60 * 6;
 
 /**
  * After solving a captcha, the account is verified for 30 minutes
  * We set the next verifyAt timestamp for when this expires
  */
-export async function verify({ id }: Verify) {
+export async function verify({ id, createdAt }: Verify) {
   // Do not make the captcha predictable, add a buffer period
   const buffer = VERIFIED_PERIOD / 5;
   const randomBuffer = Math.floor(Math.random() * buffer);
 
+  // 30 days
+  let nextVerifyAt = Date.now() + VERIFIED_PERIOD;
+
+  // If the account is new, captcha more often
+  if (new Date(createdAt).getTime() < Date.now() - VERIFIED_PERIOD) {
+    nextVerifyAt = Date.now() + EIGHT_HOURS + randomBuffer;
+  }
+
   return await verifyAccount({
     id,
-    verifyAt: new Date(
-      Date.now() + VERIFIED_PERIOD + randomBuffer
-    ).toISOString(),
+    verifyAt: new Date(nextVerifyAt).toISOString(),
   });
 }

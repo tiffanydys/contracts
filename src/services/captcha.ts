@@ -58,7 +58,7 @@ export async function verifyCaptcha({ farm, captcha }: VerifyOptions) {
     }
 
     // Update verified at
-    await verify({ id: farm.id });
+    await verify({ id: farm.id, createdAt: farm.createdAt });
   }
 
   return true;
