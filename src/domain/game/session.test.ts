@@ -140,7 +140,7 @@ describe("game", () => {
       loadV1FarmMock.mockReturnValueOnce([]);
       loadV1BalanceMock.mockReturnValueOnce("60000000000000000000");
 
-      const session = await startSession({
+      const { gameState: session } = await startSession({
         farmId: 13,
         sender,
         sessionId:
@@ -274,7 +274,7 @@ describe("game", () => {
       loadInventoryMock.mockReturnValue([toWei("1"), toWei("2")]);
       loadSessionMock.mockReturnValue("0x123");
 
-      const session = await startSession({
+      const { gameState: session } = await startSession({
         farmId: 13,
         sender,
         // Different sessionID

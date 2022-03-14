@@ -21,6 +21,7 @@ import {
   getMigrationEvent,
   storeMigrationEvent,
 } from "../../repository/eventStore";
+import { isBlackListed } from "./lib/blacklist";
 
 type StartSessionArgs = {
   farmId: number;
@@ -32,7 +33,10 @@ export async function startSession({
   farmId,
   sender,
   sessionId,
-}: StartSessionArgs): Promise<GameState> {
+}: StartSessionArgs): Promise<{
+  gameState: GameState;
+  isBlacklisted?: boolean;
+}> {
   const farm = await getFarmById(farmId);
 
   // No session was ever created for this farm NFT
@@ -85,17 +89,25 @@ export async function startSession({
       sessionId: sessionId,
     });
 
-    return initialFarm;
+    return { gameState: initialFarm };
   }
 
   const farmState = makeGame(farm.gameState);
+
+  const blacklisted = await isBlackListed(farm);
+  if (blacklisted) {
+    return {
+      gameState: farmState,
+      isBlacklisted: blacklisted,
+    };
+  }
 
   // Does the session ID match?
   const sessionMatches = farm.sessionId === sessionId;
   const ownerChanged = farm.updatedBy !== sender;
 
   if (sessionMatches && !ownerChanged) {
-    return farmState;
+    return { gameState: farmState };
   }
 
   // We are out of sync with the Blockchain
@@ -126,7 +138,7 @@ export async function startSession({
     version: farm.version + 1,
   });
 
-  return gameState;
+  return { gameState };
 }
 
 export async function fetchOnChainData({

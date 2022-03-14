@@ -41,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     throw new Error(valid.error.message);
   }
 
-  const farm = await startSession({
+  const { gameState, isBlacklisted } = await startSession({
     farmId: body.farmId,
     sessionId: body.sessionId,
     sender: address,
@@ -51,7 +51,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      farm,
+      farm: gameState,
+      isBlacklisted,
       startedAt: new Date().toISOString(),
     }),
   };
