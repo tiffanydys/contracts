@@ -67,6 +67,7 @@ export default class ApiStack extends sst.Stack {
           "https://www.sunflower-land.com",
           "https://www.sunflower-land.com",
           "https://api.opensea.io",
+          "https://opensea.io",
         ],
         allowMethods: [
           CorsHttpMethod.OPTIONS,
