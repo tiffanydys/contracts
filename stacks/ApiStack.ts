@@ -65,7 +65,6 @@ export default class ApiStack extends sst.Stack {
           "http://localhost:3000",
           "https://sunflower-land.com",
           "https://www.sunflower-land.com",
-          "https://www.sunflower-land.com",
           "https://opensea.io",
         ],
         allowMethods: [
