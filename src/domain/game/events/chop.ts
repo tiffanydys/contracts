@@ -72,7 +72,7 @@ export function chop({
     },
     skills: {
       ...state.skills,
-      gathering: experience.add(1),
+      gathering: experience.add(0.2),
     },
   };
 }
