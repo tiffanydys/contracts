@@ -57,6 +57,7 @@ export async function getDiscordAccess({
       roles.includes("golden egg") ||
       roles.includes("ambassador") ||
       roles.includes("moderator") ||
+      roles.includes("hodl") ||
       roles.includes("international ambasssador"),
   };
 }

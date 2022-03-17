@@ -46,7 +46,8 @@ type DiscordRole =
   | "golden egg"
   | "international ambasssador"
   | "ambassador"
-  | "moderator";
+  | "moderator"
+  | "hodl";
 
 const ROLES: Record<string, DiscordRole> = {
   "935397030027747348": "beta",
@@ -54,6 +55,7 @@ const ROLES: Record<string, DiscordRole> = {
   "927131260843864144": "ambassador",
   "927775987024924713": "international ambasssador",
   "925391410969071628": "moderator",
+  "927763667586527272": "hodl",
 };
 
 export async function requestRoles(accessToken: string) {
@@ -83,7 +85,6 @@ export async function requestRoles(accessToken: string) {
 export async function getRoles(
   accessToken: string
 ): Promise<{ roles: DiscordRole[]; id: string }> {
-  console.log("Get guidl member: ", accessToken);
   const guildMember: Member = await requestRoles(accessToken);
 
   console.log({ guildMember });
