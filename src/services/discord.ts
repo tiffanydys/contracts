@@ -1,4 +1,4 @@
-import DiscordOauth2, { Member, TokenRequestResult } from "discord-oauth2";
+import { Member } from "discord-oauth2";
 import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 

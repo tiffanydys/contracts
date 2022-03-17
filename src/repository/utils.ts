@@ -80,7 +80,11 @@ export function makeDBItem(farm: GameState): FarmSession {
   return {
     ...farm,
     balance: farm.balance.toString(),
-    experience: farm.experience?.toString() || "0",
+    skills: {
+      farming: farm.skills?.farming?.toString() || "0",
+      gathering: farm.skills?.gathering?.toString() || "0",
+    },
+
     inventory,
     stock,
     trees,

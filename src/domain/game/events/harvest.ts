@@ -3,15 +3,15 @@ import { CropName, CROPS } from "../types/crops";
 import Decimal from "decimal.js-light";
 
 const HARVEST_EXPERIENCE: Record<CropName, number> = {
-  Sunflower: 1,
-  Potato: 3,
-  Pumpkin: 10,
-  Carrot: 15,
-  Cabbage: 25,
-  Beetroot: 50,
-  Cauliflower: 90,
-  Parsnip: 150,
-  Radish: 200,
+  Sunflower: 0.01,
+  Potato: 0.03,
+  Pumpkin: 0.1,
+  Carrot: 0.15,
+  Cabbage: 0.25,
+  Beetroot: 0.5,
+  Cauliflower: 1,
+  Parsnip: 1.5,
+  Radish: 2,
   Wheat: 100,
 };
 
@@ -80,7 +80,7 @@ export function harvest({ state, action, createdAt = Date.now() }: Options) {
   delete newFields[action.index];
 
   const cropCount = state.inventory[field.name] || new Decimal(0);
-  const experience = state.experience || new Decimal(0);
+  const experience = state.skills?.farming || new Decimal(0);
 
   return {
     ...state,
@@ -89,6 +89,9 @@ export function harvest({ state, action, createdAt = Date.now() }: Options) {
       ...state.inventory,
       [field.name]: cropCount.add(1),
     },
-    experience: experience.add(HARVEST_EXPERIENCE[field.name]),
+    skills: {
+      ...state.skills,
+      farming: experience.add(HARVEST_EXPERIENCE[field.name]),
+    },
   } as GameState;
 }

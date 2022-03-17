@@ -15,7 +15,10 @@ describe("repository.farms", () => {
       id: 2,
       gameState: {
         balance: new Decimal(100),
-        experience: new Decimal(0),
+        skills: {
+          farming: new Decimal(0),
+          gathering: new Decimal(0),
+        },
         fields: {
           "3": {
             name: "Beetroot",
@@ -72,7 +75,10 @@ describe("repository.farms", () => {
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       previousGameState: {
         balance: new Decimal(50),
-        experience: new Decimal(0),
+        skills: {
+          farming: new Decimal(0),
+          gathering: new Decimal(0),
+        },
         fields: {},
         inventory: {},
         stock: {},
@@ -91,7 +97,10 @@ describe("repository.farms", () => {
       updatedBy: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       gameState: {
         balance: "100",
-        experience: "0",
+        skills: {
+          farming: "0",
+          gathering: "0",
+        },
         fields: {
           "3": {
             name: "Beetroot",
@@ -147,7 +156,10 @@ describe("repository.farms", () => {
       },
       previousGameState: {
         balance: "50",
-        experience: "0",
+        skills: {
+          farming: "0",
+          gathering: "0",
+        },
         fields: {},
         inventory: {},
         stock: {},
@@ -169,7 +181,10 @@ describe("repository.farms", () => {
       id: 2,
       gameState: {
         balance: new Decimal(100),
-        experience: new Decimal(5),
+        skills: {
+          farming: new Decimal(5),
+          gathering: new Decimal(2),
+        },
         fields: {
           "3": {
             name: "Beetroot",
@@ -232,7 +247,10 @@ describe("repository.farms", () => {
       owner: "0xD755984F4A5D885919451eD25e1a854daa5086C9",
       session: {
         balance: "100",
-        experience: "5",
+        skills: {
+          farming: "5",
+          gathering: "2",
+        },
         fields: {
           "3": {
             name: "Beetroot",
@@ -296,7 +314,10 @@ describe("repository.farms", () => {
       sessionId: "0x8123",
       gameState: {
         balance: new Decimal(100),
-        experience: new Decimal(1000500),
+        skills: {
+          farming: new Decimal(1000500),
+          gathering: new Decimal(2),
+        },
         fields: {
           "3": {
             name: "Beetroot",
@@ -360,7 +381,10 @@ describe("repository.farms", () => {
       sessionId: "0x8123",
       session: {
         balance: "100",
-        experience: "1000500",
+        skills: {
+          farming: "1000500",
+          gathering: "2",
+        },
         fields: {
           "3": {
             name: "Beetroot",

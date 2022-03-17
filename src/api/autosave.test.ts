@@ -318,7 +318,10 @@ describe("api.autosave", () => {
         stones: {},
         iron: {},
         gold: {},
-        experience: "1",
+        skills: {
+          farming: "0.01",
+          gathering: "0",
+        },
       },
     });
   });

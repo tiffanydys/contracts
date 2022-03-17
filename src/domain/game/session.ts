@@ -172,7 +172,10 @@ export async function fetchOnChainData({
     id: farmId,
     address: nftFarm.account,
     // Off chain data
-    experience: new Decimal(0),
+    skills: {
+      gathering: new Decimal(0),
+      farming: new Decimal(0),
+    },
     fields: {},
     stock: {},
     trees: {},

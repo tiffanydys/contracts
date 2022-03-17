@@ -19,7 +19,7 @@ export type SanitizedRock = Omit<Rock, "amount"> & {
 export type FarmSession = Omit<
   GameState,
   | "balance"
-  | "experience"
+  | "skills"
   | "inventory"
   | "stock"
   | "trees"
@@ -28,7 +28,10 @@ export type FarmSession = Omit<
   | "gold"
 > & {
   balance: string;
-  experience: string;
+  skills: {
+    farming: string;
+    gathering: string;
+  };
   inventory: Partial<Record<InventoryItemName, string>>;
   stock: Partial<Record<InventoryItemName, string>>;
   trees: Record<number, SanitizedTree>;

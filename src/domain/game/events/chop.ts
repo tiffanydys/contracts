@@ -53,7 +53,7 @@ export function chop({
   }
 
   const woodAmount = state.inventory.Wood || new Decimal(0);
-  const experience = state.experience || new Decimal(0);
+  const experience = state.skills.gathering || new Decimal(0);
 
   return {
     ...state,
@@ -70,6 +70,9 @@ export function chop({
         wood: new Decimal(randomInt(3, 6)),
       },
     },
-    experience: experience.add(50),
+    skills: {
+      ...state.skills,
+      gathering: experience.add(1),
+    },
   };
 }

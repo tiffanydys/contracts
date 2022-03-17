@@ -103,7 +103,10 @@ describe("api.session", () => {
       updatedAt: new Date().toISOString(),
       gameState: {
         balance: "100000",
-        experience: "25",
+        skills: {
+          farming: "25",
+          gathering: "0",
+        },
         fields: {},
         inventory: {
           Sunflower: "10000",
@@ -152,7 +155,10 @@ describe("api.session", () => {
       updatedBy: "0xA9Fe8878e901eF014a789feC3257F72A51d4103F",
       previousGameState: {
         balance: "100000",
-        experience: "0",
+        skills: {
+          farming: "0",
+          gathering: "0",
+        },
         fields: {},
         inventory: {
           Sunflower: "10000",
@@ -199,7 +205,10 @@ describe("api.session", () => {
       farm: {
         balance: "100000",
         fields: {},
-        experience: "25",
+        skills: {
+          farming: "25",
+          gathering: "0",
+        },
         inventory: {
           Sunflower: "10000",
           Stone: "1000",

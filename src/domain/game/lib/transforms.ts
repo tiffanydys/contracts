@@ -103,7 +103,10 @@ export function makeGame(gameState: Account["gameState"]): GameState {
 
   return {
     balance: new Decimal(gameState.balance),
-    experience: new Decimal(gameState.experience || 0),
+    skills: {
+      gathering: new Decimal(gameState.skills?.gathering || 0),
+      farming: new Decimal(gameState.skills?.farming || 0),
+    },
     fields: gameState.fields,
     inventory,
     stock,
