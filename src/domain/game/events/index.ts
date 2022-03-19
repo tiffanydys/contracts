@@ -8,6 +8,7 @@ import { mineIron, IronMineAction } from "./ironMine";
 import { chop, ChopAction } from "./chop";
 
 import { GameState } from "../types/game";
+import { learnSkill, LearnSkillAction } from "./learnSkill";
 
 export type GameEvent =
   | CraftAction
@@ -17,7 +18,8 @@ export type GameEvent =
   | StoneMineAction
   | IronMineAction
   | GoldMineAction
-  | ChopAction;
+  | ChopAction
+  | LearnSkillAction;
 
 export type EventName = Extract<GameEvent, { type: string }>["type"];
 
@@ -40,6 +42,6 @@ export const EVENTS: Handlers = {
   "stone.mined": mineStone,
   "iron.mined": mineIron,
   "gold.mined": mineGold,
-
   "tree.chopped": chop,
+  "skill.learned": learnSkill,
 };

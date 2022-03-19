@@ -19,7 +19,7 @@ export function storeFlaggedEvents({
   state,
   version,
 }: FlaggedEvent) {
-  const key = `land/${farmId}/flagged/${version}.json`;
+  const key = `land/${farmId}/flagged/${version}-${new Date().getTime()}.json`;
 
   const params = {
     Bucket: process.env.bucketName as string,

@@ -8,11 +8,6 @@ const FLAG_COUNT = 10;
 const BLACKLISTED_MS = 1000 * 60 * 60 * 24 * 3;
 
 export async function isBlackListed(account: Account) {
-  /**
-   * Only during beta stage
-   */
-  return false;
-
   if (!account) {
     return false;
   }
@@ -24,6 +19,11 @@ export async function isBlackListed(account: Account) {
       new Date(account.blacklistedAt as string).getTime() + BLACKLISTED_MS
     );
   }
+
+  /**
+   * Only during beta stage
+   */
+  return false;
 
   // Not yet blacklisted but should be
   if (account.flaggedCount > FLAG_COUNT) {
