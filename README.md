@@ -21,6 +21,16 @@ Run `make` to see full list of commands.
 2. Start ganache - `docker-compose up eth`
 3. `make test`
 
+## Contract Addresses
+
+FARM_CONTRACT="0x2B4A66557A79263275826AD31a4cDDc2789334bD"
+INVENTORY_CONTRACT="0x22d5f9B75c524Fec1D6619787e582644CD4D7422"
+TOKEN_CONTRACT="0xD1f9c58e33933a993A3891F8acFe05a68E1afC05"
+BETA_CONTRACT="0x48AfE14AE52987F6fE6E2F69aB74DC7Ac5a10fd2"
+SESSION_CONTRACT="0x49287922D4fe89D260C94F1a7Eb3c3FbBBc2788e"
+
+WISHING_WELL_CONTRACT="0xBE403A6054af56629D7d591A8fBD8cce3dc66771"
+          
 ## Architecture
 
 Sunflower Land uses an off-chain architecture to allow players to store data off-chain without the need to transact on the Blockchain after every action.
