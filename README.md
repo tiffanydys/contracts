@@ -1,8 +1,8 @@
-# Sunflower Land API
+# Sunflower Land Contracts
 
-This API is used for players in Sunflower Land.
+These contracts are for educational use only. Use at your own risk.
 
-It handles saving actions, loading farms and verifiying transactions (save and withdraw to Polygon Blockchain)
+This repo includes the contracts used in Sunflower Land along with a suite of tests.
 
 ## Prerequisites
 
@@ -15,11 +15,34 @@ It handles saving actions, loading farms and verifiying transactions (save and w
 
 Run `make` to see full list of commands.
 
-Ensure you have your AWS credentials set up correctly. AWS credentials should never be stored in your config file.
+## Testing
 
-See: https://github.com/99designs/aws-vault
-
+1. Open docker (if not already running)
+2. Start ganache - `docker-compose up eth`
+3. `make test`
 
 ## Architecture
 
-![Sunflower_Land_Architecture](https://user-images.githubusercontent.com/11745561/152216577-3d58d31e-0620-486e-8719-9e0d33ad95af.png)
+Sunflower Land uses an off-chain architecture to allow players to store data off-chain without the need to transact on the Blockchain after every action.
+
+`Farm.sol` - NFT that is minted when starting the game
+`Token.sol` - SFL ERC20 token
+`Inventory.sol` - ERC1155 inventory of game supplies
+
+`Beta.sol` - Mint Farm NFTs during beta stage
+`Session.sol` - Session management + synchronisation of off chain data
+
+The synchronisation of data is managed with 2 key concepts:
+
+- Implicit Custody of assets
+- Session Management
+
+When a user mints a farm (Farm.sol), their NFT is assigned a unique address on the Blockchain. All tokens earnt during gameplay are sent to that address, instead of their personal wallet. A user must explicitly 'withdraw' from their NFT to gain custody of their assets. See more here - https://docs.sunflower-land.com/fundamentals/depositing-and-custody
+
+`Session.sol` performs the session management. While playing the game, a user is assigned a unique session ID (see `getSessionId`). Each time the user either `syncs` or `withdraws` the game validates:
+
+1. The session ID is the same (i.e. the user has not withdrawn any resources)
+2. The caller is the owner of the NFT that holds custody of the assets
+3. The transaction has been signed by our off-chain server
+
+Once a user has interacted with either `sync` or `withdraw` a new session is created.

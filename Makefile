@@ -35,28 +35,12 @@ lint: | $(pre-reqs) ## Lint all files
 
 .PHONY: test
 test: | $(pre-reqs) ## Run docker-compose up eth before running this target. `JEST_OPTS="any jest options" make test` to pass jest options
-	yarn test $(JEST_FLAGS) --runInBand
+	yarn jest $(JEST_FLAGS) --runInBand
 
 .PHONY: test.watch
 test.watch: | $(pre-reqs) ## Run tests in watch mode. This can also be done with `JEST_OPTS="--watch" make test`
-	yarn test --watch --runInBand
+	yarn jest --watch --runInBand
 
 .PHONY: contracts.watch
 contracts.watch: | $(pre-reqs) ## Continuously compile contracts
 	yarn chokidar contracts/*.sol -c "$(MAKE) bin/contracts"
-
-.PHONY: start
-start: | $(pre-reqs) ## Starts the local Lambda development environment.
-	yarn start
-
-.PHONY: build
-build: | $(pre-reqs) ## Build your app and synthesize your stacks. Generates a `.build/` directory with the compiled files and a `.build/cdk.out/` directory with the synthesized CloudFormation stacks.
-	yarn build
-
-.PHONY: deploy
-deploy: | $(pre-reqs) ## Deploy all your stacks to AWS. Or optionally deploy a specific stack.
-	yarn deploy
-
-.PHONY: remove
-remove: | $(pre-reqs) ## Remove all your stacks and all of their resources from AWS. Or optionally remove a specific stack.
-	yarn remove

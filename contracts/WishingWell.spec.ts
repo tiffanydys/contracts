@@ -71,7 +71,7 @@ describe("Wishing Well contract", () => {
 
   it("does not throw tokens a user does not have", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell } = await deployWishingWellContracts(web3);
 
@@ -88,7 +88,7 @@ describe("Wishing Well contract", () => {
 
   it("throws tokens in", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken } =
       await deployWishingWellContracts(web3);
@@ -110,7 +110,7 @@ describe("Wishing Well contract", () => {
 
   it("waits 3 days before collecting", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken } =
       await deployWishingWellContracts(web3);
@@ -132,7 +132,7 @@ describe("Wishing Well contract", () => {
 
   it("collects nothing", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken } =
       await deployWishingWellContracts(web3);
@@ -154,7 +154,7 @@ describe("Wishing Well contract", () => {
 
   it("collects after 3 days", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
@@ -190,7 +190,7 @@ describe("Wishing Well contract", () => {
 
   it("rewards a user proportionally", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
@@ -252,7 +252,7 @@ describe("Wishing Well contract", () => {
 
   it("rewards a user over multiple days", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
@@ -315,7 +315,7 @@ describe("Wishing Well contract", () => {
 
   it("ensure tokens have been deposited for at least 3 days before taking out", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken } =
       await deployWishingWellContracts(web3);
@@ -337,7 +337,7 @@ describe("Wishing Well contract", () => {
 
   it("ensures user hasn't collected rewards within 3 days of depositing", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
@@ -374,7 +374,7 @@ describe("Wishing Well contract", () => {
 
   it("does not allow a user to pull out more than they have", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
     const { wishingWell, liquidityTestToken, token } =
@@ -406,7 +406,7 @@ describe("Wishing Well contract", () => {
 
   it("pulls out tokens from well", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
     const { wishingWell, liquidityTestToken, token } =
@@ -440,7 +440,7 @@ describe("Wishing Well contract", () => {
 
   it("cannot collect rewards after pulling out tokens", async () => {
     const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK!)
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
     const { wishingWell, liquidityTestToken, token } =
