@@ -22,7 +22,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
 
     // Farm ID to saved timestamp
     mapping(uint => bytes32) public sessions;
-    mapping(uint => uint) public withdrawnAt;
+    mapping(uint => uint) public syncedAt;
 
     function deposit() external payable {}
 
@@ -86,8 +86,8 @@ contract SunflowerLandSession is Ownable, GameOwner {
     }
 
 
-    function getWithdrawnAt(uint tokenId) public view returns(uint) {
-        return withdrawnAt[tokenId];
+    function getSyncedAt(uint tokenId) public view returns(uint) {
+        return syncedAt[tokenId];
     }
 
     // A unique nonce identifer for the account
@@ -107,6 +107,11 @@ contract SunflowerLandSession is Ownable, GameOwner {
     function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
         return ethSignedHash.recover(signature) == signer;
+    }
+
+    modifier isReady(uint farmId) {
+        require(syncedAt[farmId] < block.timestamp - 60, "SunflowerLand: Too many requests");
+        _;
     }
 
     function syncSignature(
@@ -140,7 +145,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         uint256[] memory burnIds,
         uint256[] memory burnAmounts,
         int256 tokens
-    ) public payable returns(bool success) {
+    ) public payable isReady(farmId) returns(bool success) {
        require(msg.value >= syncFee, "SunflowerLand: Missing fee");
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
@@ -154,6 +159,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         // Start a new session
         bytes32 newSessionId = generateSessionId(farmId);
         sessions[farmId] = newSessionId;
+        syncedAt[farmId] = block.timestamp;
 
         // Verify
         bytes32 txHash = syncSignature(sessionId, farmId, deadline, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
@@ -218,7 +224,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         uint256 sfl,
         // 100 = 10%
         uint tax
-    ) public returns (bool) {
+    ) public isReady(farmId) returns (bool) {
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
@@ -231,7 +237,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         // Start a new session
         bytes32 newSessionId = generateSessionId(farmId);
         sessions[farmId] = newSessionId;
-        withdrawnAt[farmId] = block.timestamp;
+        syncedAt[farmId] = block.timestamp;
 
         // Verify
         bytes32 txHash = keccak256(abi.encode(sessionId, deadline,  _msgSender(), farmId, ids, amounts, sfl, tax));

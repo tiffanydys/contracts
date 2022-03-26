@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Token.sol";
 
-// TODO - do not make it pausable, that is a bit dodgy and could 'accidentally' lock the tokens
-
 /**
  * A contract which converts an ERC20 token (SFL/MATIC pair token) into Wishing Well (WW) Tokens
  * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
