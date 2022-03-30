@@ -124,7 +124,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
     }
 
     modifier isReady(uint farmId) {
-        require(syncedAt[farmId] < block.timestamp - 60, "SunflowerLand: Too many requests");
+        require(syncedAt[farmId] < block.timestamp - 15, "SunflowerLand: Too many requests");
         _;
     }
 

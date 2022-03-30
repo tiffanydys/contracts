@@ -12,6 +12,10 @@ contract TestToken is ERC20Pausable {
   constructor() payable ERC20("Testing", "TST") {}
 
   function mint(address account, uint256 amount) public {
-	_mint(account, amount);
- }
+    _mint(account, amount);
+  }
+
+  function burn(address account, uint256 amount) public {
+    _burn(account, amount);
+  }
 }

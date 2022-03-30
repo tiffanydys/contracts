@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import { soliditySha3 } from "web3-utils";
+import { encodeWishArgs, WishArgs } from "../src/signatures";
 import {
   deploySFLContracts,
   deployWishingWellContracts,
@@ -12,35 +13,9 @@ import {
  * In production, the token will be the SFL/MATIC ERC20 pair
  */
 describe("Wishing Well contract", () => {
+  const validDeadline = 10000000000000;
+
   // Reusable function that approves and then throws in
-  const throwIn = async (
-    amount: number,
-    liquidityToken: any,
-    wishingWell: any,
-    web3: any,
-    address = TestAccount.PLAYER.address
-  ) => {
-    await liquidityToken.methods.mint(address, 1000).send({
-      from: address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await liquidityToken.methods
-      .approve(wishingWell.options.address, amount)
-      .send({
-        from: address,
-        gasPrice: await web3.eth.getGasPrice(),
-        gas: gasLimit,
-      });
-
-    await wishingWell.methods.throwTokens(amount).send({
-      from: address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-  };
-
   function increaseTime(web3: any, seconds: number) {
     const id = Date.now();
     return new Promise((resolve, reject) => {
@@ -69,418 +44,367 @@ describe("Wishing Well contract", () => {
     });
   }
 
-  it("does not throw tokens a user does not have", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell } = await deployWishingWellContracts(web3);
-
-    const result = wishingWell.methods.throwTokens(100000).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("ERC20: transfer amount exceeds balance");
-  });
-
-  it("throws tokens in", async () => {
+  it("makes a wish", async () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken } =
       await deployWishingWellContracts(web3);
 
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 1000)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
-    let tokenBalance = await liquidityTestToken.methods
+    await wishingWell.methods.wish().send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    let balance = await wishingWell.methods
       .balanceOf(TestAccount.PLAYER.address)
       .call({ from: TestAccount.PLAYER.address });
 
-    expect(tokenBalance).toEqual("700");
+    expect(balance).toEqual("1000");
 
-    let wishingWellBalance = await wishingWell.methods
+    // Wish again and see if it increases
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 500)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await wishingWell.methods.wish().send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    balance = await wishingWell.methods
       .balanceOf(TestAccount.PLAYER.address)
       .call({ from: TestAccount.PLAYER.address });
 
-    expect(wishingWellBalance).toEqual("300");
-  });
+    expect(balance).toEqual("1500");
 
-  it("waits 3 days before collecting", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell, liquidityTestToken } =
-      await deployWishingWellContracts(web3);
+    // Wish again and see if it decreases
+    await liquidityTestToken.methods
+      .burn(TestAccount.PLAYER.address, 300)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    const result = wishingWell.methods.collectFromWell().send({
+    await wishingWell.methods.wish().send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
 
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("WishingWell: Good things come for those who wait");
+    balance = await wishingWell.methods
+      .balanceOf(TestAccount.PLAYER.address)
+      .call({ from: TestAccount.PLAYER.address });
+
+    expect(balance).toEqual("1200");
   });
 
-  it("ensures a user has tokens", () => {});
-
-  it("collects nothing", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell, liquidityTestToken } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    const result = wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("WishingWell: Nothing today");
-  });
-
-  it("collects after 3 days", async () => {
+  it("makes a user wait after making a wish", async () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
 
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 1000)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
-    // Put some tokens into the well
+    await wishingWell.methods.wish().send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    // Put 500 SFL in the well
     await token.methods.gameMint(wishingWell.options.address, 500).send({
       from: TestAccount.TEAM.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
 
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
+    const signature = await sign(web3, {
+      deadline: validDeadline,
+      sender: TestAccount.PLAYER.address,
+      tokens: 1000,
     });
 
-    const tokenBalance = await token.methods
+    let result = wishingWell.methods
+      .collectFromWell(signature, 1000, validDeadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("WishingWell: Good things come for those who wait");
+
+    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
+
+    await wishingWell.methods
+      .collectFromWell(signature, 1000, validDeadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    const sflBalance = await token.methods
       .balanceOf(TestAccount.PLAYER.address)
       .call({ from: TestAccount.PLAYER.address });
 
-    expect(tokenBalance).toBe("500");
-
-    const wishingWillBalance = await token.methods
-      .balanceOf(wishingWell.options.address)
-      .call({ from: TestAccount.PLAYER.address });
-    expect(wishingWillBalance).toBe("0");
+    expect(sflBalance).toBe("500");
   });
 
-  it("rewards a user proportionally", async () => {
+  it("ensures the user has wished tokens in the well", async () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
     const { wishingWell, liquidityTestToken, token } =
       await deployWishingWellContracts(web3);
 
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 200)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
-    await throwIn(
-      200,
-      liquidityTestToken,
-      wishingWell,
-      web3,
-      TestAccount.CHARITY.address
-    );
-
-    // Put some tokens into the well
-    await token.methods.gameMint(wishingWell.options.address, 1000).send({
-      from: TestAccount.TEAM.address,
+    await wishingWell.methods.wish().send({
+      from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
 
     await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
 
-    await wishingWell.methods.collectFromWell().send({
+    const signature = await sign(web3, {
+      deadline: validDeadline,
+      sender: TestAccount.PLAYER.address,
+      tokens: 500,
+    });
+
+    let result = wishingWell.methods
+      .collectFromWell(signature, 500, validDeadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("WishingWell: Not enough tokens");
+  });
+
+  it("ensures transaction is done before deadline", async () => {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+    );
+    const { wishingWell, liquidityTestToken, token } =
+      await deployWishingWellContracts(web3);
+
+    const deadline = Math.floor(Date.now() / 1000);
+    const signature = await sign(web3, {
+      deadline,
+      sender: TestAccount.PLAYER.address,
+      tokens: 500,
+    });
+
+    let result = wishingWell.methods
+      .collectFromWell(signature, 500, deadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("WishingWell: Deadline Passed");
+  });
+
+  it("ensures oracle has verified transaction", async () => {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+    );
+    const { wishingWell, liquidityTestToken, token } =
+      await deployWishingWellContracts(web3);
+
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 700)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await wishingWell.methods.wish().send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
 
-    const userBalance = await token.methods
-      .balanceOf(TestAccount.PLAYER.address)
-      .call({ from: TestAccount.PLAYER.address });
+    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
 
-    let wishingWillBalance = await token.methods
-      .balanceOf(wishingWell.options.address)
-      .call({ from: TestAccount.PLAYER.address });
+    const signature = await sign(web3, {
+      deadline: validDeadline,
+      // A different value in the transaction
+      sender: TestAccount.CHARITY.address,
+      tokens: 500,
+    });
 
-    expect(userBalance).toBe("600");
-    expect(wishingWillBalance).toBe("400");
+    let result = wishingWell.methods
+      .collectFromWell(signature, 500, validDeadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
-    await wishingWell.methods.collectFromWell().send({
+    await expect(
+      result.catch((e: Error) => Promise.reject(e.message))
+    ).rejects.toContain("WishingWell: Unauthorised");
+  });
+
+  it("collects tokens based on share in well", async () => {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+    );
+    const { wishingWell, liquidityTestToken, token } =
+      await deployWishingWellContracts(web3);
+
+    // Put 1000 SFL in the well
+    await token.methods.gameMint(wishingWell.options.address, 1000).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    // Player One
+    await liquidityTestToken.methods
+      .mint(TestAccount.PLAYER.address, 700)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await wishingWell.methods.wish().send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    // Player Two
+    await liquidityTestToken.methods
+      .mint(TestAccount.CHARITY.address, 300)
+      .send({
+        from: TestAccount.CHARITY.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await wishingWell.methods.wish().send({
       from: TestAccount.CHARITY.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
 
-    const secondUserBalance = await token.methods
+    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
+
+    const signature = await sign(web3, {
+      deadline: validDeadline,
+      // A different value in the transaction
+      sender: TestAccount.PLAYER.address,
+      tokens: 700,
+    });
+
+    await wishingWell.methods
+      .collectFromWell(signature, 700, validDeadline)
+      .send({
+        from: TestAccount.PLAYER.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    let playerOneBalance = await token.methods
+      .balanceOf(TestAccount.PLAYER.address)
+      .call({ from: TestAccount.PLAYER.address });
+    const playerOneWellBalance = await wishingWell.methods
+      .balanceOf(TestAccount.PLAYER.address)
+      .call({ from: TestAccount.PLAYER.address });
+
+    expect(playerOneBalance).toEqual("700");
+    expect(playerOneWellBalance).toEqual("700");
+
+    const signatureTwo = await sign(web3, {
+      deadline: validDeadline,
+      sender: TestAccount.CHARITY.address,
+      // Try a bit less than they have in the well
+      tokens: 200,
+    });
+
+    // Lets burn some LP tokens before they withdraw
+    await liquidityTestToken.methods
+      .burn(TestAccount.CHARITY.address, 80)
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await wishingWell.methods
+      .collectFromWell(signatureTwo, 200, validDeadline)
+      .send({
+        from: TestAccount.CHARITY.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    const playerTwoBalance = await token.methods
+      .balanceOf(TestAccount.CHARITY.address)
+      .call({ from: TestAccount.CHARITY.address });
+    const playerTwoWellBalance = await wishingWell.methods
       .balanceOf(TestAccount.CHARITY.address)
       .call({ from: TestAccount.CHARITY.address });
 
-    wishingWillBalance = await token.methods
-      .balanceOf(wishingWell.options.address)
-      .call({ from: TestAccount.PLAYER.address });
-
-    // Remember, it is a percentage of what is left ;)
-    expect(secondUserBalance).toBe("160");
-    expect(wishingWillBalance).toBe("240");
+    // 20% of remaining 300 share
+    expect(playerTwoBalance).toEqual("60");
+    expect(playerTwoWellBalance).toEqual("220");
   });
 
-  it("rewards a user over multiple days", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell, liquidityTestToken, token } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(200, liquidityTestToken, wishingWell, web3);
-
-    // Put some tokens into the well
-    await token.methods.gameMint(wishingWell.options.address, 1000).send({
-      from: TestAccount.TEAM.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
+  async function sign(web3: Web3, args: WishArgs) {
+    const sha = encodeWishArgs({
+      ...args,
     });
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    let userBalance = await token.methods
-      .balanceOf(TestAccount.PLAYER.address)
-      .call({ from: TestAccount.PLAYER.address });
-
-    expect(userBalance).toBe("1000");
-
-    // Put some more tokens into the well
-    await token.methods.gameMint(wishingWell.options.address, 500).send({
-      from: TestAccount.TEAM.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    // Try pull out too fast
-    const result = wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("WishingWell: Good things come for those who wait");
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    userBalance = await token.methods
-      .balanceOf(TestAccount.PLAYER.address)
-      .call({ from: TestAccount.PLAYER.address });
-
-    expect(userBalance).toBe("1500");
-  });
-
-  it("ensure tokens have been deposited for at least 3 days before taking out", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell, liquidityTestToken } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    const result = wishingWell.methods.takeOut(300).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain(
-      "WishingWell: Wait 3 days after throwing in or collecting"
-    );
-  });
-
-  it("ensures user hasn't collected rewards within 3 days of depositing", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-    const { wishingWell, liquidityTestToken, token } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    // Put some tokens into the well
-    await token.methods.gameMint(wishingWell.options.address, 500).send({
-      from: TestAccount.TEAM.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.collectFromWell().send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    const result = wishingWell.methods.takeOut(300).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain(
-      "WishingWell: Wait 3 days after throwing in or collecting"
-    );
-  });
-
-  it("does not allow a user to pull out more than they have", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+    const { signature } = await web3.eth.accounts.sign(
+      sha,
+      TestAccount.TEAM.privateKey
     );
 
-    const { wishingWell, liquidityTestToken, token } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    // Some other player throws in as well
-    await throwIn(
-      500,
-      liquidityTestToken,
-      wishingWell,
-      web3,
-      TestAccount.CHARITY.address
-    );
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    const result = wishingWell.methods.takeOut(500).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain("ERC20: burn amount exceeds balance");
-  });
-
-  it("pulls out tokens from well", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-
-    const { wishingWell, liquidityTestToken, token } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    // Some other player throws in as well
-    await throwIn(
-      500,
-      liquidityTestToken,
-      wishingWell,
-      web3,
-      TestAccount.CHARITY.address
-    );
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.takeOut(200).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    let tokenBalance = await liquidityTestToken.methods
-      .balanceOf(TestAccount.PLAYER.address)
-      .call({ from: TestAccount.PLAYER.address });
-
-    expect(tokenBalance).toEqual("900");
-  });
-
-  it("cannot collect rewards after pulling out tokens", async () => {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
-    );
-
-    const { wishingWell, liquidityTestToken, token } =
-      await deployWishingWellContracts(web3);
-
-    await throwIn(300, liquidityTestToken, wishingWell, web3);
-
-    // Some other player throws in as well
-    await throwIn(
-      500,
-      liquidityTestToken,
-      wishingWell,
-      web3,
-      TestAccount.CHARITY.address
-    );
-
-    await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
-
-    await wishingWell.methods.takeOut(200).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    let tokenBalance = await liquidityTestToken.methods
-      .balanceOf(TestAccount.PLAYER.address)
-      .call({ from: TestAccount.PLAYER.address });
-
-    expect(tokenBalance).toEqual("900");
-
-    const result = wishingWell.methods.takeOut(300).send({
-      from: TestAccount.PLAYER.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
-    await expect(
-      result.catch((e: Error) => Promise.reject(e.message))
-    ).rejects.toContain(
-      "WishingWell: Wait 3 days after throwing in or collecting"
-    );
-  });
+    return signature;
+  }
 });
