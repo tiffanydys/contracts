@@ -27,13 +27,14 @@ contract SunflowerLandSession is Ownable, GameOwner {
     function deposit() external payable {}
 
     address private signer;
-    address private team;
+    address private syncFeeWallet;
+    address private withdrawFeeWallet;
     address private wishingWell;
 
     // 0.1
     uint private syncFee = 1 * (10 ** 17);
 
-    // 30% of the tax goes into the wishing well
+    // 30% of the fee goes into the wishing well
     uint private wishingWellTax = 30;
 
     // Whether to liquidate fees instead of sending SFL token
@@ -51,7 +52,8 @@ contract SunflowerLandSession is Ownable, GameOwner {
         token = _token;
         farm = _farm;
         signer = _msgSender();
-        team = _msgSender();
+        syncFeeWallet = _msgSender();
+        withdrawFeeWallet = _msgSender();
 
         // Enable for deploy - disable for testing
         //uniswapV2Router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
@@ -61,15 +63,15 @@ contract SunflowerLandSession is Ownable, GameOwner {
         signer = _signer;
     }
 
-    function transferTeam(address _team) public onlyOwner {
-        team = _team;
+    function transferSyncFeeWallet(address _team) public onlyOwner {
+        syncFeeWallet = _team;
+    }
+
+    function transferWithdrawFeeWallet(address _team) public onlyOwner {
+        withdrawFeeWallet = _team;
     }
 
     function setSyncFee(uint _fee) public onlyOwner {
-        syncFee = _fee;
-    }
-
-    function setWithdrawFee(uint _fee) public onlyOwner {
         syncFee = _fee;
     }
 
@@ -99,12 +101,24 @@ contract SunflowerLandSession is Ownable, GameOwner {
         return sessions[tokenId];
     }
 
+    struct Session {
+        bytes32 id;
+        uint256 syncedAt;
+    }
+
+    function getSession(uint tokenId) public view returns (Session memory ) {
+        return Session({
+            id: getSessionId(tokenId),
+            syncedAt: syncedAt[tokenId]
+        });
+    }
+
     function updateSession(uint tokenId) public onlyGame returns(bool) {
         sessions[tokenId] =  generateSessionId(tokenId);
         return true;
     }
 
-    function verify(bytes32 hash, bytes memory signature) public view returns (bool) {
+    function verify(bytes32 hash, bytes memory signature) private view returns (bool) {
         bytes32 ethSignedHash = hash.toEthSignedMessageHash();
         return ethSignedHash.recover(signature) == signer;
     }
@@ -150,7 +164,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
-        bytes32 farmSessionId = sessions[farmId];
+        bytes32 farmSessionId = getSessionId(farmId);
         require(
             farmSessionId == sessionId,
             "SunflowerLand: Session has changed"
@@ -178,7 +192,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
 
         updateBalance(farmNFT.account, mintIds, mintAmounts, burnIds, burnAmounts, tokens);
 
-        (bool teamSent,) = team.call{value: msg.value}("");
+        (bool teamSent,) = syncFeeWallet.call{value: msg.value}("");
         require(teamSent, "SunflowerLand: Fee Failed");
 
         emit SessionChanged(farmNFT.owner, newSessionId, farmId);
@@ -228,7 +242,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
         // Check the session is new or has not changed (already saved or withdrew funds)
-        bytes32 farmSessionId = sessions[farmId];
+        bytes32 farmSessionId = getSessionId(farmId);
         require(
             farmSessionId == sessionId,
             "SunflowerLand: Session has changed"
@@ -280,7 +294,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
             // Enable for deploy - disable for testing
             //liquidate(remaining);
         } else {
-            token.transfer(team, remaining);
+            token.transfer(withdrawFeeWallet, remaining);
         }
     }
 
@@ -298,7 +312,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
     //         amount,
     //         0, // accept any amount of ETH
     //         path,
-    //         team,
+    //         withdrawFeeWallet,
     //         block.timestamp
     //     );
     // }
