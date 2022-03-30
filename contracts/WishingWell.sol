@@ -112,6 +112,11 @@ contract WishingWell is ERC20, Ownable {
         uint tokensInWell = token.balanceOf(address(this));
         uint reward = tokensInWell.mul(tokens).div(totalSupply());
 
+        // Don't be to greedy, max rewards is 10%
+        if (reward > tokensInWell/10) {
+            reward = tokensInWell/10;
+        }
+        
         token.transfer(msg.sender, reward);
 
         // While they are in the well, make another wish for next time
@@ -122,5 +127,21 @@ contract WishingWell is ERC20, Ownable {
 
     function lastUpdatedAt(address account) public view returns (uint) {
         return updatedAt[account];
+    }
+
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        require(false, "WishingWell: Transfer not allowed");
+
+        return false;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        require(false, "WishingWell: Transfer not allowed");
+
+        return false;
     }
 }

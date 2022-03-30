@@ -174,7 +174,8 @@ describe("Wishing Well contract", () => {
       .balanceOf(TestAccount.PLAYER.address)
       .call({ from: TestAccount.PLAYER.address });
 
-    expect(sflBalance).toBe("500");
+    // Max rewards is only 10%
+    expect(sflBalance).toBe("50");
   });
 
   it("ensures the user has wished tokens in the well", async () => {
@@ -357,7 +358,7 @@ describe("Wishing Well contract", () => {
       .balanceOf(TestAccount.PLAYER.address)
       .call({ from: TestAccount.PLAYER.address });
 
-    expect(playerOneBalance).toEqual("700");
+    expect(playerOneBalance).toEqual("100");
     expect(playerOneWellBalance).toEqual("700");
 
     const signatureTwo = await sign(web3, {
@@ -392,7 +393,7 @@ describe("Wishing Well contract", () => {
       .call({ from: TestAccount.CHARITY.address });
 
     // 20% of remaining 300 share
-    expect(playerTwoBalance).toEqual("60");
+    expect(playerTwoBalance).toEqual("90");
     expect(playerTwoWellBalance).toEqual("220");
   });
 
