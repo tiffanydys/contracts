@@ -98,7 +98,14 @@ contract SunflowerLandSession is Ownable, GameOwner {
     }
 
     function getSessionId(uint tokenId) public view returns(bytes32) {
-        return sessions[tokenId];
+        bytes32 id = sessions[tokenId];
+
+        if (id == 0) {
+            // First ID is based on the unique contract
+            id = keccak256(abi.encode(address(this)));
+        }
+
+        return id;
     }
 
     struct Session {
