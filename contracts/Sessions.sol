@@ -59,6 +59,11 @@ contract SunflowerLandSession is Ownable, GameOwner {
         //uniswapV2Router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
     }
 
+    function destroy() public onlyOwner payable {
+        address payable addr = payable(address(owner()));
+        selfdestruct(addr);
+    }
+
     function transferSigner(address _signer) public onlyOwner {
         signer = _signer;
     }

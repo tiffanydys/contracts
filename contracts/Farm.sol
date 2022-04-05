@@ -71,6 +71,10 @@ contract SunflowerLand is ERC721Enumerable, Pausable, GameOwner {
 
     }
 
+    /**
+     * DO NOT USE - it will cause overlaps in the ID that gets generated based on the totalSupply
+     * Prefer transfer to dead address
+     */
     function gameBurn(uint256 tokenId) public onlyGame returns (bool){
         _burn(tokenId);
         return true;
