@@ -157,6 +157,12 @@ describe("Session contract", () => {
         web3
       );
 
+      await session.methods.setMaxItemAmounts([101], [toWei("400")]).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
       await farm.methods.mint(TestAccount.PLAYER.address).send({
         from: TestAccount.TEAM.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -188,8 +194,8 @@ describe("Session contract", () => {
         deadline: validDeadline,
         sender: TestAccount.PLAYER.address,
         farmId: 1,
-        mintIds: [1],
-        mintAmounts: [toWei("500")],
+        mintIds: [101],
+        mintAmounts: [toWei("300")],
         burnIds: [],
         burnAmounts: [],
         tokens: toWei("60"),
@@ -201,8 +207,8 @@ describe("Session contract", () => {
           sessionId,
           validDeadline,
           1,
-          [1],
-          [toWei("500")],
+          [101],
+          [toWei("300")],
           [],
           [],
           toWei("60")
@@ -221,10 +227,10 @@ describe("Session contract", () => {
       expect(tokenBalance).toEqual(toWei("60"));
 
       inventoryBalance = await inventory.methods
-        .balanceOf(farmNFT.account, 1)
+        .balanceOf(farmNFT.account, 101)
         .call({ from: TestAccount.PLAYER.address });
 
-      expect(inventoryBalance).toEqual(toWei("500"));
+      expect(inventoryBalance).toEqual(toWei("300"));
     });
 
     it("requires the mint IDs are in the signature", async () => {
@@ -415,6 +421,12 @@ describe("Session contract", () => {
         web3
       );
 
+      await session.methods.setMaxItemAmounts([101], [toWei("400")]).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
       await farm.methods.mint(TestAccount.PLAYER.address).send({
         from: TestAccount.TEAM.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -434,7 +446,7 @@ describe("Session contract", () => {
         deadline: validDeadline,
         sender: TestAccount.PLAYER.address,
         farmId: 1,
-        mintIds: [1],
+        mintIds: [101],
         mintAmounts: [500],
         burnIds: [],
         burnAmounts: [],
@@ -442,7 +454,7 @@ describe("Session contract", () => {
       });
 
       await session.methods
-        .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
+        .sync(signature, sessionId, validDeadline, 1, [101], [500], [], [], 60)
         .send({
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
@@ -455,7 +467,7 @@ describe("Session contract", () => {
 
       // Try again with same session ID
       const result = session.methods
-        .sync(signature, sessionId, validDeadline, 1, [1], [200], [], [], 99)
+        .sync(signature, sessionId, validDeadline, 1, [101], [200], [], [], 99)
         .send({
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
@@ -476,7 +488,7 @@ describe("Session contract", () => {
         deadline: validDeadline,
         sender: TestAccount.PLAYER.address,
         farmId: 1,
-        mintIds: [1],
+        mintIds: [101],
         mintAmounts: [500],
         burnIds: [],
         burnAmounts: [],
@@ -489,7 +501,7 @@ describe("Session contract", () => {
           newSessionId,
           validDeadline,
           1,
-          [1],
+          [101],
           [500],
           [],
           [],
@@ -560,6 +572,12 @@ describe("Session contract", () => {
       );
       const { session, farm } = await deploySFLContracts(web3);
 
+      await session.methods.setMaxItemAmounts([101], [toWei("400")]).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
       await farm.methods.mint(TestAccount.PLAYER.address).send({
         from: TestAccount.TEAM.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -575,7 +593,7 @@ describe("Session contract", () => {
         deadline: validDeadline,
         sender: TestAccount.PLAYER.address,
         farmId: 1,
-        mintIds: [1],
+        mintIds: [101],
         mintAmounts: [500],
         burnIds: [],
         burnAmounts: [],
@@ -586,7 +604,7 @@ describe("Session contract", () => {
       const teamBalance = await web3.eth.getBalance(TestAccount.TEAM.address);
 
       await session.methods
-        .sync(signature, sessionId, validDeadline, 1, [1], [500], [], [], 60)
+        .sync(signature, sessionId, validDeadline, 1, [101], [500], [], [], 60)
         .send({
           from: TestAccount.PLAYER.address,
           gasPrice: await web3.eth.getGasPrice(),
@@ -651,6 +669,257 @@ describe("Session contract", () => {
       await expect(
         result.catch((e: Error) => Promise.reject(e.message))
       ).rejects.toContain("SunflowerLand: Too many requests");
+    });
+
+    it("does not sync more SFL than possible in a session", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [],
+        mintAmounts: [],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: toWei("200"),
+      });
+
+      const result = session.methods
+        .sync(
+          signature,
+          sessionId,
+          validDeadline,
+          1,
+          [],
+          [],
+          [],
+          [],
+          toWei("200")
+        )
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("SunflowerLand: SFL Exceeds max mint amount");
+    });
+
+    it("does not sync rare items", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        // NFT ID
+        mintIds: [501],
+        mintAmounts: [1],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: 0,
+      });
+
+      const result = session.methods
+        .sync(signature, sessionId, validDeadline, 1, [501], [1], [], [], 0)
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("SunflowerLand: Item mint exceeds max mint amount");
+    });
+
+    it("does not sync more resources than possible", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await session.methods
+        .setMaxItemAmounts([101, 102], [toWei("400"), toWei("300")])
+        .send({
+          from: TestAccount.TEAM.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+        });
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [101, 102],
+        mintAmounts: [toWei("100"), toWei("1000")],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: 60,
+      });
+
+      const result = session.methods
+        .sync(
+          signature,
+          sessionId,
+          validDeadline,
+          1,
+          [101, 102],
+          [toWei("100"), toWei("1000")],
+          [],
+          [],
+          60
+        )
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("SunflowerLand: Item mint exceeds max mint amount");
+    });
+
+    it("does not mint more SFL than the allowance allows", async () => {
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+      );
+      const { session, farm } = await deploySFLContracts(web3);
+
+      await session.methods.setMintAllowance(toWei("150")).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      await farm.methods.mint(TestAccount.PLAYER.address).send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+      const sessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature = await sign(web3, {
+        sessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [],
+        mintAmounts: [],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: toWei("100"),
+      });
+
+      await session.methods
+        .sync(
+          signature,
+          sessionId,
+          validDeadline,
+          1,
+          [],
+          [],
+          [],
+          [],
+          toWei("100")
+        )
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      // Avoid throttled method
+      await increaseTime(web3, 60 + 1);
+
+      const newSessionId = await session.methods
+        .getSessionId(1)
+        .call({ from: TestAccount.PLAYER.address });
+
+      const signature2 = await sign(web3, {
+        sessionId: newSessionId,
+        deadline: validDeadline,
+        sender: TestAccount.PLAYER.address,
+        farmId: 1,
+        mintIds: [],
+        mintAmounts: [],
+        burnIds: [],
+        burnAmounts: [],
+        tokens: toWei("100"),
+      });
+
+      const result = session.methods
+        .sync(
+          signature2,
+          newSessionId,
+          validDeadline,
+          1,
+          [],
+          [],
+          [],
+          [],
+          toWei("100")
+        )
+        .send({
+          from: TestAccount.PLAYER.address,
+          gasPrice: await web3.eth.getGasPrice(),
+          gas: gasLimit,
+          value: fee,
+        });
+
+      await expect(
+        result.catch((e: Error) => Promise.reject(e.message))
+      ).rejects.toContain("SunflowerLand: Session allowance exceeded");
     });
 
     async function sign(web3: Web3, args: SyncArgs) {

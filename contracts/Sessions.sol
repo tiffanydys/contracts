@@ -40,6 +40,15 @@ contract SunflowerLandSession is Ownable, GameOwner {
     // Whether to liquidate fees instead of sending SFL token
     bool private liquify = false;
 
+    // Humanly possible values earnt during a gameplay session
+    uint private maxSessionSFL = 100 * (10 ** 18);
+    mapping(uint => uint) private maxSessionItems;
+
+    // How much this contract is approved to mint
+    uint private mintAllowance = 5000000 * (10 ** 18);
+    uint private mintedAmount = 0;
+
+
     SunflowerLandInventory inventory;
     SunflowerLandToken token;
     SunflowerLand farm;
@@ -92,6 +101,31 @@ contract SunflowerLandSession is Ownable, GameOwner {
         wishingWell = _wishingWell;
     }
 
+
+    function setMaxSessionSFL(uint _amount) public onlyOwner {
+        maxSessionSFL = _amount;
+    }
+
+    function setMaxItemAmounts(uint256[] memory _ids, uint256[] memory _amounts) public onlyOwner {
+        require(_ids.length == _amounts.length, "SunflowerLand: Invalid length mismatch");
+        for(uint index=0; index < _ids.length; index++) {
+            maxSessionItems[_ids[index]] = _amounts[index];
+        }
+    }
+
+    function getMaxItemAmounts(uint256[] memory _ids) public view returns (uint256[] memory) {
+        uint256[] memory amounts;
+
+        for(uint index=0; index < _ids.length; index++) {
+            amounts[index] = (maxSessionItems[_ids[index]]);
+        }
+
+        return amounts;
+    }
+
+    function setMintAllowance(uint _amount) public onlyOwner {
+        mintAllowance = _amount;
+    }
 
     function getSyncedAt(uint tokenId) public view returns(uint) {
         return syncedAt[tokenId];
@@ -171,7 +205,7 @@ contract SunflowerLandSession is Ownable, GameOwner {
         uint256[] memory burnIds,
         uint256[] memory burnAmounts,
         int256 tokens
-    ) public payable isReady(farmId) returns(bool success) {
+    ) external payable isReady(farmId) returns(bool success) {
        require(msg.value >= syncFee, "SunflowerLand: Missing fee");
        require(deadline >= block.timestamp, "SunflowerLand: Deadline Passed");
 
@@ -221,6 +255,10 @@ contract SunflowerLandSession is Ownable, GameOwner {
         int256 tokens
     ) private {
         if (mintIds.length > 0) {
+            for(uint index=0; index < mintIds.length; index++) {
+                require(mintAmounts[index] <= maxSessionItems[mintIds[index]], "SunflowerLand: Item mint exceeds max mint amount" );
+            }
+
             inventory.gameMint(account, mintIds, mintAmounts, "");
         }
 
@@ -229,10 +267,16 @@ contract SunflowerLandSession is Ownable, GameOwner {
         }
 
         if (tokens > 0) {
+            // Player is trying to mint more than humanly possible in a session
+            require(uint256(tokens) <= maxSessionSFL, "SunflowerLand: SFL Exceeds max mint amount");
+
+            mintedAmount += uint256(tokens);
+
+            // Contract is only authorised to mint a total of X amount (Similar to an ERC20 allowance)
+            require(mintedAmount < mintAllowance, "SunflowerLand: Session allowance exceeded");
+    
             token.gameMint(account, uint256(tokens));
-        }
-        
-        if (tokens < 0) {
+        } else if (tokens < 0) {
             // Send to the burn address so total supply keeps increasing
             token.gameTransfer(account, 0x000000000000000000000000000000000000dEaD, uint256(-tokens));
         }
