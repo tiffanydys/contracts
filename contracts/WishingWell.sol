@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "./Token.sol";
+import "./Farm.sol";
 
 /**
  * Whenever someone withdraws SFL from the game, a percentage gets placed into this Wishing Well. 
@@ -21,6 +22,7 @@ contract WishingWell is ERC20, Ownable {
 
     SunflowerLandToken token;
     ERC20 liquidityToken;
+    SunflowerLand farm;
 
     uint private lockedPeriod = 60 * 60 * 24 * 3; // 3 days
     address private signer;
@@ -32,10 +34,21 @@ contract WishingWell is ERC20, Ownable {
     event Rewarded(address indexed owner, uint tokens);
 
 
-    constructor(SunflowerLandToken _token, ERC20 _liquidityToken) payable ERC20("WishingWell", "WW") {
+    constructor(SunflowerLandToken _token, ERC20 _liquidityToken, SunflowerLand _farm) payable ERC20("WishingWell", "WW") {
         token = _token;
         liquidityToken = _liquidityToken;
+        farm = _farm;
+
         signer = msg.sender;
+    }
+
+    function destroy() public onlyOwner payable {
+        // Burn SFL in well
+        uint total = token.balanceOf(address(this));
+        token.transfer(0x000000000000000000000000000000000000dEaD, total);
+
+        address payable addr = payable(address(owner()));
+        selfdestruct(addr);
     }
 
     function setLockedPeriod(uint period) public onlyOwner {
@@ -93,7 +106,8 @@ contract WishingWell is ERC20, Ownable {
     function collectFromWell(
         bytes memory signature,
         uint tokens,
-        uint deadline
+        uint deadline,
+        uint farmId
     ) public {
         require(tokens > 0, "WishingWell: Nothing to collect");
         require(deadline >= block.timestamp, "WishingWell: Deadline Passed");
@@ -103,7 +117,7 @@ contract WishingWell is ERC20, Ownable {
         updatedAt[msg.sender] = block.timestamp;
 
         // Oracle verify they have not withdrawn liquidity
-        bytes32 txHash = keccak256(abi.encode(tokens,  _msgSender(), deadline));
+        bytes32 txHash = keccak256(abi.encode(tokens,  _msgSender(), deadline, farmId));
         require(!executed[txHash], "WishingWell: Tx Executed");
         require(verify(txHash, signature), "WishingWell: Unauthorised");
         executed[txHash] = true;
@@ -117,7 +131,9 @@ contract WishingWell is ERC20, Ownable {
             reward = tokensInWell/10;
         }
         
-        token.transfer(msg.sender, reward);
+        // Get the holding address of the farm
+        Farm memory farmNFT = farm.getFarm(farmId);
+        token.transfer(farmNFT.account, reward);
 
         // While they are in the well, make another wish for next time
         wish();
@@ -127,6 +143,10 @@ contract WishingWell is ERC20, Ownable {
 
     function lastUpdatedAt(address account) public view returns (uint) {
         return updatedAt[account];
+    }
+
+    function getLockedPeriod() public view returns (uint) {
+        return lockedPeriod;
     }
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {

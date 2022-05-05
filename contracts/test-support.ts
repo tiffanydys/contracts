@@ -88,7 +88,7 @@ export async function deploySFLContracts(web3: Web3) {
 }
 
 export async function deployWishingWellContracts(web3: Web3) {
-  const [token, liquidityTestToken] = await Promise.all([
+  const [token, liquidityTestToken, farm] = await Promise.all([
     deployContract(
       web3,
       abijson.contracts["contracts/Token.sol:SunflowerLandToken"],
@@ -99,6 +99,11 @@ export async function deployWishingWellContracts(web3: Web3) {
       abijson.contracts["contracts/ERC20Testing.sol:TestToken"],
       TestAccount.TEAM.address
     ),
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Farm.sol:SunflowerLand"],
+      TestAccount.TEAM.address
+    ),
   ]);
 
   const wishingWell = await deployContract(
@@ -106,9 +111,13 @@ export async function deployWishingWellContracts(web3: Web3) {
     abijson.contracts["contracts/WishingWell.sol:WishingWell"],
     TestAccount.TEAM.address,
     // In production this will be the SFL/MATIC pair, but for testing we'll use SFL as it is an ERC20 as well
-    [token.options.address, liquidityTestToken.options.address]
+    [
+      token.options.address,
+      liquidityTestToken.options.address,
+      farm.options.address,
+    ]
   );
-  return { token, liquidityTestToken, wishingWell };
+  return { token, liquidityTestToken, wishingWell, farm };
 }
 
 async function deployContract(

@@ -107,14 +107,15 @@ export type WishArgs = {
   deadline: number;
   sender: string;
   tokens: number;
+  farmId: number;
 };
 
-export function encodeWishArgs({ deadline, sender, tokens }: WishArgs) {
+export function encodeWishArgs({ deadline, sender, tokens, farmId }: WishArgs) {
   const web3 = new Web3();
   return web3.utils.keccak256(
     web3.eth.abi.encodeParameters(
-      ["uint256", "address", "uint256"],
-      [tokens, sender, deadline]
+      ["uint256", "address", "uint256", "uint256"],
+      [tokens, sender, deadline, farmId]
     )
   );
 }

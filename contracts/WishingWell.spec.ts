@@ -118,8 +118,18 @@ describe("Wishing Well contract", () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
-    const { wishingWell, liquidityTestToken, token } =
+    const { wishingWell, liquidityTestToken, token, farm } =
       await deployWishingWellContracts(web3);
+
+    await farm.methods.mint(TestAccount.PLAYER.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    const playerFarm = await farm.methods
+      .getFarm(1)
+      .call({ from: TestAccount.PLAYER.address });
 
     await liquidityTestToken.methods
       .mint(TestAccount.PLAYER.address, 1000)
@@ -146,10 +156,11 @@ describe("Wishing Well contract", () => {
       deadline: validDeadline,
       sender: TestAccount.PLAYER.address,
       tokens: 1000,
+      farmId: 1,
     });
 
     let result = wishingWell.methods
-      .collectFromWell(signature, 1000, validDeadline)
+      .collectFromWell(signature, 1000, validDeadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -163,7 +174,7 @@ describe("Wishing Well contract", () => {
     await increaseTime(web3, 3 * 24 * 60 * 60 + 1);
 
     await wishingWell.methods
-      .collectFromWell(signature, 1000, validDeadline)
+      .collectFromWell(signature, 1000, validDeadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -171,7 +182,7 @@ describe("Wishing Well contract", () => {
       });
 
     const sflBalance = await token.methods
-      .balanceOf(TestAccount.PLAYER.address)
+      .balanceOf(playerFarm.account)
       .call({ from: TestAccount.PLAYER.address });
 
     // Max rewards is only 10%
@@ -205,10 +216,11 @@ describe("Wishing Well contract", () => {
       deadline: validDeadline,
       sender: TestAccount.PLAYER.address,
       tokens: 500,
+      farmId: 1,
     });
 
     let result = wishingWell.methods
-      .collectFromWell(signature, 500, validDeadline)
+      .collectFromWell(signature, 500, validDeadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -232,10 +244,11 @@ describe("Wishing Well contract", () => {
       deadline,
       sender: TestAccount.PLAYER.address,
       tokens: 500,
+      farmId: 1,
     });
 
     let result = wishingWell.methods
-      .collectFromWell(signature, 500, deadline)
+      .collectFromWell(signature, 500, deadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -275,10 +288,11 @@ describe("Wishing Well contract", () => {
       // A different value in the transaction
       sender: TestAccount.CHARITY.address,
       tokens: 500,
+      farmId: 1,
     });
 
     let result = wishingWell.methods
-      .collectFromWell(signature, 500, validDeadline)
+      .collectFromWell(signature, 500, validDeadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -294,7 +308,7 @@ describe("Wishing Well contract", () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
-    const { wishingWell, liquidityTestToken, token } =
+    const { wishingWell, liquidityTestToken, token, farm } =
       await deployWishingWellContracts(web3);
 
     // Put 1000 SFL in the well
@@ -313,6 +327,16 @@ describe("Wishing Well contract", () => {
         gas: gasLimit,
       });
 
+    await farm.methods.mint(TestAccount.PLAYER.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    const playerOneFarm = await farm.methods
+      .getFarm(1)
+      .call({ from: TestAccount.PLAYER.address });
+
     await wishingWell.methods.wish().send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
@@ -328,6 +352,16 @@ describe("Wishing Well contract", () => {
         gas: gasLimit,
       });
 
+    await farm.methods.mint(TestAccount.CHARITY.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    const playerTwoFarm = await farm.methods
+      .getFarm(2)
+      .call({ from: TestAccount.PLAYER.address });
+
     await wishingWell.methods.wish().send({
       from: TestAccount.CHARITY.address,
       gasPrice: await web3.eth.getGasPrice(),
@@ -341,10 +375,11 @@ describe("Wishing Well contract", () => {
       // A different value in the transaction
       sender: TestAccount.PLAYER.address,
       tokens: 700,
+      farmId: 1,
     });
 
     await wishingWell.methods
-      .collectFromWell(signature, 700, validDeadline)
+      .collectFromWell(signature, 700, validDeadline, 1)
       .send({
         from: TestAccount.PLAYER.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -352,7 +387,7 @@ describe("Wishing Well contract", () => {
       });
 
     let playerOneBalance = await token.methods
-      .balanceOf(TestAccount.PLAYER.address)
+      .balanceOf(playerOneFarm.account)
       .call({ from: TestAccount.PLAYER.address });
     const playerOneWellBalance = await wishingWell.methods
       .balanceOf(TestAccount.PLAYER.address)
@@ -366,6 +401,7 @@ describe("Wishing Well contract", () => {
       sender: TestAccount.CHARITY.address,
       // Try a bit less than they have in the well
       tokens: 200,
+      farmId: 2,
     });
 
     // Lets burn some LP tokens before they withdraw
@@ -378,7 +414,7 @@ describe("Wishing Well contract", () => {
       });
 
     await wishingWell.methods
-      .collectFromWell(signatureTwo, 200, validDeadline)
+      .collectFromWell(signatureTwo, 200, validDeadline, 2)
       .send({
         from: TestAccount.CHARITY.address,
         gasPrice: await web3.eth.getGasPrice(),
@@ -386,7 +422,7 @@ describe("Wishing Well contract", () => {
       });
 
     const playerTwoBalance = await token.methods
-      .balanceOf(TestAccount.CHARITY.address)
+      .balanceOf(playerTwoFarm.account)
       .call({ from: TestAccount.CHARITY.address });
     const playerTwoWellBalance = await wishingWell.methods
       .balanceOf(TestAccount.CHARITY.address)
