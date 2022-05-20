@@ -1,5 +1,5 @@
 import Web3 from "web3";
-import { TestAccount, deployMoMContracts } from "./test-support";
+import { TestAccount, deployMoMContracts, gasLimit } from "./test-support";
 
 describe("Million on Mars contract", () => {
   it("deploys with total supply zero", async function () {
@@ -23,9 +23,11 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    const result = millionOnMarsNFT.methods
-      .mint([])
-      .call({ from: TestAccount.TEAM.address });
+    const result = millionOnMarsNFT.methods.mint([]).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
@@ -39,17 +41,21 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    millionOnMarsNFT.methods
+    await millionOnMarsNFT.methods
       .addGameRole(TestAccount.TEAM.address)
-      .call({ from: TestAccount.TEAM.address });
+      .send({ from: TestAccount.TEAM.address });
 
     await millionOnMarsNFT.methods
-      .mint(["0x5DD6c98eF2F48a31a3B2fd81ad8c1dbD5C7410Db"])
-      .call({ from: TestAccount.TEAM.address });
+      .mint(["0xE9c52F005c5c2dE19C71eD2Bad7482cf92043F74"])
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
     expect(
       await millionOnMarsNFT.methods
-        .balanceOf("0x5DD6c98eF2F48a31a3B2fd81ad8c1dbD5C7410Db")
+        .balanceOf("0xE9c52F005c5c2dE19C71eD2Bad7482cf92043F74")
         .call({ from: TestAccount.TEAM.address })
     ).toEqual("1");
 
@@ -67,20 +73,26 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    millionOnMarsNFT.methods
-      .addGameRole(TestAccount.TEAM.address)
-      .call({ from: TestAccount.TEAM.address });
+    await millionOnMarsNFT.methods.addGameRole(TestAccount.TEAM.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
 
     await millionOnMarsNFT.methods
       .mint([
-        "0x5DD6c98eF2F48a31a3B2fd81ad8c1dbD5C7410Db",
+        "0xE9c52F005c5c2dE19C71eD2Bad7482cf92043F74",
         "0x5001FD9F7EcF5aC206F499fB93b6728Dca319165",
       ])
-      .call({ from: TestAccount.TEAM.address });
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
 
     expect(
       await millionOnMarsNFT.methods
-        .balanceOf("0x5DD6c98eF2F48a31a3B2fd81ad8c1dbD5C7410Db")
+        .balanceOf("0xE9c52F005c5c2dE19C71eD2Bad7482cf92043F74")
         .call({ from: TestAccount.TEAM.address })
     ).toEqual("1");
 
@@ -104,9 +116,11 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    millionOnMarsNFT.methods
-      .addGameRole(TestAccount.TEAM.address)
-      .call({ from: TestAccount.TEAM.address });
+    await millionOnMarsNFT.methods.addGameRole(TestAccount.TEAM.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
 
     const result = millionOnMarsNFT.methods
       .transferFrom(
@@ -128,9 +142,11 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    const result = millionOnMarsNFT.methods
-      .trade(1)
-      .call({ from: TestAccount.TEAM.address });
+    const result = millionOnMarsNFT.methods.trade(1).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
 
     await expect(
       result.catch((e: Error) => Promise.reject(e.message))
