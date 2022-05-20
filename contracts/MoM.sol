@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 import "./Inventory.sol";
 import "./GameOwner.sol";
 
-contract MoMNFT is GameOwner, ERC721 {
+contract MoMNFT is ERC721Enumerable, GameOwner  {
     SunflowerLandInventory inventory;
     // Inclusive of items traded (burnt) for Sunflower Land items
     uint private supply = 0;
@@ -42,10 +42,6 @@ contract MoMNFT is GameOwner, ERC721 {
         mintAmounts[0] = 1;
         
         inventory.gameMint(_msgSender(), mintIds, mintAmounts, "");
-    }
-
-    function totalSupply() public view returns (uint) {
-        return supply;
     }
 
     function transferFrom(
