@@ -116,12 +116,6 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    await millionOnMarsNFT.methods.addGameRole(TestAccount.TEAM.address).send({
-      from: TestAccount.TEAM.address,
-      gasPrice: await web3.eth.getGasPrice(),
-      gas: gasLimit,
-    });
-
     const result = millionOnMarsNFT.methods
       .transferFrom(
         TestAccount.TEAM.address,
@@ -143,7 +137,7 @@ describe("Million on Mars contract", () => {
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
     const result = millionOnMarsNFT.methods.trade(1).send({
-      from: TestAccount.TEAM.address,
+      from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
     });
@@ -153,5 +147,39 @@ describe("Million on Mars contract", () => {
     ).rejects.toContain("MoMNFT: Player does not have NFT to trade");
   });
 
-  it("trades for Sunflower Land item", () => {});
+  it("trades for Sunflower Land item", async () => {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
+    );
+
+    const { millionOnMarsNFT, inventory } = await deployMoMContracts(web3);
+
+    await millionOnMarsNFT.methods
+      .addGameRole(TestAccount.TEAM.address)
+      .send({ from: TestAccount.TEAM.address });
+
+    await millionOnMarsNFT.methods.mint([TestAccount.PLAYER.address]).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    await millionOnMarsNFT.methods.trade(1).send({
+      from: TestAccount.PLAYER.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    expect(
+      await millionOnMarsNFT.methods
+        .balanceOf(TestAccount.PLAYER.address)
+        .call({ from: TestAccount.TEAM.address })
+    ).toEqual("0");
+
+    expect(
+      await inventory.methods
+        .balanceOf(TestAccount.PLAYER.address, 911)
+        .call({ from: TestAccount.PLAYER.address })
+    ).toEqual("1");
+  });
 });

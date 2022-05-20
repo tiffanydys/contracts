@@ -9,6 +9,7 @@ import "./GameOwner.sol";
 
 contract MoMNFT is GameOwner, ERC721 {
     SunflowerLandInventory inventory;
+    // Inclusive of items traded (burnt) for Sunflower Land items
     uint private supply = 0;
 
     constructor(SunflowerLandInventory _inventory) ERC721("MoM Sunflower Crossover", "MSF")  {
@@ -28,11 +29,50 @@ contract MoMNFT is GameOwner, ERC721 {
 
     }
 
-    function trade() public {
+    function trade(uint tokenId) public {
+        require(balanceOf(_msgSender()) > 0, "MoMNFT: Player does not have NFT to trade");
+        require(ownerOf(tokenId) == _msgSender(), "MoMNFT: You are not the owner");
+
+        _burn(tokenId);
+
+        uint256[] memory mintIds = new uint256[](1);
+        uint256[] memory mintAmounts = new uint256[](1);
+        // Intialises the only element in the array
+        mintIds[0] = 911;
+        mintAmounts[0] = 1;
+        
+        inventory.gameMint(_msgSender(), mintIds, mintAmounts, "");
     }
 
     function totalSupply() public view returns (uint) {
         return supply;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(false, "MoMNFT: You can not transfer this");
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(false, "MoMNFT: You can not transfer this");
+
+    }
+
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public virtual override {
+        require(false, "MoMNFT: You can not transfer this");
     }
 
 }
