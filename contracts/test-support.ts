@@ -66,6 +66,13 @@ export async function deploySFLContracts(web3: Web3) {
     [farm.options.address]
   );
 
+  const millionOnMarsNFT = await deployContract(
+    web3,
+    abijson.contracts["contracts/MoM.sol:MoMNFT"],
+    TestAccount.TEAM.address,
+    [inventory.options.address]
+  );
+
   await Promise.all([
     session.methods.setWishingWell(wishingWell.options.address).send({
       from: TestAccount.TEAM.address,
@@ -82,11 +89,46 @@ export async function deploySFLContracts(web3: Web3) {
     inventory.methods
       .addGameRole(session.options.address)
       .send({ from: TestAccount.TEAM.address }),
+    inventory.methods
+      .addGameRole(millionOnMarsNFT.options.address)
+      .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { session, farm, token, inventory, beta, wishingWell };
+  return {
+    session,
+    farm,
+    token,
+    inventory,
+    beta,
+    wishingWell,
+    millionOnMarsNFT,
+  };
 }
 
+export async function deployMoMContracts(web3: Web3) {
+  const [inventory] = await Promise.all([
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
+      TestAccount.TEAM.address
+    ),
+  ]);
+
+  const millionOnMarsNFT = await deployContract(
+    web3,
+    abijson.contracts["contracts/MoM.sol:MoMNFT"],
+    TestAccount.TEAM.address,
+    [inventory.options.address]
+  );
+
+  await Promise.all([
+    inventory.methods
+      .addGameRole(millionOnMarsNFT.options.address)
+      .send({ from: TestAccount.TEAM.address }),
+  ]);
+
+  return { inventory, millionOnMarsNFT };
+}
 export async function deployWishingWellContracts(web3: Web3) {
   const [token, liquidityTestToken, farm] = await Promise.all([
     deployContract(
