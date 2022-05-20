@@ -15,6 +15,11 @@ contract MoMNFT is GameOwner, ERC721 {
         inventory = _inventory;
     }
 
+    function destroy() public onlyOwner payable {
+        address payable addr = payable(address(owner()));
+        selfdestruct(addr);
+    }
+
     function mint(address[] memory) public onlyGame {
     }
 
@@ -23,5 +28,36 @@ contract MoMNFT is GameOwner, ERC721 {
 
     function totalSupply() public view returns (uint) {
         return supply;
+    }
+
+/*
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+
+        _transfer(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public virtual override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+        _safeTransfer(from, to, tokenId, _data);
     }
 }
