@@ -106,10 +106,15 @@ export async function deploySFLContracts(web3: Web3) {
 }
 
 export async function deployMoMContracts(web3: Web3) {
-  const [inventory] = await Promise.all([
+  const [inventory, farm] = await Promise.all([
     deployContract(
       web3,
       abijson.contracts["contracts/Inventory.sol:SunflowerLandInventory"],
+      TestAccount.TEAM.address
+    ),
+    deployContract(
+      web3,
+      abijson.contracts["contracts/Farm.sol:SunflowerLand"],
       TestAccount.TEAM.address
     ),
   ]);
@@ -118,7 +123,7 @@ export async function deployMoMContracts(web3: Web3) {
     web3,
     abijson.contracts["contracts/MoM.sol:MoMNFT"],
     TestAccount.TEAM.address,
-    [inventory.options.address]
+    [inventory.options.address, farm.options.address]
   );
 
   await Promise.all([
@@ -127,7 +132,7 @@ export async function deployMoMContracts(web3: Web3) {
       .send({ from: TestAccount.TEAM.address }),
   ]);
 
-  return { inventory, millionOnMarsNFT };
+  return { inventory, millionOnMarsNFT, farm };
 }
 export async function deployWishingWellContracts(web3: Web3) {
   const [token, liquidityTestToken, farm] = await Promise.all([

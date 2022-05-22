@@ -109,7 +109,7 @@ describe("Million on Mars contract", () => {
     ).toEqual("2");
   });
 
-  it("does not let user trade MoM NFT directly", async () => {
+  it.skip("does not let user trade MoM NFT directly", async () => {
     const web3 = new Web3(
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
@@ -136,7 +136,7 @@ describe("Million on Mars contract", () => {
 
     const { millionOnMarsNFT } = await deployMoMContracts(web3);
 
-    const result = millionOnMarsNFT.methods.trade(1).send({
+    const result = millionOnMarsNFT.methods.trade(1, 1).send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
@@ -152,7 +152,9 @@ describe("Million on Mars contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { millionOnMarsNFT, inventory } = await deployMoMContracts(web3);
+    const { millionOnMarsNFT, inventory, farm } = await deployMoMContracts(
+      web3
+    );
 
     await millionOnMarsNFT.methods
       .addGameRole(TestAccount.TEAM.address)
@@ -164,7 +166,27 @@ describe("Million on Mars contract", () => {
       gas: gasLimit,
     });
 
-    await millionOnMarsNFT.methods.trade(1).send({
+    // Mint it to the team address (not the player)
+    await farm.methods.mint(TestAccount.PLAYER.address).send({
+      from: TestAccount.TEAM.address,
+      gasPrice: await web3.eth.getGasPrice(),
+      gas: gasLimit,
+    });
+
+    const farmNFT = await farm.methods
+      .getFarm(1)
+      .call({ from: TestAccount.PLAYER.address });
+
+    // Mint rocket fuel
+    await inventory.methods
+      .gameMint(farmNFT.account, [910], [1], web3.utils.keccak256("randomID"))
+      .send({
+        from: TestAccount.TEAM.address,
+        gasPrice: await web3.eth.getGasPrice(),
+        gas: gasLimit,
+      });
+
+    await millionOnMarsNFT.methods.trade(1, 1).send({
       from: TestAccount.PLAYER.address,
       gasPrice: await web3.eth.getGasPrice(),
       gas: gasLimit,
@@ -178,7 +200,13 @@ describe("Million on Mars contract", () => {
 
     expect(
       await inventory.methods
-        .balanceOf(TestAccount.PLAYER.address, 911)
+        .balanceOf(farmNFT.account, 910)
+        .call({ from: TestAccount.PLAYER.address })
+    ).toEqual("0");
+
+    expect(
+      await inventory.methods
+        .balanceOf(farmNFT.account, 911)
         .call({ from: TestAccount.PLAYER.address })
     ).toEqual("1");
   });
