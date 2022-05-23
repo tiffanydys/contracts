@@ -105,8 +105,17 @@ export async function deployMutantCropContracts(web3: Web3) {
     web3,
     abijson.contracts["contracts/MutantCrops.sol:MutantCrops"],
     TestAccount.TEAM.address,
-    [farm.options.address]
+    [inventory.options.address, farm.options.address]
   );
+
+  await inventory.methods
+    .addGameRole(mutantCrops.options.address)
+    .send({ from: TestAccount.TEAM.address });
+
+  await farm.methods
+    .addGameRole(TestAccount.TEAM.address)
+    .send({ from: TestAccount.TEAM.address });
+
   return { farm, inventory, mutantCrops };
 }
 

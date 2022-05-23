@@ -4,13 +4,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 import "./GameOwner.sol";
 
 import "./Inventory.sol";
+import "./Farm.sol";
 
-contract MutantCrops is GameOwner, ERC721 {
+contract MutantCrops is GameOwner, ERC721Enumerable {
     using ECDSA for bytes32;
 
     mapping(bytes32 => bool) public executed;
@@ -18,17 +19,32 @@ contract MutantCrops is GameOwner, ERC721 {
     // Farm ID to saved timestamp
     mapping(uint => uint) public mintedAt;
 
-    uint private inventoryId = 910;
-
-    uint public totalSupply = 0;
+    uint private inventoryId = 912;
 
     address private signer;
 
     SunflowerLandInventory inventory;
+    SunflowerLand farm;
 
-    constructor(SunflowerLandInventory _inventory) ERC721("Sunflower Land Mutant Crop", "SLM") {
+    string private baseURI = "https://sunflower-land.com/play/nfts/mutant-crops/";
+
+    constructor(SunflowerLandInventory _inventory, SunflowerLand _farm) ERC721("Sunflower Land Mutant Crop", "SLM") {
         inventory = _inventory;
+        farm = _farm;
         signer = _msgSender();
+        addGameRole(_msgSender());
+    }
+
+    function setBaseUri(string memory uri) public onlyOwner {
+        baseURI = uri;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    function transferSigner(address _signer) public onlyOwner {
+        signer = _signer;
     }
 
     function verify(bytes32 hash, bytes memory signature) private view returns (bool) {
@@ -37,35 +53,38 @@ contract MutantCrops is GameOwner, ERC721 {
     }
 
     function mintSignature(
-        uint deadline,
-        uint cropId
+        uint256 deadline,
+        uint256 cropId,
+        uint256 farmId
     ) private view returns(bytes32 success) {
         /**
          * Distinct order and abi.encode to avoid hash collisions
          */
-        return keccak256(abi.encode(deadline, _msgSender(), cropId));
+        return keccak256(abi.encode(deadline, _msgSender(), cropId, farmId));
     }
 
     function mint(
         // Verification
         bytes memory signature,
-        uint deadline,
+        uint256 deadline,
         // Data
-        uint256 cropId
+        uint256 cropId,
+        uint256 farmId
     ) external returns(bool success) {
         require(deadline >= block.timestamp, "MutantCrops: Deadline Passed");
 
         // Verify
-        bytes32 txHash = mintSignature(deadline, cropId);
+        bytes32 txHash = mintSignature(deadline, cropId, farmId);
         require(!executed[txHash], "MutantCrops: Tx Executed");
         require(verify(txHash, signature), "MutantCrops: Unauthorised");
         executed[txHash] = true;
 
         require(nextMutantCrop() == cropId, "MutantCrops: Crop is not ready");
 
-        totalSupply += 1;
+        Farm memory farmNFT = farm.getFarm(farmId);
+        require(farmNFT.owner == _msgSender(), "MutantCrops: You do not own this farm");
 
-        _mint(_msgSender(), totalSupply);
+        _mint(farmNFT.account, totalSupply() + 1);
         return true;
     }
 
@@ -77,7 +96,7 @@ contract MutantCrops is GameOwner, ERC721 {
      * Wheat = 9
      */
     function nextMutantCrop() public view returns (uint) {
-        return (totalSupply + 1) % 10;
+        return (totalSupply()) % 10;
     }
 
     /**
@@ -88,13 +107,16 @@ contract MutantCrops is GameOwner, ERC721 {
         address to,
         uint256 tokenId
     ) internal override {
+        // Always let base contracts run first
+        super._beforeTokenTransfer(from, to, tokenId);
+
         bool isMint = from == address(0);
 
         uint256[] memory ids = new uint256[](1);
         uint256[] memory amounts = new uint256[](1);
 
         // Intialises the only element in the array
-        ids[0] = tokenId;
+        ids[0] = inventoryId;
         amounts[0] = 1;
 
         if (isMint) {
