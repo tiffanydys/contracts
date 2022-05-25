@@ -80,7 +80,7 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops } = await deployMutantCropContracts(web3);
+    const { mutantCropMinter } = await deployMutantCropContracts(web3);
 
     // 6 minutes ago
     const expiredDeadline = 0;
@@ -91,7 +91,7 @@ describe("Mutant Crops contract", () => {
       farmId: 5,
     });
 
-    const result = mutantCrops.methods
+    const result = mutantCropMinter.methods
       .mint(signature, expiredDeadline, Crops.Sunflower, 5)
       .send({
         from: TestAccount.PLAYER.address,
@@ -109,7 +109,7 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops } = await deployMutantCropContracts(web3);
+    const { mutantCropMinter } = await deployMutantCropContracts(web3);
 
     const sha = encodeMutantCropFunction({
       cropId: 1,
@@ -124,7 +124,7 @@ describe("Mutant Crops contract", () => {
       TestAccount.CHARITY.privateKey
     );
 
-    const result = mutantCrops.methods
+    const result = mutantCropMinter.methods
       .mint(signature, VALID_DEADLINE, 1, 5)
       .send({
         from: TestAccount.PLAYER.address,
@@ -142,7 +142,7 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops, farm } = await deployMutantCropContracts(web3);
+    const { mutantCropMinter, farm } = await deployMutantCropContracts(web3);
 
     // Mint to different account
     await farm.methods.mint(TestAccount.CHARITY.address).send({
@@ -158,7 +158,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    const result = mutantCrops.methods
+    const result = mutantCropMinter.methods
       .mint(signature, VALID_DEADLINE, Crops.Sunflower, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -176,7 +176,7 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops, farm } = await deployMutantCropContracts(web3);
+    const { mutantCropMinter, farm } = await deployMutantCropContracts(web3);
 
     await farm.methods.mint(TestAccount.PLAYER.address).send({
       from: TestAccount.TEAM.address,
@@ -191,7 +191,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    const result = mutantCrops.methods
+    const result = mutantCropMinter.methods
       .mint(signature, VALID_DEADLINE, Crops.Potato, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -209,9 +209,8 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops, farm, inventory } = await deployMutantCropContracts(
-      web3
-    );
+    const { mutantCrops, mutantCropMinter, farm, inventory } =
+      await deployMutantCropContracts(web3);
 
     await farm.methods.mint(TestAccount.PLAYER.address).send({
       from: TestAccount.TEAM.address,
@@ -230,7 +229,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    await mutantCrops.methods
+    await mutantCropMinter.methods
       .mint(signature, VALID_DEADLINE, Crops.Sunflower, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -251,12 +250,6 @@ describe("Mutant Crops contract", () => {
     ).toEqual(farmNFT.account);
 
     expect(
-      await mutantCrops.methods
-        .nextMutantCrop()
-        .call({ from: TestAccount.TEAM.address })
-    ).toEqual("1");
-
-    expect(
       await inventory.methods
         .balanceOf(farmNFT.account, 912)
         .call({ from: TestAccount.TEAM.address })
@@ -268,9 +261,8 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops, farm, inventory } = await deployMutantCropContracts(
-      web3
-    );
+    const { mutantCrops, mutantCropMinter, farm, inventory } =
+      await deployMutantCropContracts(web3);
 
     await farm.methods.mint(TestAccount.PLAYER.address).send({
       from: TestAccount.TEAM.address,
@@ -289,7 +281,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    await mutantCrops.methods
+    await mutantCropMinter.methods
       .mint(signature, VALID_DEADLINE, Crops.Sunflower, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -304,7 +296,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    await mutantCrops.methods
+    await mutantCropMinter.methods
       .mint(signature2, VALID_DEADLINE, Crops.Potato, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -319,7 +311,7 @@ describe("Mutant Crops contract", () => {
       farmId: 1,
     });
 
-    await mutantCrops.methods
+    await mutantCropMinter.methods
       .mint(signature3, VALID_DEADLINE, Crops.Pumpkin, 1)
       .send({
         from: TestAccount.PLAYER.address,
@@ -340,12 +332,6 @@ describe("Mutant Crops contract", () => {
     ).toEqual("3");
 
     expect(
-      await mutantCrops.methods
-        .nextMutantCrop()
-        .call({ from: TestAccount.TEAM.address })
-    ).toEqual("3");
-
-    expect(
       await inventory.methods
         .balanceOf(farmNFT.account, 912)
         .call({ from: TestAccount.TEAM.address })
@@ -357,7 +343,8 @@ describe("Mutant Crops contract", () => {
       new Web3.providers.HttpProvider(process.env.ETH_NETWORK)
     );
 
-    const { mutantCrops, inventory } = await deployMutantCropContracts(web3);
+    const { mutantCrops, mutantCropMinter, inventory } =
+      await deployMutantCropContracts(web3);
 
     await mutantCrops.methods.gameMint(TestAccount.PLAYER.address, 1).send({
       from: TestAccount.TEAM.address,

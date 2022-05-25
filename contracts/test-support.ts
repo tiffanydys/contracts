@@ -108,6 +108,13 @@ export async function deployMutantCropContracts(web3: Web3) {
     [inventory.options.address, farm.options.address]
   );
 
+  const mutantCropMinter = await deployContract(
+    web3,
+    abijson.contracts["contracts/MutantCropsMinter.sol:MutantCropMinter"],
+    TestAccount.TEAM.address,
+    [farm.options.address, mutantCrops.options.address]
+  );
+
   await inventory.methods
     .addGameRole(mutantCrops.options.address)
     .send({ from: TestAccount.TEAM.address });
@@ -116,7 +123,11 @@ export async function deployMutantCropContracts(web3: Web3) {
     .addGameRole(TestAccount.TEAM.address)
     .send({ from: TestAccount.TEAM.address });
 
-  return { farm, inventory, mutantCrops };
+  await mutantCrops.methods
+    .addGameRole(mutantCropMinter.options.address)
+    .send({ from: TestAccount.TEAM.address });
+
+  return { farm, inventory, mutantCrops, mutantCropMinter };
 }
 
 export async function deployWishingWellContracts(web3: Web3) {

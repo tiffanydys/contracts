@@ -119,8 +119,8 @@ export function encodeMutantCropFunction({
   const web3 = new Web3();
   return web3.utils.keccak256(
     web3.eth.abi.encodeParameters(
-      ["uint256", "address", "uint256", "uint256"],
-      [deadline, sender, cropId, farmId]
+      ["string", "uint256", "address", "uint256", "uint256"],
+      ["mutant-crops", deadline, sender, cropId, farmId]
     )
   );
 }

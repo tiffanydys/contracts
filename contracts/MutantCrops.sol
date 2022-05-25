@@ -5,13 +5,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 
 import "./GameOwner.sol";
 
 import "./Inventory.sol";
 import "./Farm.sol";
 
-contract MutantCrops is GameOwner, ERC721Enumerable {
+contract MutantCrops is GameOwner, ERC721Enumerable, Pausable {
     using ECDSA for bytes32;
 
     mapping(bytes32 => bool) public executed;
@@ -43,62 +44,6 @@ contract MutantCrops is GameOwner, ERC721Enumerable {
         return baseURI;
     }
 
-    function transferSigner(address _signer) public onlyOwner {
-        signer = _signer;
-    }
-
-    function verify(bytes32 hash, bytes memory signature) private view returns (bool) {
-        bytes32 ethSignedHash = hash.toEthSignedMessageHash();
-        return ethSignedHash.recover(signature) == signer;
-    }
-
-    function mintSignature(
-        uint256 deadline,
-        uint256 cropId,
-        uint256 farmId
-    ) private view returns(bytes32 success) {
-        /**
-         * Distinct order and abi.encode to avoid hash collisions
-         */
-        return keccak256(abi.encode(deadline, _msgSender(), cropId, farmId));
-    }
-
-    function mint(
-        // Verification
-        bytes memory signature,
-        uint256 deadline,
-        // Data
-        uint256 cropId,
-        uint256 farmId
-    ) external returns(bool success) {
-        require(deadline >= block.timestamp, "MutantCrops: Deadline Passed");
-
-        // Verify
-        bytes32 txHash = mintSignature(deadline, cropId, farmId);
-        require(!executed[txHash], "MutantCrops: Tx Executed");
-        require(verify(txHash, signature), "MutantCrops: Unauthorised");
-        executed[txHash] = true;
-
-        require(nextMutantCrop() == cropId, "MutantCrops: Crop is not ready");
-
-        Farm memory farmNFT = farm.getFarm(farmId);
-        require(farmNFT.owner == _msgSender(), "MutantCrops: You do not own this farm");
-
-        _mint(farmNFT.account, totalSupply() + 1);
-        return true;
-    }
-
-    /**
-     * Cycle evenly one by one through the different crops
-     * Sunflower = 0
-     * Potato = 1
-     * ....
-     * Wheat = 9
-     */
-    function nextMutantCrop() public view returns (uint) {
-        return (totalSupply()) % 10;
-    }
-
     /**
      * Update it in the ERC1155 contract
      */
@@ -109,6 +54,8 @@ contract MutantCrops is GameOwner, ERC721Enumerable {
     ) internal override {
         // Always let base contracts run first
         super._beforeTokenTransfer(from, to, tokenId);
+
+        require(!paused(), "ERC721Pausable: token transfer while paused");
 
         bool isMint = from == address(0);
 
@@ -135,14 +82,20 @@ contract MutantCrops is GameOwner, ERC721Enumerable {
         address from,
         address to,
         uint256 tokenId
-    ) public onlyGame {
+    ) external onlyGame {
         _transfer(from, to, tokenId);
     }
 
     function gameMint(
         address to,
         uint256 tokenId
-    ) public onlyGame {
+    ) external onlyGame {
         _mint(to, tokenId);
+    }
+
+    function gameBurn(
+        uint256 tokenId
+    ) external onlyGame {
+        _burn(tokenId);
     }
 }
