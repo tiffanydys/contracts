@@ -17,8 +17,6 @@ contract MutantCrops is GameOwner, ERC721Enumerable, Pausable {
 
     mapping(bytes32 => bool) public executed;
 
-    // Farm ID to saved timestamp
-    mapping(uint => uint) public mintedAt;
 
     uint private inventoryId = 912;
 

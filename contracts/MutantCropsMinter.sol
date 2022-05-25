@@ -15,6 +15,9 @@ contract MutantCropMinter is GameOwner {
 
     mapping(bytes32 => bool) public executed;
 
+    // Farm ID -> Crop ID -> Timestamp
+    mapping(uint256 => mapping(uint256 => uint256)) public mintedAt;
+
     address private signer;
 
     SunflowerLand farm;
@@ -56,13 +59,15 @@ contract MutantCropMinter is GameOwner {
         uint256 farmId
     ) external returns(bool success) {
         require(deadline >= block.timestamp, "MutantCrops: Deadline Passed");
+        require(mintedAt[farmId][cropId] == 0, "MutantCrop: Already minted");
 
         // Verify
         bytes32 txHash = mintSignature(deadline, cropId, farmId);
         require(!executed[txHash], "MutantCrops: Tx Executed");
         require(verify(txHash, signature), "MutantCrops: Unauthorised");
         executed[txHash] = true;
-
+        mintedAt[farmId][cropId] = block.timestamp;
+        
         Farm memory farmNFT = farm.getFarm(farmId);
         require(farmNFT.owner == _msgSender(), "MutantCrops: You do not own this farm");
 
