@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT LICENSE
-// Contract: Potato Land - Frogs
-// Token ID: "PotatoLandFrogs"
-// Token Symbol: "PLF"
+// Contract: Sunflower Land - Frogs
+// Token ID: "SunflowerLandFrogs"
+// Token Symbol: "SFL-F"
 // Author: tiffanydys
 // Coder: tiffanydys
 // Artists: paluras & vadimas (VP)
@@ -88,7 +88,7 @@ contract Frogs is ERC721Enumerable, Ownable {
         if (founder[ownerAddress] == true) {
             cost = 0;
         }
-        
+
         require(!paused, "Minting is paused.");
         require(frogSupply + 1 <= maxSupply, "Max supply reached!");
         require(msg.sender == ownerAddress, "You are not the owner of this farm.");
